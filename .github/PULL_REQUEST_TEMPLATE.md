@@ -30,12 +30,12 @@ CMDCT-
 <!-- Complete the following steps before merging -->
 
 #### Review
-- [ ] Design: This work has been reviewed and approved by designer, if necessary
+- [ ] Design: This work has been reviewed and approved by design, if necessary
 - [ ] Product: This work has been reviewed and approved by product owner, if necessary
 
 #### Security
-_If either of the following are true, notify the ISSO (Information System Security Officer)._
+_If either of the following are true, notify the team's ISSO (Information System Security Officer)._
 
 - [ ] These changes are significant enough to require an update to the SIA.
-- [ ] These changes are significant enought to require a penetration test.
+- [ ] These changes are significant enough to require a penetration test.
 ---
