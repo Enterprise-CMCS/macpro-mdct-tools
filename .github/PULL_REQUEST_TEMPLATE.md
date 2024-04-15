@@ -20,10 +20,9 @@ CMDCT-
 ---
 ### Pre-review checklist
 <!-- Complete the following steps before opening for review -->
-
-- [ ] I have performed a self-review of my code
 - [ ] I have added [thorough](https://shorturl.at/aejkF) tests, if necessary
 - [ ] I have updated relevant documentation, if necessary
+- [ ] I have performed a self-review of my code
 
 ---
 ### Pre-merge checklist
