@@ -185,6 +185,25 @@ for url in "${repo_urls[@]}"; do
     else
         echo "Failed to install pre-commit in $repo_name."
     fi
+
+    # Ensure repository is on main or master branch
+    current_branch=$(git rev-parse --abbrev-ref HEAD)
+    if [ "$current_branch" != "main" ] && [ "$current_branch" != "master" ]; then
+        echo "Error: $repo_name is not on the main or master branch. Please switch to the main/master branch before running this script."
+        exit 1
+    fi
+
+    # Pull latest changes from main or master branch
+    echo "Pulling latest changes in $repo_name..."
+    git pull origin "$current_branch"
+    
+    # Check if pull was successful
+    if [ $? -eq 0 ]; then
+        echo "Pulled latest changes successfully in $repo_name."
+    else
+        echo "Failed to pull latest changes in $repo_name."
+        continue
+    fi
         
     # install correct version of node using the .nvmrc
     echo "Installing the correct node version"
