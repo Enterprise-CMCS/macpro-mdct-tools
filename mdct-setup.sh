@@ -179,16 +179,35 @@ for url in "${repo_urls[@]}"; do
     echo "Running pre-commit install in $repo_name..."
     pre-commit install
     
-    # install correct version of node using the .nvmrc
-    echo "Installing the correct node version"
-    nvm install
-    
     # Check if pre-commit install was successful
     if [ $? -eq 0 ]; then
         echo "pre-commit installed successfully in $repo_name."
     else
         echo "Failed to install pre-commit in $repo_name."
     fi
+        
+    # install correct version of node using the .nvmrc
+    echo "Installing the correct node version"
+    nvm install
+
+    # Check if node_modules directory exists
+    if [ -d "node_modules" ]; then
+        echo "node_modules directory found in $repo_name. Removing its contents..."
+        rm -rf node_modules/*
+    fi
+    
+    # Run yarn from the top level of the repository
+    echo "Running yarn in $repo_name..."
+    yarn
+    
+    # Check if yarn was successful
+    if [ $? -eq 0 ]; then
+        echo "yarn completed successfully in $repo_name."
+    else
+        echo "Failed to run yarn in $repo_name."
+    fi
+
+    # rebuild clean
     
     # Navigate back to the original directory
     cd -
@@ -197,6 +216,11 @@ done
 # Install serverless
 if ! which sls > /dev/null ; then
   npm install -g serverless
+fi
+
+# Install dynamodb-admin
+if ! which dynamodb-admin > /dev/null ; then
+  npm install -g dynamodb-admin
 fi
 
 # todo 
