@@ -89,6 +89,23 @@ if ! which pre-commit > /dev/null ; then
   brew install pre-commit
 fi
 
+# Install java with brew 
+if ! which java > /dev/null ; then
+	brew install java
+fi
+
+# Check if java is installed and add it to PATH if necessary
+if ! which java > /dev/null ; then
+    echo "Java installation failed."
+else
+    # Get the directory where java is installed
+    java_home=$(brew --prefix)/opt/openjdk@11
+    
+    # Add java to PATH
+    echo "export PATH=\"$java_home/bin:\$PATH\"" >> "$shellprofile"
+    # echo "Java installed successfully and added to PATH."
+fi
+
 # Install awslogs, a utility for streaming CloudWatch logs
 if ! which awslogs > /dev/null ; then
   brew install awslogs
@@ -104,7 +121,7 @@ if ! which git > /dev/null ; then
   brew install git
 fi
 
-# Install git, our version control system 
+# Install 1password
 if ! which op > /dev/null ; then
   brew install 1password-cli
 fi
@@ -151,10 +168,20 @@ for url in "${repo_urls[@]}"; do
     
     # Navigate into the cloned repository directory
     cd "$clone_dir/$repo_name"
+
+    # Load nvm if it's not already loaded
+    if [ -s "$HOME/.nvm/nvm.sh" ]; then
+        # Source nvm script
+        . "$HOME/.nvm/nvm.sh"
+    fi
     
     # Run the "pre-commit install" command
     echo "Running pre-commit install in $repo_name..."
     pre-commit install
+    
+    # install correct version of node using the .nvmrc
+    echo "Installing the correct node version"
+    nvm install
     
     # Check if pre-commit install was successful
     if [ $? -eq 0 ]; then
@@ -167,10 +194,11 @@ for url in "${repo_urls[@]}"; do
     cd -
 done
 
+# Install serverless
+if ! which sls > /dev/null ; then
+  npm install -g serverless
+fi
+
 # todo 
-# install npm
-# install serverless 
-# loop into each directory and install the correct version of node w/ nvm
 # testing workflow using one pass ... grab stuff from onepass at test run time for e2e 
 # .env workflow ... we check in the .tpl version of env files with op references 
-# install java w/ brew 
