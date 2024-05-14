@@ -5,6 +5,25 @@ if [[ ! "$OSTYPE" =~ ^darwin ]]; then
   echo "ERROR:  This script is intended only for MacOS." && exit 1
 fi
 
+# Confirmation prompt function
+confirm() {
+    read -r -p "${1:-Are you sure? [Y/n]} " response
+    case "$response" in
+        [yY][eE][sS]|[yY]|"")
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
+
+# Confirmation prompt
+if ! confirm "Warning: This script will remove all node modules and re-download. Would you like to continue? [Y/n]"; then
+    echo "Exiting script."
+    exit 0
+fi
+
 # Determine what shell and rc file we might want to modify
 shell=""
 shellprofile=""
@@ -194,7 +213,7 @@ for url in "${repo_urls[@]}"; do
     # Ensure repository is on main or master branch
     current_branch=$(git rev-parse --abbrev-ref HEAD)
     if [ "$current_branch" != "main" ] && [ "$current_branch" != "master" ]; then
-        echo "Error: $repo_name is not on the main or master branch. Please switch to the main/master branch before running this script."
+        echo "Error: $repo_name is not on the main or master branch. Please commit any outstanding changes and switch to the main/master branch before running this script."
         exit 1
     fi
 
@@ -218,6 +237,26 @@ for url in "${repo_urls[@]}"; do
     if [ -d "node_modules" ]; then
         echo "node_modules directory found in $repo_name. Removing its contents..."
         rm -rf node_modules
+    fi
+
+    # Check if ui-src node_modules directory exists
+    if [ -d "services/ui-src/node_modules" ]; then
+        echo "services/ui-src/node_modules directory found. Removing its contents..."
+        rm -rf services/ui-src/node_modules
+
+        # Run yarn in /services/ui-src/ directory
+        echo "Running yarn in /services/ui-src/ directory..."
+        (cd services/ui-src/ && yarn)
+    fi
+
+    # Check if app-api node_modules directory exists
+    if [ -d "services/app-api/node_modules" ]; then
+        echo "services/app-api/node_modules directory found. Removing its contents..."
+        rm -rf services/app-api/node_modules
+
+        # Run yarn in /services/app-api/ directory
+        echo "Running yarn in /services/app-api/ directory..."
+        (cd services/app-api/ && yarn)
     fi
     
     # Run yarn from the top level of the repository
