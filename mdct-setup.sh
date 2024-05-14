@@ -217,7 +217,7 @@ for url in "${repo_urls[@]}"; do
     # Check if node_modules directory exists
     if [ -d "node_modules" ]; then
         echo "node_modules directory found in $repo_name. Removing its contents..."
-        rm -rf node_modules/*
+        rm -rf node_modules
     fi
     
     # Run yarn from the top level of the repository
