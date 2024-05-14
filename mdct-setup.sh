@@ -126,6 +126,11 @@ if ! which op > /dev/null ; then
   brew install 1password-cli
 fi
 
+# Install go (needed to install kion)
+if ! which go > /dev/null ; then
+  brew install go
+fi
+
 # Install kion-cli, a go package used to authenticate to Kion and access AWS
 go install github.com/kionsoftware/kion-cli@latest
 touch ~/.kion.yml
