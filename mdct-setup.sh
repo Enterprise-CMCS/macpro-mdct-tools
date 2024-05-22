@@ -81,7 +81,9 @@ else
   homebrewprefix="/usr/local"
 fi
 
-(echo; echo 'eval "$($homebrewprefix/bin/brew shellenv)"') >> $shellprofile
+if ! grep -q '$('$homebrewprefix'/bin/brew shellenv)"' $shellprofile; then
+  (echo; echo 'eval "$('$homebrewprefix'/bin/brew shellenv)"') >> $shellprofile
+fi
 eval "$($homebrewprefix/bin/brew shellenv)"
 
 # Install the AWS CLI, used to interact with any/all AWS services
