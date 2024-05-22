@@ -95,6 +95,16 @@ if ! which jq > /dev/null ; then
 fi
 
 # Install nvm, a version manager for Node, allowing multiple versions of Node to be installed and used
+# if [ "$CI" != "true" ]; then
+#   if [ ! -f ~/.nvm/nvm.sh ]; then
+#     brew install nvm
+#   fi
+# else
+#   brew install nvm
+# fi
+# mkdir -p ~/.nvm
+
+# Install nvm, a version manager for Node, allowing multiple versions of Node to be installed and used
 if [ "$CI" != "true" ]; then
   if [ ! -f ~/.nvm/nvm.sh ]; then
     brew install nvm
@@ -103,6 +113,21 @@ else
   brew install nvm
 fi
 mkdir -p ~/.nvm
+
+# Source NVM script and set up NVM environment
+export NVM_DIR="$HOME/.nvm"
+source $(brew --prefix nvm)/nvm.sh
+
+# Optional: Add NVM initialization to shell profile for future sessions
+if ! grep -q 'source $(brew --prefix nvm)/nvm.sh' ~/.bashrc; then
+  echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
+  echo 'source $(brew --prefix nvm)/nvm.sh' >> ~/.bashrc
+fi
+
+if ! grep -q 'source $(brew --prefix nvm)/nvm.sh' ~/.zshrc; then
+  echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
+  echo 'source $(brew --prefix nvm)/nvm.sh' >> ~/.zshrc
+fi
 
 # Install pre-commit
 if ! which pre-commit > /dev/null ; then
@@ -201,10 +226,10 @@ for url in "${repo_urls[@]}"; do
     cd "$clone_dir/$repo_name"
 
     # Load nvm if it's not already loaded
-    if [ -s "$HOME/.nvm/nvm.sh" ]; then
-        # Source nvm script
-        . "$HOME/.nvm/nvm.sh"
-    fi
+    # if [ -s "$HOME/.nvm/nvm.sh" ]; then
+    #     # Source nvm script
+    #     . "$HOME/.nvm/nvm.sh"
+    # fi
     
     # Run the "pre-commit install" command
     echo "Running pre-commit install in $repo_name..."
