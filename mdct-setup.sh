@@ -140,6 +140,11 @@ if ! which git > /dev/null ; then
   brew install git
 fi
 
+# Install GitHub CLI, our version control system 
+if ! which gh > /dev/null ; then
+  brew install gh
+fi
+
 # Install 1password
 if ! which op > /dev/null ; then
   brew install 1password-cli
@@ -161,6 +166,7 @@ repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
 )
 
 # Directory where repositories will be cloned
