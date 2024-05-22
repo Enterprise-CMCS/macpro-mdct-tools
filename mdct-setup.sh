@@ -81,7 +81,8 @@ else
   homebrewprefix="/usr/local"
 fi
 
-export PATH="$homebrewprefix:$PATH"
+(echo; echo 'eval "$($homebrewprefix/bin/brew shellenv)"') >> $shellprofile
+eval "$($homebrewprefix/bin/brew shellenv)"
 
 # Install the AWS CLI, used to interact with any/all AWS services
 if ! which aws > /dev/null ; then
