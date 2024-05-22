@@ -71,7 +71,7 @@ fi
 # Set some things based on chip architecture
 arch=`uname -m`
 homebrewprefix=""
-if [ "$arch" == "arm64" ]; then
+if [ "$arch" = "arm64" ]; then
   # If we're on Apple Silicon, check that Rosetta 2 has already been installed and is running.
   if ! /usr/bin/pgrep -q oahd; then
     echo "ERROR:  Rosetta must be installed on this machine before running this script, but was not found." && exit 1
@@ -97,16 +97,6 @@ if ! which jq > /dev/null ; then
 fi
 
 # Install nvm, a version manager for Node, allowing multiple versions of Node to be installed and used
-# if [ "$CI" != "true" ]; then
-#   if [ ! -f ~/.nvm/nvm.sh ]; then
-#     brew install nvm
-#   fi
-# else
-#   brew install nvm
-# fi
-# mkdir -p ~/.nvm
-
-# Install nvm, a version manager for Node, allowing multiple versions of Node to be installed and used
 if [ "$CI" != "true" ]; then
   if [ ! -f ~/.nvm/nvm.sh ]; then
     brew install nvm
@@ -121,12 +111,12 @@ export NVM_DIR="$HOME/.nvm"
 source $(brew --prefix nvm)/nvm.sh
 
 # Optional: Add NVM initialization to shell profile for future sessions
-if ! grep -q 'source $(brew --prefix nvm)/nvm.sh' ~/.bashrc; then
+if [ "$shell" = "bash" ] && ! grep -q 'source $(brew --prefix nvm)/nvm.sh' ~/.bashrc; then
   echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
   echo 'source $(brew --prefix nvm)/nvm.sh' >> ~/.bashrc
 fi
 
-if ! grep -q 'source $(brew --prefix nvm)/nvm.sh' ~/.zshrc; then
+if [ "$shell" = "zsh" ] && ! grep -q 'source $(brew --prefix nvm)/nvm.sh' ~/.zshrc; then
   echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
   echo 'source $(brew --prefix nvm)/nvm.sh' >> ~/.zshrc
 fi
@@ -226,12 +216,6 @@ for url in "${repo_urls[@]}"; do
     
     # Navigate into the cloned repository directory
     cd "$clone_dir/$repo_name"
-
-    # Load nvm if it's not already loaded
-    # if [ -s "$HOME/.nvm/nvm.sh" ]; then
-    #     # Source nvm script
-    #     . "$HOME/.nvm/nvm.sh"
-    # fi
     
     # Run the "pre-commit install" command
     echo "Running pre-commit install in $repo_name..."
@@ -263,6 +247,8 @@ for url in "${repo_urls[@]}"; do
         continue
     fi
         
+    [ ! -f ".nvmrc" ] && continue
+
     # install correct version of node using the .nvmrc
     echo "Installing the correct node version"
     nvm install
