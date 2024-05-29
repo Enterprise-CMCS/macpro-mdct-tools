@@ -172,6 +172,26 @@ if ! which kion-cli > /dev/null ; then
   brew install kionsoftware/tap/kion-cli
 fi
 
+# Output the kion configuration to a file in the home directory
+kion_config_file="$HOME/.kion.yml"
+
+if [ ! -f "$kion_config_file" ]; then
+  cat <<EOL > $kion_config_file
+kion:
+  url: https://cloudtamer.cms.gov
+  api_key: ""
+  username: <eua id here>
+  idms_id: "2"
+  saml_metadata_file: ""
+  saml_sp_issuer: ""
+EOL
+  echo "Kion configuration file created at $kion_config_file"
+else
+  echo "Kion configuration file already exists at $kion_config_file. Skipping creation."
+fi
+
+echo "Kion configuration file created at $kion_config_file"
+
 # Define the URLs of the MDCT repositories
 repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
