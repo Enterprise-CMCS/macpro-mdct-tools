@@ -167,24 +167,10 @@ if ! which op > /dev/null ; then
   brew install 1password-cli
 fi
 
-# Install go (needed to install kion)
-if ! which go > /dev/null ; then
-  brew install go
-  if ! which go > /dev/null ; then
-      echo "go installation failed." && exit 1
-  else
-    # Get the directory where java is installed
-    go_home=$(brew --prefix)/opt/go
-    
-    # Add go to PATH
-    echo "export PATH=\"$go_home/bin:\$PATH\"" >> "$shellprofile"
-    echo "go installed successfully and added to PATH."
-  fi
+# Install Kion
+if ! which kion-cli > /dev/null ; then
+  brew install kionsoftware/tap/kion-cli
 fi
-
-# Install kion-cli, a go package used to authenticate to Kion and access AWS
-go install github.com/kionsoftware/kion-cli@latest
-touch ~/.kion.yml
 
 # Define the URLs of the MDCT repositories
 repo_urls=(
