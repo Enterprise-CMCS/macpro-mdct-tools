@@ -229,7 +229,7 @@ if ! which op > /dev/null ; then
 fi
 
 # Install Kion
-if ! which kion-cli > /dev/null ; then
+if ! which kion > /dev/null ; then
   brew install kionsoftware/tap/kion-cli
 fi
 
