@@ -121,19 +121,27 @@ confirm() {
 
 # Check if the version file exists
 if [ ! -f "$version_file" ]; then
-    echo "It looks like you've never run the workspace setup script before. The MDCT team uses the workspace setup script to maintain a consistent development environment and brew to install as many packages as possible.  The script will remove your ~/.nvm, ~/.npm, and ~/go folders if they already exist to ensure a consistent installation process. "
+    echo "It looks like you've never run the workspace setup script before. The MDCT team uses the workspace setup script to maintain a consistent development environment and brew to install as many packages as possible. The script will remove your ~/.nvm, ~/.npm, and ~/go folders if they already exist to ensure a consistent installation process."
     if confirm "Would you like to proceed with deleting these folders and continuing the setup? [Y/n]"; then
         echo "Proceeding with the setup..."
         
         # Remove ~/.nvm ~/.npm and ~/go folders
-        echo "Removing ~/.nvm and ~/.npm folders..."
+        echo "Removing ~/.nvm, ~/.npm, and ~/go folders if they exist..."
         rm -rf "$HOME/.nvm"
         rm -rf "$HOME/.npm"
         sudo rm -rf "$HOME/go"
+        
+        # Create the version file
+        echo "Creating version file at $version_file"
+        echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
     else
         echo "Exiting script."
         exit 0
     fi
+else
+    # Update the version file on subsequent runs
+    echo "Updating version file at $version_file"
+    echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
 fi
 
 # Create the Projects directory if it doesn't exist
@@ -229,11 +237,12 @@ fi
 kion_config_file="$HOME/.kion.yml"
 
 if [ ! -f "$kion_config_file" ]; then
+  read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
   cat <<EOL > $kion_config_file
 kion:
   url: https://cloudtamer.cms.gov
   api_key: ""
-  username: <eua id here>
+  username: $user_id
   idms_id: "2"
   saml_metadata_file: ""
   saml_sp_issuer: ""
