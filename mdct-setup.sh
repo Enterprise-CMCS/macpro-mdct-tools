@@ -1,5 +1,8 @@
 set -e
 
+# Script version
+SCRIPT_VERSION="1.0.0"
+
 # Check that user is using MacOS
 if [[ ! "$OSTYPE" =~ ^darwin ]]; then
   echo "ERROR:  This script is intended only for MacOS." && exit 1
@@ -85,6 +88,56 @@ if ! grep -q '$('$homebrewprefix'/bin/brew shellenv)"' $shellprofile; then
   (echo; echo 'eval "$('$homebrewprefix'/bin/brew shellenv)"') >> $shellprofile
 fi
 eval "$($homebrewprefix/bin/brew shellenv)"
+
+# # Directory where repositories will be cloned
+# clone_dir="$HOME/Projects"
+
+# # Define version file 
+# version_file="$clone_dir/.mdct_workspace_setup_version"
+
+# # Create the Projects directory if it doesn't exist
+# mkdir -p "$clone_dir"
+
+# # Create or update the version file in the Projects directory
+# echo "Creating version file at $version_file"
+# echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
+
+# Define the clone directory and version file
+clone_dir="$HOME/Projects"
+version_file="$clone_dir/.mdct_workspace_setup_version"
+
+# Confirmation prompt function
+confirm() {
+    read -r -p "${1:-Are you sure? [Y/n]} " response
+    case "$response" in
+        [yY][eE][sS]|[yY]|"")
+            true
+            ;;
+        *)
+            false
+            ;;
+    esac
+}
+
+# Check if the version file exists
+if [ ! -f "$version_file" ]; then
+    echo "It looks like you've never run the workspace setup script before. The MDCT team uses the workspace setup script to maintain a consistent development environment and brew to install as many packages as possible.  The script will remove your ~/.nvm, ~/.npm, and ~/go folders if they already exist to ensure a consistent installation process. "
+    if confirm "Would you like to proceed with deleting these folders and continuing the setup? [Y/n]"; then
+        echo "Proceeding with the setup..."
+        
+        # Remove ~/.nvm ~/.npm and ~/go folders
+        echo "Removing ~/.nvm and ~/.npm folders..."
+        rm -rf "$HOME/.nvm"
+        rm -rf "$HOME/.npm"
+        sudo rm -rf "$HOME/go"
+    else
+        echo "Exiting script."
+        exit 0
+    fi
+fi
+
+# Create the Projects directory if it doesn't exist
+mkdir -p "$clone_dir"
 
 # Install the AWS CLI, used to interact with any/all AWS services
 if ! which aws > /dev/null ; then
@@ -202,11 +255,16 @@ repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
 )
 
-# Directory where repositories will be cloned
-clone_dir="$HOME/Projects"
+# # Directory where repositories will be cloned
+# clone_dir="$HOME/Projects"
 
-# Create the Projects directory if it doesn't exist
-mkdir -p "$clone_dir"
+# # Create the Projects directory if it doesn't exist
+# mkdir -p "$clone_dir"
+
+# # Create or update the version file in the Projects directory
+# version_file="$clone_dir/.mdct_workspace_setup_version"
+# echo "Creating version file at $version_file"
+# echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
 
 # Loop through each repository URL
 for url in "${repo_urls[@]}"; do
