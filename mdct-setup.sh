@@ -121,15 +121,16 @@ confirm() {
 
 # Check if the version file exists
 if [ ! -f "$version_file" ]; then
-    echo "It looks like you've never run the workspace setup script before. The MDCT team uses the workspace setup script to maintain a consistent development environment and brew to install as many packages as possible. The script will remove your ~/.nvm, ~/.npm, and ~/go folders if they already exist to ensure a consistent installation process."
+    echo "It looks like you've never run the workspace setup script before. The MDCT team uses the workspace setup script to maintain a consistent development environment and brew to install as many packages as possible. The script will remove your ~/.nvm, ~/.npm, ~/go, and ~/.kion.yml folders/files if they already exist to ensure a consistent installation process."
     if confirm "Would you like to proceed with deleting these folders and continuing the setup? [Y/n]"; then
         echo "Proceeding with the setup..."
         
         # Remove ~/.nvm ~/.npm and ~/go folders
-        echo "Removing ~/.nvm, ~/.npm, and ~/go folders if they exist..."
+        echo "Removing ~/.nvm, ~/.npm, ~/go, and ~/.kion.yml folders and files if they exist..."
         rm -rf "$HOME/.nvm"
         rm -rf "$HOME/.npm"
         sudo rm -rf "$HOME/go"
+        rm -rf "$HOME/.kion.yml"
         
         # Create the version file
         echo "Creating version file at $version_file"
