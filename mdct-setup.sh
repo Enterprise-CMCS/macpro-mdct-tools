@@ -170,6 +170,16 @@ fi
 # Install go (needed to install kion)
 if ! which go > /dev/null ; then
   brew install go
+  if ! which go > /dev/null ; then
+      echo "go installation failed." && exit 1
+  else
+    # Get the directory where java is installed
+    go_home=$(brew --prefix)/opt/go
+    
+    # Add go to PATH
+    echo "export PATH=\"$go_home/bin:\$PATH\"" >> "$shellprofile"
+    echo "go installed successfully and added to PATH."
+  fi
 fi
 
 # Install kion-cli, a go package used to authenticate to Kion and access AWS
