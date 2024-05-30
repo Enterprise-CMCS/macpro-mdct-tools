@@ -252,17 +252,6 @@ repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
 )
 
-# # Directory where repositories will be cloned
-# clone_dir="$HOME/Projects"
-
-# # Create the Projects directory if it doesn't exist
-# mkdir -p "$clone_dir"
-
-# # Create or update the version file in the Projects directory
-# version_file="$clone_dir/.mdct_workspace_setup_version"
-# echo "Creating version file at $version_file"
-# echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
-
 # Loop through each repository URL
 for url in "${repo_urls[@]}"; do
     # Extract the repository name from the URL
