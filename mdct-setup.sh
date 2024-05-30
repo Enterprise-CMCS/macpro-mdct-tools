@@ -119,6 +119,9 @@ confirm() {
     esac
 }
 
+# Create the Projects directory if it doesn't exist
+mkdir -p "$clone_dir"
+
 # Check if the version file exists
 if [ ! -f "$version_file" ]; then
     echo "It looks like you've never run the workspace setup script before. The MDCT team uses the workspace setup script to maintain a consistent development environment and brew to install as many packages as possible. The script will remove your ~/.nvm, ~/.npm, ~/go, and ~/.kion.yml folders/files if they already exist to ensure a consistent installation process."
@@ -144,9 +147,6 @@ else
     echo "Updating version file at $version_file"
     echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
 fi
-
-# Create the Projects directory if it doesn't exist
-mkdir -p "$clone_dir"
 
 # Install the AWS CLI, used to interact with any/all AWS services
 if ! which aws > /dev/null ; then
