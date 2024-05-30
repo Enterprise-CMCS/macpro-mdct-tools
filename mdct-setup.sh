@@ -317,30 +317,33 @@ for url in "${repo_urls[@]}"; do
         echo "node_modules directory found in $repo_name. Removing its contents..."
         rm -rf node_modules
     fi
+    # Run yarn in top level of repo
+    echo "Running yarn"
+    yarn
 
     # Check if ui-src node_modules directory exists
     if [ -d "services/ui-src/node_modules" ]; then
         echo "services/ui-src/node_modules directory found. Removing its contents..."
         rm -rf services/ui-src/node_modules
-
-        # Run yarn in /services/ui-src/ directory
-        echo "Running yarn in /services/ui-src/ directory..."
-        (cd services/ui-src/ && yarn)
     fi
+
+    # Run yarn in /services/ui-src/ directory
+    echo "Running yarn in /services/ui-src/ directory..."
+    (cd services/ui-src/ && yarn)
 
     # Check if app-api node_modules directory exists
     if [ -d "services/app-api/node_modules" ]; then
         echo "services/app-api/node_modules directory found. Removing its contents..."
         rm -rf services/app-api/node_modules
-
-        # Run yarn in /services/app-api/ directory
-        echo "Running yarn in /services/app-api/ directory..."
-        (cd services/app-api/ && yarn)
     fi
+
+    # Run yarn in /services/app-api/ directory
+    echo "Running yarn in /services/app-api/ directory..."
+    (cd services/app-api/ && yarn)
     
-    # Run yarn from the top level of the repository
-    echo "Running yarn in $repo_name..."
-    yarn
+    # # Run yarn from the top level of the repository
+    # echo "Running yarn in $repo_name..."
+    # yarn
     
     # Check if yarn was successful
     if [ $? -eq 0 ]; then
