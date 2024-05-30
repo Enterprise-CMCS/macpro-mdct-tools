@@ -360,7 +360,7 @@ done
 
 # Install serverless
 if ! which sls > /dev/null ; then
-  npm install -g serverless
+  npm install -g serverless@3.38.0
 fi
 
 # Install dynamodb-admin
