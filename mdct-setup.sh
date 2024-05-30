@@ -106,6 +106,9 @@ eval "$($homebrewprefix/bin/brew shellenv)"
 clone_dir="$HOME/Projects"
 version_file="$clone_dir/.mdct_workspace_setup_version"
 
+# Create the Projects directory if it doesn't exist
+mkdir -p "$clone_dir"
+
 # Confirmation prompt function
 confirm() {
     read -r -p "${1:-Are you sure? [Y/n]} " response
@@ -118,9 +121,6 @@ confirm() {
             ;;
     esac
 }
-
-# Create the Projects directory if it doesn't exist
-mkdir -p "$clone_dir"
 
 # Check if the version file exists
 if [ ! -f "$version_file" ]; then
