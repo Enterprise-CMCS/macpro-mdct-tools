@@ -89,19 +89,6 @@ if ! grep -q '$('$homebrewprefix'/bin/brew shellenv)"' $shellprofile; then
 fi
 eval "$($homebrewprefix/bin/brew shellenv)"
 
-# # Directory where repositories will be cloned
-# clone_dir="$HOME/Projects"
-
-# # Define version file 
-# version_file="$clone_dir/.mdct_workspace_setup_version"
-
-# # Create the Projects directory if it doesn't exist
-# mkdir -p "$clone_dir"
-
-# # Create or update the version file in the Projects directory
-# echo "Creating version file at $version_file"
-# echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
-
 # Define the clone directory and version file
 clone_dir="$HOME/Projects"
 version_file="$clone_dir/.mdct_workspace_setup_version"
@@ -388,7 +375,3 @@ fi
 if ! which dynamodb-admin > /dev/null ; then
   npm install -g dynamodb-admin
 fi
-
-# todo 
-# testing workflow using one pass ... grab stuff from onepass at test run time for e2e 
-# .env workflow ... we check in the .tpl version of env files with op references 
