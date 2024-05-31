@@ -38,7 +38,7 @@ if [ "$CI" != "true" ]; then
     case $selectedshell in
       "zsh")
         shell=$selectedshell
-        shellprofile="$HOME/.zshenv"
+        shellprofile="$HOME/.zprofile"
         mdctrcfile="$HOME/.mdctrc"
         ;;
 
@@ -65,6 +65,9 @@ else
 fi
 touch $mdctrcfile
 touch $shellprofile
+if ! grep -q "source $mdctrcfile" $shellprofile; then
+  (echo; echo "source $mdctrcfile") >> $shellprofile
+fi
 
 # Install HomeBrew, an OSX package manager
 if ! which brew > /dev/null ; then
@@ -176,19 +179,19 @@ if ! which pre-commit > /dev/null ; then
 fi
 
 # Install java with brew 
-if ! which java > /dev/null ; then
+if [[ ! $(which java) =~ "homebrew" ]] ; then
 	brew install java
+  # Get the directory where java is installed
+  java_home=$(brew --prefix)/opt/openjdk
+  
+  # Add java to PATH
+  echo "export PATH=\"$java_home/bin:\$PATH\"" >> "$shellprofile"
+  # echo "Java installed successfully and added to PATH."
+  source $shellprofile
   # Check if java is installed and add it to PATH if necessary
-  if ! which java > /dev/null ; then
+  if [[ ! $(which java) =~ "homebrew" ]] ; then
       echo "Java installation failed." && exit 1
-  else
-      # Get the directory where java is installed
-      java_home=$(brew --prefix)/opt/openjdk@11
-      
-      # Add java to PATH
-      echo "export PATH=\"$java_home/bin:\$PATH\"" >> "$shellprofile"
-      # echo "Java installed successfully and added to PATH."
-  fi  
+  fi
 fi
 
 # Install awslogs, a utility for streaming CloudWatch logs
