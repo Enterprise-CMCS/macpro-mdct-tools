@@ -66,7 +66,7 @@ fi
 touch $mdctrcfile
 touch $shellprofile
 if ! grep -q "source $mdctrcfile" $shellprofile; then
-  (echo; echo "source $mdctrcfile" >> $shellprofile
+  (echo; echo "source $mdctrcfile") >> $shellprofile
 fi
 
 # Install HomeBrew, an OSX package manager
