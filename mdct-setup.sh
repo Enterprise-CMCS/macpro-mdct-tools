@@ -343,6 +343,46 @@ for url in "${repo_urls[@]}"; do
     # Run yarn in /services/app-api/ directory
     echo "Running yarn in /services/app-api/ directory..."
     (cd services/app-api/ && yarn)
+
+    # Check if database node_modules directory exists
+    if [ -d "services/database/node_modules" ]; then
+        echo "services/database/node_modules directory found. Removing its contents..."
+        rm -rf services/database/node_modules
+    fi
+
+    # Run yarn in /services/app-api/ directory
+    echo "Running yarn in /services/database/ directory..."
+    (cd services/database/ && yarn)
+
+    # Check if ui node_modules directory exists
+    if [ -d "services/ui/node_modules" ]; then
+        echo "services/ui/node_modules directory found. Removing its contents..."
+        rm -rf services/ui/node_modules
+    fi
+
+    # Run yarn in /services/app-api/ directory
+    echo "Running yarn in /services/ui/ directory..."
+    (cd services/ui/ && yarn)
+
+    # Check if ui-auth node_modules directory exists
+    if [ -d "services/ui-auth/node_modules" ]; then
+        echo "services/ui-auth/node_modules directory found. Removing its contents..."
+        rm -rf services/ui-auth/node_modules
+    fi
+
+    # Run yarn in /services/app-api/ directory
+    echo "Running yarn in /services/ui-auth/ directory..."
+    (cd services/ui-auth/ && yarn)
+
+    # Check if uploads node_modules directory exists
+    if [ -d "services/uploads/node_modules" ]; then
+        echo "services/uploads/node_modules directory found. Removing its contents..."
+        rm -rf services/uploads/node_modules
+    fi
+
+    # Run yarn in /services/app-api/ directory
+    echo "Running yarn in /services/uploads/ directory..."
+    (cd services/uploads/ && yarn)
     
     # # Run yarn from the top level of the repository
     # echo "Running yarn in $repo_name..."
