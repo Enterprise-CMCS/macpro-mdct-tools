@@ -181,17 +181,17 @@ fi
 # Install java with brew 
 if [[ ! $(which java) =~ "homebrew" ]] ; then
 	brew install java
+  # Get the directory where java is installed
+  java_home=$(brew --prefix)/opt/openjdk@11
+  
+  # Add java to PATH
+  echo "export PATH=\"$java_home/bin:\$PATH\"" >> "$shellprofile"
+  # echo "Java installed successfully and added to PATH."
+  source $shellprofile
   # Check if java is installed and add it to PATH if necessary
-  if ! which java > /dev/null ; then
+  if [[ ! $(which java) =~ "homebrew" ]] then
       echo "Java installation failed." && exit 1
-  else
-      # Get the directory where java is installed
-      java_home=$(brew --prefix)/opt/openjdk@11
-      
-      # Add java to PATH
-      echo "export PATH=\"$java_home/bin:\$PATH\"" >> "$shellprofile"
-      # echo "Java installed successfully and added to PATH."
-  fi  
+  fi
 fi
 
 # Install awslogs, a utility for streaming CloudWatch logs
