@@ -182,7 +182,7 @@ fi
 if [[ ! $(which java) =~ "homebrew" ]] ; then
 	brew install java
   # Get the directory where java is installed
-  java_home=$(brew --prefix)/opt/openjdk@11
+  java_home=$(brew --prefix)/opt/openjdk
   
   # Add java to PATH
   echo "export PATH=\"$java_home/bin:\$PATH\"" >> "$shellprofile"
