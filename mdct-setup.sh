@@ -24,7 +24,43 @@ if [[ ! "$OSTYPE" =~ ^darwin ]]; then
 fi
 
 # Loop through each repository URL
-echo "checking to see if repositories have already been cloned and are on the correct branch to run the mdct workspace setup script"
+# echo "Checking to see if the MDCT repos already exist and ensure they are on the correct branch to continue running the MDCT workspace setup script...."
+# for repo_url in "${repo_urls[@]}"; do
+#     # Extract the repository name from the URL
+#     repo_name=$(basename -s .git "$repo_url")
+
+#     # Construct the repository directory path
+#     repo_dir="$clone_dir/$repo_name"
+
+#     # Check if the repository directory exists
+#     if [ -d "$repo_dir" ]; then
+#         # echo "Repository $repo_name exists in $clone_dir."
+
+#         # Change to the repository directory
+#         cd "$repo_dir" || exit 1
+
+#         # Check if the directory is a Git repository
+#         if [ -d ".git" ]; then
+#             # Get the current branch name
+#             current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+#             # Check if the current branch is 'main' or 'master'
+#             if [[ "$current_branch" == "main" || "$current_branch" == "master" ]]; then
+#                 echo "Repository $repo_name is on branch $current_branch."
+#             else
+#                 echo "Repository $repo_name is not on the 'main' or 'master' branch. Please commit any changes you may have and check out main or master to re-run the MDCT workspace setup script."
+#                 exit 1
+#             fi
+#         else
+#             echo "Directory $repo_dir is not a Git repository."
+#         fi
+#     else
+#         echo "Repository $repo_name does not exist in $clone_dir."
+#     fi
+# done
+
+# Loop through each repository URL
+echo "Checking to see if the MDCT repos already exist and ensure they are on the correct branch to continue running the MDCT workspace setup script...."
 for repo_url in "${repo_urls[@]}"; do
     # Extract the repository name from the URL
     repo_name=$(basename -s .git "$repo_url")
@@ -34,27 +70,28 @@ for repo_url in "${repo_urls[@]}"; do
 
     # Check if the repository directory exists
     if [ -d "$repo_dir" ]; then
-        echo "Repository $repo_name exists in $clone_dir."
-
         # Change to the repository directory
         cd "$repo_dir" || exit 1
 
-        # Get the current branch name
-        current_branch=$(git rev-parse --abbrev-ref HEAD)
+        # Check if the directory is a Git repository
+        if [ -d ".git" ]; then
+            # Get the current branch name
+            current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-        # Check if the current branch is 'main' or 'master'
-        if [[ "$current_branch" == "main" || "$current_branch" == "master" ]]; then
-            echo "Repository $repo_name is on branch $current_branch."
+            # Check if the current branch is 'main' or 'master'
+            if [[ "$current_branch" != "main" && "$current_branch" != "master" ]]; then
+                echo "Repository $repo_name is not on the 'main' or 'master' branch. Please commit any changes you may have and checkout main or master to re-run the MDCT workspace setup script."
+                exit 1
+            fi
         else
-            echo "Repository $repo_name is not on the 'main' or 'master' branch. Please commit any changes you may have and check out main or master to re-run the MDCT workspace setup script."
-            exit 1
+            echo "Directory $repo_dir is not a Git repository."
         fi
     else
         echo "Repository $repo_name does not exist in $clone_dir."
     fi
 done
 
-echo "All repositories are on the 'main' or 'master' branch."
+
 
 # Confirmation prompt function
 confirm() {
