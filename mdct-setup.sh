@@ -405,6 +405,30 @@ for url in "${repo_urls[@]}"; do
     # Run yarn in /services/app-api/ directory
     echo "Running yarn in /services/uploads/ directory..."
     (cd services/uploads/ && yarn)
+
+    # Check if tests/cypress node_modules directory exists
+    if [ -d "tests/cypress/node_modules" ]; then
+        echo "tests/cypress/node_modules directory found. Removing its contents..."
+        rm -rf tests/cypress/node_modules
+    fi
+
+    # If the tets live in tests/cypress ... run yarn there
+    if [ -d "tests/cypress" ]; then
+        echo "running yarn in the tests/cypress folder...."
+        (cd tests/cypress && yarn)
+    fi
+
+    # Check if tests node_modules directory exists
+    if [ -d "tests/node_modules" ]; then
+        echo "tests/node_modules directory found. Removing its contents..."
+        rm -rf tests/node_modules
+    fi
+
+    # If the tets live in tests ... run yarn there
+    if [ -f "tests/package.json" ]; then
+        echo "running yarn in the tests folder...."
+        (cd tests && yarn)
+    fi
     
     # Check if yarn was successful
     if [ $? -eq 0 ]; then
