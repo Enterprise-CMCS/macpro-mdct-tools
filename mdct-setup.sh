@@ -4,6 +4,7 @@ set -e
 SCRIPT_VERSION="1.0.0"
 
 # Check that user is using MacOS
+echo "checking os type"
 if [[ ! "$OSTYPE" =~ ^darwin ]]; then
   echo "ERROR:  This script is intended only for MacOS." && exit 1
 fi
@@ -70,7 +71,9 @@ if ! grep -q "source $mdctrcfile" $shellprofile; then
 fi
 
 # Install HomeBrew, an OSX package manager
+echo "checking to see if brew is installed"
 if ! which brew > /dev/null ; then
+  echo "installing brew"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
@@ -82,8 +85,10 @@ if [ "$arch" = "arm64" ]; then
   if ! /usr/bin/pgrep -q oahd; then
     echo "ERROR:  Rosetta must be installed on this machine before running this script, but was not found." && exit 1
   fi
+  echo "homebrew prefix is /opt/homebrew"
   homebrewprefix="/opt/homebrew"
 else
+  echo "homebrewprefix is /usr/local"
   homebrewprefix="/usr/local"
 fi
 
@@ -97,6 +102,7 @@ clone_dir="$HOME/Projects"
 version_file="$clone_dir/.mdct_workspace_setup_version"
 
 # Create the Projects directory if it doesn't exist
+echo "creating the Projects directory if it does not already exit"
 mkdir -p "$clone_dir"
 
 # Confirmation prompt function
@@ -140,26 +146,32 @@ fi
 
 # Install the AWS CLI, used to interact with any/all AWS services
 if ! which aws > /dev/null ; then
+  echo "brew installing aws cli session-manager-plugin"
 	brew install awscli session-manager-plugin
 fi
 
 # Install jq, a command line utility for parsing JSON.
 if ! which jq > /dev/null ; then
+  echo " brew installing jq"
 	brew install jq
 fi
 
 # Install nvm, a version manager for Node, allowing multiple versions of Node to be installed and used
 if [ "$CI" != "true" ]; then
   if [ ! -f ~/.nvm/nvm.sh ]; then
+    echo "brew installing nvm"
     brew install nvm
   fi
 else
+  echo "brew is installing nvm"
   brew install nvm
 fi
+echo "creating ~/.nvm if it does no exist"
 mkdir -p ~/.nvm
 
 # Source NVM script and set up NVM environment
 export NVM_DIR="$HOME/.nvm"
+echo "sourcing nvm.sh"
 source $(brew --prefix nvm)/nvm.sh
 
 # Optional: Add NVM initialization to shell profile for future sessions
@@ -175,16 +187,19 @@ fi
 
 # Install pre-commit
 if ! which pre-commit > /dev/null ; then
+  echo "brew installing pre-commit"
   brew install pre-commit
 fi
 
 # Install java with brew 
 if [[ ! $(which java) =~ "homebrew" ]] ; then
+  echo "brew installing java"
 	brew install java
   # Get the directory where java is installed
   java_home=$(brew --prefix)/opt/openjdk
   
   # Add java to PATH
+  echo "adding java to PATH"
   echo "export PATH=\"$java_home/bin:\$PATH\"" >> "$shellprofile"
   # echo "Java installed successfully and added to PATH."
   source $shellprofile
@@ -196,31 +211,37 @@ fi
 
 # Install awslogs, a utility for streaming CloudWatch logs
 if ! which awslogs > /dev/null ; then
+  echo "brew installing awslogs"
   brew install awslogs
 fi
 
 # Install yarn, a node package manager similiar to npm
 if ! which yarn > /dev/null ; then
+  echo "brew installing yarn"
   brew install yarn
 fi
 
 # Install git, our version control system 
 if ! which git > /dev/null ; then
+  echo "brew installing git"
   brew install git
 fi
 
 # Install GitHub CLI, our version control system 
 if ! which gh > /dev/null ; then
+  echo "brew installing GitHub cli"
   brew install gh
 fi
 
 # Install 1password
 if ! which op > /dev/null ; then
+  echo "brew installing 1Password CLI"
   brew install 1password-cli
 fi
 
 # Install Kion
 if ! which kion > /dev/null ; then
+  echo "brew installing kion"
   brew install kionsoftware/tap/kion-cli
 fi
 
@@ -228,6 +249,7 @@ fi
 kion_config_file="$HOME/.kion.yml"
 
 if [ ! -f "$kion_config_file" ]; then
+  echo "creating a kion config file"
   read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
   cat <<EOL > $kion_config_file
 kion:
@@ -384,18 +406,12 @@ for url in "${repo_urls[@]}"; do
     echo "Running yarn in /services/uploads/ directory..."
     (cd services/uploads/ && yarn)
     
-    # # Run yarn from the top level of the repository
-    # echo "Running yarn in $repo_name..."
-    # yarn
-    
     # Check if yarn was successful
     if [ $? -eq 0 ]; then
         echo "yarn completed successfully in $repo_name."
     else
         echo "Failed to run yarn in $repo_name."
     fi
-
-    # rebuild clean
     
     # Navigate back to the original directory
     cd -
@@ -403,11 +419,13 @@ done
 
 # Install serverless
 if ! which sls > /dev/null ; then
+  echo "npm installing serverless v3.38.0"
   npm install -g serverless@3.38.0
 fi
 
 # Install dynamodb-admin
 if ! which dynamodb-admin > /dev/null ; then
+  echo "npm installing dynamodb-admin"
   npm install -g dynamodb-admin
 fi
 
