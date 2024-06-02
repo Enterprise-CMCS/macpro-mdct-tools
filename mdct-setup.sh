@@ -3,11 +3,58 @@ set -e
 # Script version
 SCRIPT_VERSION="1.0.0"
 
+# Define the clone directory and version file
+clone_dir="$HOME/Projects"
+version_file="$clone_dir/.mdct_workspace_setup_version"
+
+# Define the URLs of the MDCT repositories
+repo_urls=(
+    "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-seds.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
+)
+
 # Check that user is using MacOS
 echo "checking os type"
 if [[ ! "$OSTYPE" =~ ^darwin ]]; then
   echo "ERROR:  This script is intended only for MacOS." && exit 1
 fi
+
+# Loop through each repository URL
+echo "checking to see if repositories have already been cloned and are on the correct branch to run the mdct workspace setup script"
+for repo_url in "${repo_urls[@]}"; do
+    # Extract the repository name from the URL
+    repo_name=$(basename -s .git "$repo_url")
+
+    # Construct the repository directory path
+    repo_dir="$clone_dir/$repo_name"
+
+    # Check if the repository directory exists
+    if [ -d "$repo_dir" ]; then
+        echo "Repository $repo_name exists in $clone_dir."
+
+        # Change to the repository directory
+        cd "$repo_dir" || exit 1
+
+        # Get the current branch name
+        current_branch=$(git rev-parse --abbrev-ref HEAD)
+
+        # Check if the current branch is 'main' or 'master'
+        if [[ "$current_branch" == "main" || "$current_branch" == "master" ]]; then
+            echo "Repository $repo_name is on branch $current_branch."
+        else
+            echo "Repository $repo_name is not on the 'main' or 'master' branch. Please commit any changes you may have and check out main or master to re-run the MDCT workspace setup script."
+            exit 1
+        fi
+    else
+        echo "Repository $repo_name does not exist in $clone_dir."
+    fi
+done
+
+echo "All repositories are on the 'main' or 'master' branch."
 
 # Confirmation prompt function
 confirm() {
@@ -96,10 +143,6 @@ if ! grep -q '$('$homebrewprefix'/bin/brew shellenv)"' $shellprofile; then
   (echo; echo 'eval "$('$homebrewprefix'/bin/brew shellenv)"') >> $shellprofile
 fi
 eval "$($homebrewprefix/bin/brew shellenv)"
-
-# Define the clone directory and version file
-clone_dir="$HOME/Projects"
-version_file="$clone_dir/.mdct_workspace_setup_version"
 
 # Create the Projects directory if it doesn't exist
 echo "creating the Projects directory if it does not already exit"
@@ -267,15 +310,15 @@ fi
 
 echo "Kion configuration file created at $kion_config_file"
 
-# Define the URLs of the MDCT repositories
-repo_urls=(
-    "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-seds.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
-)
+# # Define the URLs of the MDCT repositories
+# repo_urls=(
+#     "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
+#     "https://github.com/Enterprise-CMCS/macpro-mdct-seds.git"
+#     "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
+#     "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
+#     "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
+#     "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
+# )
 
 # Loop through each repository URL
 for url in "${repo_urls[@]}"; do
