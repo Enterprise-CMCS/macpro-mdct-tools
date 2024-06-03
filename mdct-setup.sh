@@ -219,14 +219,14 @@ echo "sourcing nvm.sh"
 source $(brew --prefix nvm)/nvm.sh
 
 # Optional: Add NVM initialization to shell profile for future sessions
-if [ "$shell" = "bash" ] && ! grep -q 'source $(brew --prefix nvm)/nvm.sh' ~/.bashrc; then
-  echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bashrc
-  echo 'source $(brew --prefix nvm)/nvm.sh' >> ~/.bashrc
+if [ "$shell" = "bash" ] && ! grep -q 'source $(brew --prefix nvm)/nvm.sh' $shellprofile; then
+  echo 'export NVM_DIR="$HOME/.nvm"' >> $shellprofile
+  echo 'source $(brew --prefix nvm)/nvm.sh' >> $shellprofile
 fi
 
-if [ "$shell" = "zsh" ] && ! grep -q 'source $(brew --prefix nvm)/nvm.sh' ~/.zshrc; then
-  echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
-  echo 'source $(brew --prefix nvm)/nvm.sh' >> ~/.zshrc
+if [ "$shell" = "zsh" ] && ! grep -q 'source $(brew --prefix nvm)/nvm.sh' $shellprofile; then
+  echo 'export NVM_DIR="$HOME/.nvm"' >> $shellprofile
+  echo 'source $(brew --prefix nvm)/nvm.sh' >> $shellprofile
 fi
 
 # Install pre-commit
