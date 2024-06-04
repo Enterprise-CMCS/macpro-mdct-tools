@@ -236,7 +236,7 @@ if ! which pre-commit > /dev/null ; then
 fi
 
 # Install java with brew 
-if [[ ! $(which java) =~ "homebrew" ]] ; then
+if [[ ! $(which java) =~ "$(brew --prefix)/opt/openjdk" ]] ; then
   echo "brew installing java"
 	brew install java
   # Get the directory where java is installed
@@ -248,7 +248,7 @@ if [[ ! $(which java) =~ "homebrew" ]] ; then
   # echo "Java installed successfully and added to PATH."
   source $shellprofile
   # Check if java is installed and add it to PATH if necessary
-  if [[ ! $(which java) =~ "homebrew" ]] ; then
+  if [[ ! $(which java) =~ "$(brew --prefix)/opt/openjdk" ]] ; then
       echo "Java installation failed." && exit 1
   fi
 fi
