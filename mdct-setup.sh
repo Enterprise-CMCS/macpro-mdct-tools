@@ -1,7 +1,7 @@
 set -e
 
 # Script version
-SCRIPT_VERSION="1.0.0"
+SCRIPT_VERSION="1.0.1"
 
 # Define the clone directory and version file
 clone_dir="$HOME/Projects"
@@ -14,7 +14,9 @@ repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-hcbs.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-core.git"
 )
 
 # Check that user is using MacOS
