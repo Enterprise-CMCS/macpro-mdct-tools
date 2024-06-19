@@ -64,6 +64,35 @@ cd ~/Projects/macpro-mdct-core && git remote set-url origin git@github.com:Enter
 cd ~/Projects/macpro-mdct-hcbs && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-hcbs.git &&
 cd ~/Projects/macpro-mdct-tools && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-tools.git`
 
+### Tools Installed: 
+
+Tools installed via script:
+````
+brew
+XCode Command Line Tools
+````
+
+Tools installed via brew:
+````
+aws cli
+jq
+nvm
+pre-commit
+java
+aws logs
+yarn
+git
+github cli
+1password cli
+kion
+````
+
+Tools installed via npm:
+````
+serverless
+dynamodb-admin
+````
+
 
 ### Developing/Adding Changes to Workspace setup: 
 
@@ -86,6 +115,23 @@ note: These are the steps at the time of publishing and may be changed later for
 * The setup script does install 1Password CLI you will need a 1Password account to retrieve secrets when running the MDCT applications or you will need to reach out to the team for examples to be manually populated if you do not have a 1Password account or cannot get one. 
 
 * If using 1Password its highly recommended to install the 1Password desktop application. When the `./run local --update-env` or `./run update-env` commands are run 1Password CLI needs to authenticate to pull the credentials, the desktop app makes this a more seemless process by allowing you to authenticate via fingerprint on your Mac.
+
+
+### Kion
+Kion CLI is a tool installed by workspace setup that allows you to obtain temporary access keys or console access after you've been granted the approparite job codes.
+
+To use Kion you  will need to be logged into CMS VPN via Zscaler
+
+For console access run the following from anywhere in your terminal
+
+`kion c`
+
+For temporary access keys run the following from anywhere in your terminal
+
+`kion s`
+
+Both steps above will prompt you for your EUA password then walk you through a select menu in which you select your desired account you wish to gain access whether it be for temporary access keys or console access. 
+
 
    
 
