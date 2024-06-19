@@ -8,6 +8,10 @@ The MDCT program uses the workspace setup script to maintain a consistent approa
 
 ### Running Workspace setup
 
+#### Pre-requisite's
+
+There are no pre-requisite's to running the script other than a Mac and a terminal. 
+
 #### New Developers
 If you're new to the MDCT program and have not cloned any repositories yet please follow the steps below
 
@@ -76,6 +80,12 @@ The team is encouraged to add changes to the workspace setup that will be benefi
 9) `sh mdct-setup.sh`
 
 note: These are the steps at the time of publishing and may be changed later for a more seamless development workflow.
+
+### 1Password: 
+
+* The setup script does install 1Password CLI you will need a 1Password account to retrieve secrets when running the MDCT applications or you will need to reach out to the team for examples to be manually populated if you do not have a 1Password account or cannot get one. 
+
+* If using 1Password its highly recommended to install the 1Password desktop application. When the `./run local --update-env` or `./run update-env` commands are run 1Password CLI needs to authenticate to pull the credentials, the desktop app makes this a more seemless process by allowing you to authenticate via fingerprint on your Mac.
 
    
 
