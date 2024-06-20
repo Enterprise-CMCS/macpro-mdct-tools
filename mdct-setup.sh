@@ -60,7 +60,23 @@ done
 
 
 # Confirmation prompt function
+# confirm() {
+#     read -r -p "${1:-Are you sure? [Y/n]} " response
+#     case "$response" in
+#         [yY][eE][sS]|[yY]|"")
+#             true
+#             ;;
+#         *)
+#             false
+#             ;;
+#     esac
+# }
+
 confirm() {
+    if [ "$CI" = "true" ]; then
+        return 0
+    fi
+
     read -r -p "${1:-Are you sure? [Y/n]} " response
     case "$response" in
         [yY][eE][sS]|[yY]|"")
@@ -79,6 +95,42 @@ if ! confirm "Warning: This script will remove all node modules and re-download.
 fi
 
 # Determine what shell and rc file we might want to modify
+# shell=""
+# shellprofile=""
+# mdctrcfile=""
+# if [ "$CI" != "true" ]; then
+#   echo "Which terminal shell do you want to configure?  Please input a number and hit Enter:"
+#   select selectedshell in zsh bash
+#   do
+#     case $selectedshell in
+#       "zsh")
+#         shell=$selectedshell
+#         shellprofile="$HOME/.zprofile"
+#         mdctrcfile="$HOME/.mdctrc"
+#         ;;
+
+#       "bash")
+#         shell=$selectedshell
+#         mdctrcfile="$HOME/.mdctrc"
+#         if test -f "$HOME/.bash_profile"; then
+#           shellprofile="$HOME/.bash_profile"
+#         else
+#           shellprofile="$HOME/.bashrc"
+#         fi
+#         ;;
+#       *)
+#         echo "ERROR:  Invalid input.  Exiting."
+#         exit 1
+#         ;;
+#     esac
+#     break
+#   done
+# else
+#   shell="bash"
+#   shellprofile="/tmp/.profile"
+#   mdctrcfile="/tmp/.mdctrc"
+# fi
+
 shell=""
 shellprofile=""
 mdctrcfile=""
@@ -114,6 +166,7 @@ else
   shellprofile="/tmp/.profile"
   mdctrcfile="/tmp/.mdctrc"
 fi
+
 touch $mdctrcfile
 touch $shellprofile
 if ! grep -q "source $mdctrcfile" $shellprofile; then
@@ -294,11 +347,34 @@ if ! which kion > /dev/null ; then
 fi
 
 # Output the kion configuration to a file in the home directory
+# kion_config_file="$HOME/.kion.yml"
+
+# if [ ! -f "$kion_config_file" ]; then
+#   echo "creating a kion config file"
+#   read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
+#   cat <<EOL > $kion_config_file
+# kion:
+#   url: https://cloudtamer.cms.gov
+#   api_key: ""
+#   username: $user_id
+#   idms_id: "2"
+#   saml_metadata_file: ""
+#   saml_sp_issuer: ""
+# EOL
+#   echo "Kion configuration file created at $kion_config_file"
+# else
+#   echo "Kion configuration file already exists at $kion_config_file. Skipping creation."
+# fi
+
 kion_config_file="$HOME/.kion.yml"
 
 if [ ! -f "$kion_config_file" ]; then
-  echo "creating a kion config file"
-  read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
+  if [ "$CI" != "true" ]; then
+    echo "creating a kion config file"
+    read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
+  else
+    user_id="ci-user"
+  fi
   cat <<EOL > $kion_config_file
 kion:
   url: https://cloudtamer.cms.gov
