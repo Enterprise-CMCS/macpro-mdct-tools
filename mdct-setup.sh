@@ -370,6 +370,7 @@ else
 fi
 
 # Loop through each repository URL
+echo "Begin cloing/looping through repos"
 for url in "${repo_urls[@]}"; do
     # Extract the repository name from the URL
     repo_name=$(basename "$url" .git)
