@@ -340,47 +340,21 @@ if ! which op > /dev/null ; then
   brew install 1password-cli
 fi
 
-# Install go
-if ! which go > /dev/null ; then
-  echo "brew installing go"
-  brew install go
-fi
 
 # Install Kion
-if ! which kion > /dev/null ; then
-  echo "brew installing kion"
-  brew install kionsoftware/tap/kion-cli
+if [ "$CI" != "true" ]; then
+  if ! which kion > /dev/null ; then
+    echo "brew installing kion"
+    brew install kionsoftware/tap/kion-cli
+  fi
 fi
 
 # Output the kion configuration to a file in the home directory
-# kion_config_file="$HOME/.kion.yml"
-
-# if [ ! -f "$kion_config_file" ]; then
-#   echo "creating a kion config file"
-#   read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
-#   cat <<EOL > $kion_config_file
-# kion:
-#   url: https://cloudtamer.cms.gov
-#   api_key: ""
-#   username: $user_id
-#   idms_id: "2"
-#   saml_metadata_file: ""
-#   saml_sp_issuer: ""
-# EOL
-#   echo "Kion configuration file created at $kion_config_file"
-# else
-#   echo "Kion configuration file already exists at $kion_config_file. Skipping creation."
-# fi
-
 kion_config_file="$HOME/.kion.yml"
 
 if [ ! -f "$kion_config_file" ]; then
-  if [ "$CI" != "true" ]; then
-    echo "creating a kion config file"
-    read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
-  else
-    user_id="ci-user"
-  fi
+  echo "creating a kion config file"
+  read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
   cat <<EOL > $kion_config_file
 kion:
   url: https://cloudtamer.cms.gov
@@ -394,8 +368,6 @@ EOL
 else
   echo "Kion configuration file already exists at $kion_config_file. Skipping creation."
 fi
-
-echo "Kion configuration file created at $kion_config_file"
 
 # Loop through each repository URL
 for url in "${repo_urls[@]}"; do
