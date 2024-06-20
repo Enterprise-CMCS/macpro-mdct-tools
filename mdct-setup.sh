@@ -340,6 +340,12 @@ if ! which op > /dev/null ; then
   brew install 1password-cli
 fi
 
+# Install go
+if ! which go > /dev/null ; then
+  echo "brew installing go"
+  brew install go
+fi
+
 # Install Kion
 if ! which kion > /dev/null ; then
   echo "brew installing kion"
