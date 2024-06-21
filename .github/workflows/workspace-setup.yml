@@ -33,13 +33,14 @@ jobs:
           MDCT_OP_KEY: ${{ secrets.MDCT_OP_KEY }}
           MDCT_OP_PASSWORD: ${{ secrets.MDCT_OP_PASSWORD }}
         run: |
-          echo $MDCT_OP_PASSWORD | op signin my.1password.com $MDCT_OP_EMAIL $MDCT_OP_KEY
+          echo $MDCT_OP_PASSWORD | op signin coforma.1password.com $MDCT_OP_EMAIL $MDCT_OP_KEY
 
 
 
   #Notify the tools channel on failure
   notify_on_failure:
     runs-on: ubuntu-latest
+    if: failure()
     needs: 
       - test
     steps:
