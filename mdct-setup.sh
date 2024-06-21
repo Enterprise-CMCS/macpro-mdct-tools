@@ -1,7 +1,7 @@
 set -e
 
 # Script version
-SCRIPT_VERSION="1.0.1"
+SCRIPT_VERSION="1.0.2"
 
 # Define the clone directory and version file
 clone_dir="$HOME/Projects"
@@ -57,21 +57,6 @@ for repo_url in "${repo_urls[@]}"; do
     fi
 done
 
-
-
-# Confirmation prompt function
-# confirm() {
-#     read -r -p "${1:-Are you sure? [Y/n]} " response
-#     case "$response" in
-#         [yY][eE][sS]|[yY]|"")
-#             true
-#             ;;
-#         *)
-#             false
-#             ;;
-#     esac
-# }
-
 confirm() {
     if [ "$CI" = "true" ]; then
         return 0
@@ -94,42 +79,6 @@ if ! confirm "Warning: This script will remove all node modules and re-download.
     exit 0
 fi
 
-# Determine what shell and rc file we might want to modify
-# shell=""
-# shellprofile=""
-# mdctrcfile=""
-# if [ "$CI" != "true" ]; then
-#   echo "Which terminal shell do you want to configure?  Please input a number and hit Enter:"
-#   select selectedshell in zsh bash
-#   do
-#     case $selectedshell in
-#       "zsh")
-#         shell=$selectedshell
-#         shellprofile="$HOME/.zprofile"
-#         mdctrcfile="$HOME/.mdctrc"
-#         ;;
-
-#       "bash")
-#         shell=$selectedshell
-#         mdctrcfile="$HOME/.mdctrc"
-#         if test -f "$HOME/.bash_profile"; then
-#           shellprofile="$HOME/.bash_profile"
-#         else
-#           shellprofile="$HOME/.bashrc"
-#         fi
-#         ;;
-#       *)
-#         echo "ERROR:  Invalid input.  Exiting."
-#         exit 1
-#         ;;
-#     esac
-#     break
-#   done
-# else
-#   shell="bash"
-#   shellprofile="/tmp/.profile"
-#   mdctrcfile="/tmp/.mdctrc"
-# fi
 
 shell=""
 shellprofile=""
@@ -340,36 +289,7 @@ if ! which op > /dev/null ; then
   brew install 1password-cli
 fi
 
-
-# # Install Kion
-# if [ "$CI" != "true" ]; then
-#   if ! which kion > /dev/null ; then
-#     echo "brew installing kion"
-#     brew install kionsoftware/tap/kion-cli
-#   fi
-# fi
-
-# # Output the kion configuration to a file in the home directory
-# kion_config_file="$HOME/.kion.yml"
-
-# if [ ! -f "$kion_config_file" ]; then
-#   echo "creating a kion config file"
-#   read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
-#   cat <<EOL > $kion_config_file
-# kion:
-#   url: https://cloudtamer.cms.gov
-#   api_key: ""
-#   username: $user_id
-#   idms_id: "2"
-#   saml_metadata_file: ""
-#   saml_sp_issuer: ""
-# EOL
-#   echo "Kion configuration file created at $kion_config_file"
-# else
-#   echo "Kion configuration file already exists at $kion_config_file. Skipping creation."
-# fi
-
-# Check if not in CI
+# Install Kion except on CI. 
 if [ "$CI" != "true" ]; then
   # Install Kion
   if ! which kion > /dev/null ; then
