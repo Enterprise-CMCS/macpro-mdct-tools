@@ -33,7 +33,7 @@ jobs:
           MDCT_OP_KEY: ${{ secrets.MDCT_OP_KEY }}
           MDCT_OP_PASSWORD: ${{ secrets.MDCT_OP_PASSWORD }}
         run: |
-          op signin my.1password.com $MDCT_OP_EMAIL $MDCT_OP_KEY $MDCT_OP_PASSWORD
+          echo $MDCT_OP_PASSWORD | op signin my.1password.com $MDCT_OP_EMAIL $MDCT_OP_KEY
 
 
 
