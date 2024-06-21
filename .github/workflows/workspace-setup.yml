@@ -27,6 +27,16 @@ jobs:
         run: |
           sh mdct-setup.sh
 
+      - name: OP Signin
+        env:
+          MDCT_OP_EMAIL: ${{ secrets.MDCT_OP_EMAIL }}
+          MDCT_OP_KEY: ${{ secrets.MDCT_OP_KEY }}
+          MDCT_OP_PASSWORD: ${{ secrets.MDCT_OP_PASSWORD }}
+        run: |
+          op signin my.1password.com $MDCT_OP_EMAIL $MDCT_OP_KEY $MDCT_OP_PASSWORD
+
+
+
   #Notify the tools channel on failure
   notify_on_failure:
     runs-on: ubuntu-latest
