@@ -43,6 +43,10 @@ jobs:
         run: |
           source ~/.bash_profile
 
+      - name: show bash profile
+        run: |
+          cat ~/.bash_profile
+
       - name: cd to projects
         run: |
           cd ~/Projects/macpro-mdct-mcr
