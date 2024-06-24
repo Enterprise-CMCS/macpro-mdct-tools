@@ -43,13 +43,20 @@ jobs:
         run: |
           ls -a
 
-      - name: debug ls
+      - name: debug pwd
         run: |
           pwd
 
-      - name: run update env
+      - name: cd to projects
         run: |
           cd ~/Projects/macpro-mdct-mcr
+
+      - name: nvm use
+        run: |
+          nvm use
+
+      - name: update env
+        run: |
           ./run update-env
 
 
