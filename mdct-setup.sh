@@ -84,76 +84,76 @@ shell=""
 shellprofile=""
 mdctrcfile=""
 
-shell=""
-shellprofile=""
-mdctrcfile=""
+# shell=""
+# shellprofile=""
+# mdctrcfile=""
 
-if [ "$CI" = "true" ]; then
-    shell="bash"
-    shellprofile="$HOME/.bash_profile"
-    mdctrcfile="$HOME/.mdctrc"
-else
-    echo "Which terminal shell do you want to configure?  Please input a number and hit Enter:"
-    select selectedshell in zsh bash
-    do
-        case $selectedshell in
-            "zsh")
-                shell=$selectedshell
-                shellprofile="$HOME/.zprofile"
-                mdctrcfile="$HOME/.mdctrc"
-                ;;
-
-            "bash")
-                shell=$selectedshell
-                mdctrcfile="$HOME/.mdctrc"
-                if test -f "$HOME/.bash_profile"; then
-                    shellprofile="$HOME/.bash_profile"
-                else
-                    shellprofile="$HOME/.bashrc"
-                fi
-                ;;
-            *)
-                echo "ERROR: Invalid input. Exiting."
-                exit 1
-                ;;
-        esac
-        break
-    done
-fi
-
-
-# if [ "$CI" != "true" ]; then
-#   echo "Which terminal shell do you want to configure?  Please input a number and hit Enter:"
-#   select selectedshell in zsh bash
-#   do
-#     case $selectedshell in
-#       "zsh")
-#         shell=$selectedshell
-#         shellprofile="$HOME/.zprofile"
-#         mdctrcfile="$HOME/.mdctrc"
-#         ;;
-
-#       "bash")
-#         shell=$selectedshell
-#         mdctrcfile="$HOME/.mdctrc"
-#         if test -f "$HOME/.bash_profile"; then
-#           shellprofile="$HOME/.bash_profile"
-#         else
-#           shellprofile="$HOME/.bashrc"
-#         fi
-#         ;;
-#       *)
-#         echo "ERROR:  Invalid input.  Exiting."
-#         exit 1
-#         ;;
-#     esac
-#     break
-#   done
+# if [ "$CI" = "true" ]; then
+#     shell="bash"
+#     shellprofile="$HOME/.bash_profile"
+#     mdctrcfile="$HOME/.mdctrc"
 # else
-#   shell="bash"
-#   shellprofile="/tmp/.profile"
-#   mdctrcfile="/tmp/.mdctrc"
+#     echo "Which terminal shell do you want to configure?  Please input a number and hit Enter:"
+#     select selectedshell in zsh bash
+#     do
+#         case $selectedshell in
+#             "zsh")
+#                 shell=$selectedshell
+#                 shellprofile="$HOME/.zprofile"
+#                 mdctrcfile="$HOME/.mdctrc"
+#                 ;;
+
+#             "bash")
+#                 shell=$selectedshell
+#                 mdctrcfile="$HOME/.mdctrc"
+#                 if test -f "$HOME/.bash_profile"; then
+#                     shellprofile="$HOME/.bash_profile"
+#                 else
+#                     shellprofile="$HOME/.bashrc"
+#                 fi
+#                 ;;
+#             *)
+#                 echo "ERROR: Invalid input. Exiting."
+#                 exit 1
+#                 ;;
+#         esac
+#         break
+#     done
 # fi
+
+
+if [ "$CI" != "true" ]; then
+  echo "Which terminal shell do you want to configure?  Please input a number and hit Enter:"
+  select selectedshell in zsh bash
+  do
+    case $selectedshell in
+      "zsh")
+        shell=$selectedshell
+        shellprofile="$HOME/.zprofile"
+        mdctrcfile="$HOME/.mdctrc"
+        ;;
+
+      "bash")
+        shell=$selectedshell
+        mdctrcfile="$HOME/.mdctrc"
+        if test -f "$HOME/.bash_profile"; then
+          shellprofile="$HOME/.bash_profile"
+        else
+          shellprofile="$HOME/.bashrc"
+        fi
+        ;;
+      *)
+        echo "ERROR:  Invalid input.  Exiting."
+        exit 1
+        ;;
+    esac
+    break
+  done
+else
+  shell="bash"
+  shellprofile="/tmp/.profile"
+  mdctrcfile="/tmp/.mdctrc"
+fi
 
 touch $mdctrcfile
 touch $shellprofile

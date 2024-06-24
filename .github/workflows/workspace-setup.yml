@@ -39,9 +39,9 @@ jobs:
       #   run: |
       #     echo $MDCT_OP_PASSWORD | op signin coforma.1password.com $MDCT_OP_EMAIL $MDCT_OP_KEY
 
-      - name: source
-        run: |
-          source ~/.bash_profile
+      # - name: source
+      #   run: |
+      #     source /tmp/.profile
 
       - name: which brew
         run: |
@@ -59,10 +59,13 @@ jobs:
       - name: cd to projects
         run: |
           cd ~/Projects/macpro-mdct-mcr
+          source /tmp/.profile
+          nvm install
+          ./run update-env
 
-      - name: nvm use
-        run: |
-          /opt/homebrew/opt/nvm use
+      # - name: nvm use
+      #   run: |
+      #     /opt/homebrew/opt/nvm use
 
       - name: update env
         run: |
