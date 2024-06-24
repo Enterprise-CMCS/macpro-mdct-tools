@@ -53,7 +53,7 @@ jobs:
           cd ~/Projects/macpro-mdct-mcr
           source /tmp/.profile
           nvm install
-          echo "$OP_PASSWORD" | op account add --address $OP_SIGNIN_ADDRESS --email $OP_EMAIL --secret-key $OP_SECRET_KEY --password-stdin
+          echo "$MDCT_OP_PASSWORD" | op account add --address $MDCT_OP_ADDRESS --email $MDCT_OP_EMAIL --secret-key $MDCT_OP_KEY --password-stdin
           ./run update-env
 
 
