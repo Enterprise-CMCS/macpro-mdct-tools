@@ -58,7 +58,7 @@ jobs:
 
       - name: nvm use
         run: |
-          nvm use
+          /opt/homebrew/opt/nvm use
 
       - name: update env
         run: |
