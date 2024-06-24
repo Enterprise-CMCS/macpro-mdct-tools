@@ -47,6 +47,11 @@ jobs:
         run: |
           cat ~/.bash_profile
 
+      - name: home dir
+        run: |
+          cd ~/
+          ls -alh
+
       - name: cd to projects
         run: |
           cd ~/Projects/macpro-mdct-mcr
