@@ -43,6 +43,10 @@ jobs:
         run: |
           source ~/.bash_profile
 
+      - name: which brew
+        run: |
+          which brew
+
       - name: show bash profile
         run: |
           cat ~/.bash_profile
