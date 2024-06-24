@@ -27,13 +27,19 @@ jobs:
         run: |
           sh mdct-setup.sh
 
-      - name: OP Signin
-        env:
-          MDCT_OP_EMAIL: ${{ secrets.MDCT_OP_EMAIL }}
-          MDCT_OP_KEY: ${{ secrets.MDCT_OP_KEY }}
-          MDCT_OP_PASSWORD: ${{ secrets.MDCT_OP_PASSWORD }}
+      # - name: OP Signin
+      #   env:
+      #     MDCT_OP_EMAIL: ${{ secrets.MDCT_OP_EMAIL }}
+      #     MDCT_OP_KEY: ${{ secrets.MDCT_OP_KEY }}
+      #     MDCT_OP_PASSWORD: ${{ secrets.MDCT_OP_PASSWORD }}
+      #   run: |
+      #     echo $MDCT_OP_PASSWORD | op signin coforma.1password.com $MDCT_OP_EMAIL $MDCT_OP_KEY
+
+      - name: run update env
         run: |
-          echo $MDCT_OP_PASSWORD | op signin coforma.1password.com $MDCT_OP_EMAIL $MDCT_OP_KEY
+          ls -a
+          cd macpro-mdct-mcr
+          ./run update-env
 
 
 
