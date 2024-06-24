@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     runs-on: macos-12
-    timeout-minutes: 120 # MacOS runners are more expensive than linux, so we want to be sure to stop any stuck builds.
+    timeout-minutes: 120
     environment:
       name: test-ws-setup
     env:
@@ -43,23 +43,27 @@ jobs:
         run: |
           ls -a
 
+      - name: debug ls
+        run: |
+          pwd
+
       - name: run update env
         run: |
-          cd Projects/macpro-mdct-mcr
+          cd ~/Projects/macpro-mdct-mcr
           ./run update-env
 
 
 
   #Notify the tools channel on failure
-  notify_on_failure:
-    runs-on: ubuntu-latest
-    if: failure()
-    needs: 
-      - test
-    steps:
-      - name: Slack Notification
-        uses: rtCamp/action-slack-notify@v2
-        env:
-          SLACK_TITLE: ":boom: The weekly workspace setup job failed in ${{ github.repository }}."
-          MSG_MINIMAL: true
-          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  # notify_on_failure:
+  #   runs-on: ubuntu-latest
+  #   if: failure()
+  #   needs: 
+  #     - test
+  #   steps:
+  #     - name: Slack Notification
+  #       uses: rtCamp/action-slack-notify@v2
+  #       env:
+  #         SLACK_TITLE: ":boom: The weekly workspace setup job failed in ${{ github.repository }}."
+  #         MSG_MINIMAL: true
+  #         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
