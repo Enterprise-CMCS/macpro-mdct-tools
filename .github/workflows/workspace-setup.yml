@@ -6,7 +6,7 @@ on:
     - cron: "0 10 * * SUN"
   push:
       branches:
-        - "*"
+        - "main"
         - "!skipci*"
 
 jobs:
@@ -41,8 +41,6 @@ jobs:
           source /tmp/.profile
           ./run local&
           yarn run test:ci
-
-
 
   # Notify the tools channel on failure
   notify_on_failure:
