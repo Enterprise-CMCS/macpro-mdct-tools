@@ -10,14 +10,14 @@ version_file="$clone_dir/.mdct_workspace_setup_version"
 #
 # Define the URLs of the MDCT repositories
 repo_urls=(
-    # "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
-    # "https://github.com/Enterprise-CMCS/macpro-mdct-seds.git"
-    # "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-seds.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
-    # "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
-    # "https://github.com/Enterprise-CMCS/macpro-mdct-hcbs.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-hcbs.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
-    # "https://github.com/Enterprise-CMCS/macpro-mdct-core.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-core.git"
 )
 
 # Check that user is using MacOS
@@ -80,48 +80,9 @@ if ! confirm "Warning: This script will remove all node modules and re-download.
     exit 0
 fi
 
-
 shell=""
 shellprofile=""
 mdctrcfile=""
-
-# shell=""
-# shellprofile=""
-# mdctrcfile=""
-
-# if [ "$CI" = "true" ]; then
-#     shell="bash"
-#     shellprofile="$HOME/.bash_profile"
-#     mdctrcfile="$HOME/.mdctrc"
-# else
-#     echo "Which terminal shell do you want to configure?  Please input a number and hit Enter:"
-#     select selectedshell in zsh bash
-#     do
-#         case $selectedshell in
-#             "zsh")
-#                 shell=$selectedshell
-#                 shellprofile="$HOME/.zprofile"
-#                 mdctrcfile="$HOME/.mdctrc"
-#                 ;;
-
-#             "bash")
-#                 shell=$selectedshell
-#                 mdctrcfile="$HOME/.mdctrc"
-#                 if test -f "$HOME/.bash_profile"; then
-#                     shellprofile="$HOME/.bash_profile"
-#                 else
-#                     shellprofile="$HOME/.bashrc"
-#                 fi
-#                 ;;
-#             *)
-#                 echo "ERROR: Invalid input. Exiting."
-#                 exit 1
-#                 ;;
-#         esac
-#         break
-#     done
-# fi
-
 
 if [ "$CI" != "true" ]; then
   echo "Which terminal shell do you want to configure?  Please input a number and hit Enter:"

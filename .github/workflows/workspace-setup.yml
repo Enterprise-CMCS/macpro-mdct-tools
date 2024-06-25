@@ -34,6 +34,7 @@ jobs:
           export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.MDCT_OP_TOKEN }}
           ./run update-env
 
+      # spin up the app locally on the runner and run ui tests
       - name: run app and tests
         run: |
           cd ~/Projects/macpro-mdct-mcr
