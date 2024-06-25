@@ -7,6 +7,7 @@ SCRIPT_VERSION="1.0.2"
 clone_dir="$HOME/Projects"
 version_file="$clone_dir/.mdct_workspace_setup_version"
 
+#
 # Define the URLs of the MDCT repositories
 repo_urls=(
     # "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
