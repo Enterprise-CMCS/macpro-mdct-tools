@@ -1,7 +1,6 @@
 #!/usr/bin/expect -f
-set timeout -1
 
-spawn op account add --address $env(MDCT_OP_ADDRESS) --email $env(MDCT_OP_EMAIL) --secret-key $env(MDCT_OP_KEY)
-expect "Enter the password for mdct-integrations@coforma.io at coforma.1password.com"
-send -- "$env(OP_PASSWORD)\r"
-expect eof
+    spawn op account add --address $env(MDCT_OP_ADDRESS) --email $env(MDCT_OP_EMAIL) --secret-key $env(MDCT_OP_KEY)
+    expect "Enter the password for mdct-integrations"
+    send -- "$env(MDCT_OP_PASSWORD)\r"
+    expect eof

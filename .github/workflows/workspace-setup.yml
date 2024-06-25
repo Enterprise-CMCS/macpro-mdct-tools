@@ -43,6 +43,11 @@ jobs:
         run: |
           which brew
 
+      - name: testing scenario
+        run: |
+          cd ~/Projects/macpro-mdct-tools
+          git checkout adding-ws-testing
+
       - name: one password test
         env:
           MDCT_OP_EMAIL: ${{ secrets.MDCT_OP_EMAIL }}
@@ -54,7 +59,7 @@ jobs:
           source /tmp/.profile
           nvm install
           # echo "$MDCT_OP_PASSWORD" | op account add --address $MDCT_OP_ADDRESS --email $MDCT_OP_EMAIL --secret-key $MDCT_OP_KEY --password-stdin
-          ./add_account.expect
+          sh ~/Projects/macpro-mdct-tools/add_account.expect
           ./run update-env
 
 

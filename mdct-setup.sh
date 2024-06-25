@@ -15,7 +15,7 @@ repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
     # "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
     # "https://github.com/Enterprise-CMCS/macpro-mdct-hcbs.git"
-    # "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
     # "https://github.com/Enterprise-CMCS/macpro-mdct-core.git"
 )
 
