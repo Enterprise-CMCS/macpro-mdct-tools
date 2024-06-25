@@ -20,43 +20,39 @@ jobs:
     permissions:
       id-token: write
     steps:
-      # - name: Checkout
-      #   uses: actions/checkout@v4
-
-      # - name: Run workspace setup
-      #   run: |
-      #     sh mdct-setup.sh
-
+      # rather than run from the repo this replicates the behavior of new devs onboarding
       - name: curl setup
         run: |
           curl -o mdct-setup.sh https://raw.githubusercontent.com/Enterprise-CMCS/macpro-mdct-tools/adding-ws-testing/mdct-setup.sh && chmod +x mdct-setup.sh && ./mdct-setup.sh
 
+      # This job flexes the 1Password capability after the projects have been setup by using a 1password service account
       - name: one password test
-        env:
-          MDCT_OP_EMAIL: ${{ secrets.MDCT_OP_EMAIL }}
-          MDCT_OP_KEY: ${{ secrets.MDCT_OP_KEY }}
-          MDCT_OP_PASSWORD: ${{ secrets.MDCT_OP_PASSWORD }}
-          MDCT_OP_ADDRESS: ${{ secrets.MDCT_OP_ADDRESS }}
         run: |
           cd ~/Projects/macpro-mdct-mcr
           source /tmp/.profile
           nvm install
-          # echo "$MDCT_OP_PASSWORD" | op account add --address $MDCT_OP_ADDRESS --email $MDCT_OP_EMAIL --secret-key $MDCT_OP_KEY --password-stdin
-          # sh ~/Projects/macpro-mdct-tools/add_account.expect
           export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.MDCT_OP_TOKEN }}
           ./run update-env
 
+      - name: run app and tests
+        run: |
+          cd ~/Projects/macpro-mdct-mcr
+          source /tmp/.profile
+          ./run local&
+          yarn run test:ci
 
-  #Notify the tools channel on failure
-  # notify_on_failure:
-  #   runs-on: ubuntu-latest
-  #   if: failure()
-  #   needs: 
-  #     - test
-  #   steps:
-  #     - name: Slack Notification
-  #       uses: rtCamp/action-slack-notify@v2
-  #       env:
-  #         SLACK_TITLE: ":boom: The weekly workspace setup job failed in ${{ github.repository }}."
-  #         MSG_MINIMAL: true
-  #         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+
+
+  # Notify the tools channel on failure
+  notify_on_failure:
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: 
+      - test
+    steps:
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_TITLE: ":boom: The weekly workspace setup job failed in ${{ github.repository }}."
+          MSG_MINIMAL: true
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
