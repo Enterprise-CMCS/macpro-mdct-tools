@@ -23,7 +23,7 @@ jobs:
       # rather than run from the repo this replicates the behavior of new devs onboarding
       - name: curl setup
         run: |
-          curl -o mdct-setup.sh https://raw.githubusercontent.com/Enterprise-CMCS/macpro-mdct-tools/mdct-setup.sh && chmod +x mdct-setup.sh && ./mdct-setup.sh
+          curl -o mdct-setup.sh https://raw.githubusercontent.com/Enterprise-CMCS/macpro-mdct-tools/main/mdct-setup.sh && chmod +x mdct-setup.sh && ./mdct-setup.sh
 
       # This job flexes the 1Password capability for MCR after the projects have been setup by using a 1password service account
       - name: one password test
