@@ -1,12 +1,13 @@
 set -e
 
 # Script version
-SCRIPT_VERSION="1.0.1"
+SCRIPT_VERSION="1.0.2"
 
 # Define the clone directory and version file
 clone_dir="$HOME/Projects"
 version_file="$clone_dir/.mdct_workspace_setup_version"
 
+#
 # Define the URLs of the MDCT repositories
 repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
@@ -57,10 +58,11 @@ for repo_url in "${repo_urls[@]}"; do
     fi
 done
 
-
-
-# Confirmation prompt function
 confirm() {
+    if [ "$CI" = "true" ]; then
+        return 0
+    fi
+
     read -r -p "${1:-Are you sure? [Y/n]} " response
     case "$response" in
         [yY][eE][sS]|[yY]|"")
@@ -78,10 +80,10 @@ if ! confirm "Warning: This script will remove all node modules and re-download.
     exit 0
 fi
 
-# Determine what shell and rc file we might want to modify
 shell=""
 shellprofile=""
 mdctrcfile=""
+
 if [ "$CI" != "true" ]; then
   echo "Which terminal shell do you want to configure?  Please input a number and hit Enter:"
   select selectedshell in zsh bash
@@ -114,6 +116,7 @@ else
   shellprofile="/tmp/.profile"
   mdctrcfile="/tmp/.mdctrc"
 fi
+
 touch $mdctrcfile
 touch $shellprofile
 if ! grep -q "source $mdctrcfile" $shellprofile; then
@@ -287,19 +290,21 @@ if ! which op > /dev/null ; then
   brew install 1password-cli
 fi
 
-# Install Kion
-if ! which kion > /dev/null ; then
-  echo "brew installing kion"
-  brew install kionsoftware/tap/kion-cli
-fi
+# Install Kion except on CI. 
+if [ "$CI" != "true" ]; then
+  # Install Kion
+  if ! which kion > /dev/null ; then
+    echo "brew installing kion"
+    brew install kionsoftware/tap/kion-cli
+  fi
 
-# Output the kion configuration to a file in the home directory
-kion_config_file="$HOME/.kion.yml"
+  # Output the kion configuration to a file in the home directory
+  kion_config_file="$HOME/.kion.yml"
 
-if [ ! -f "$kion_config_file" ]; then
-  echo "creating a kion config file"
-  read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
-  cat <<EOL > $kion_config_file
+  if [ ! -f "$kion_config_file" ]; then
+    echo "creating a kion config file"
+    read -p "Please enter your EUA ID to be used for Kion CLI. If you do not have an EUA ID yet enter your first name to temporarily proceed: " user_id
+    cat <<EOL > $kion_config_file
 kion:
   url: https://cloudtamer.cms.gov
   api_key: ""
@@ -308,14 +313,14 @@ kion:
   saml_metadata_file: ""
   saml_sp_issuer: ""
 EOL
-  echo "Kion configuration file created at $kion_config_file"
-else
-  echo "Kion configuration file already exists at $kion_config_file. Skipping creation."
+    echo "Kion configuration file created at $kion_config_file"
+  else
+    echo "Kion configuration file already exists at $kion_config_file. Skipping creation."
+  fi
 fi
 
-echo "Kion configuration file created at $kion_config_file"
-
 # Loop through each repository URL
+echo "Begin cloing/looping through repos"
 for url in "${repo_urls[@]}"; do
     # Extract the repository name from the URL
     repo_name=$(basename "$url" .git)

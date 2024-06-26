@@ -1,0 +1,57 @@
+name: Workspace Setup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 10 * * SUN"
+  push:
+      branches:
+        - "main"
+        - "!skipci*"
+
+jobs:
+  test:
+    runs-on: macos-12
+    timeout-minutes: 120
+    environment:
+      name: test-ws-setup
+    env:
+      STAGE_NAME: test-ws-setup
+    permissions:
+      id-token: write
+    steps:
+      # rather than run from the repo this replicates the behavior of new devs onboarding
+      - name: curl setup
+        run: |
+          curl -o mdct-setup.sh https://raw.githubusercontent.com/Enterprise-CMCS/macpro-mdct-tools/mdct-setup.sh && chmod +x mdct-setup.sh && ./mdct-setup.sh
+
+      # This job flexes the 1Password capability for MCR after the projects have been setup by using a 1password service account
+      - name: one password test
+        run: |
+          cd ~/Projects/macpro-mdct-mcr
+          source /tmp/.profile
+          nvm install
+          export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.MDCT_OP_TOKEN }}
+          ./run update-env
+
+      # spin up MCR locally on the runner and run ui tests
+      - name: run app and tests
+        run: |
+          cd ~/Projects/macpro-mdct-mcr
+          source /tmp/.profile
+          ./run local&
+          yarn run test:ci
+
+  # Notify the tools channel on failure
+  notify_on_failure:
+    runs-on: ubuntu-latest
+    if: failure()
+    needs: 
+      - test
+    steps:
+      - name: Slack Notification
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_TITLE: ":boom: The weekly workspace setup job failed in ${{ github.repository }}."
+          MSG_MINIMAL: true
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
