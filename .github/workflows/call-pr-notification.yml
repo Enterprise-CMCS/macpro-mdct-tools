@@ -1,0 +1,19 @@
+name: Call PR Workflow
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+
+jobs:
+  call-reusable-workflow:
+    uses: https://github.com/Enterprise-CMCS/macpro-mdct-core/.github/workflows/pull-request-notification.yml@first-wf
+    with:
+      INTEGRATIONS_SLACK_WEBHOOK: ${{ secrets.INTEGRATIONS_SLACK_WEBHOOK }}
+      RETRIEVE_ENDPOINT: false  # Set to true or false based on whether you need to retrieve the endpoint
+
+    secrets:
+      INTEGRATIONS_SLACK_WEBHOOK: ${{ secrets.INTEGRATIONS_SLACK_WEBHOOK }}
+      # Conditionally provide AWS secrets if RETRIEVE_ENDPOINT is true
+      # if: ${{ inputs.RETRIEVE_ENDPOINT == 'true' }}
+      # AWS_OIDC_ROLE_TO_ASSUME: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
+      # AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
