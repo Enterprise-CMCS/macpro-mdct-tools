@@ -6,7 +6,7 @@ on:
 
 jobs:
   call-reusable-workflow:
-    uses: Enterprise-CMCS/macpro-mdct-core/.github/workflows/pull-request-notification.yml@first-wf
+    uses: Enterprise-CMCS/macpro-mdct-core/.github/workflows/pull-request-notification.yml@main
     with:
       INTEGRATIONS_SLACK_WEBHOOK: ${{ secrets.INTEGRATIONS_SLACK_WEBHOOK }}
       RETRIEVE_ENDPOINT: false  # Set to true or false based on whether you need to retrieve the endpoint
