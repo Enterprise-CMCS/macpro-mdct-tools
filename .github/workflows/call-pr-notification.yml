@@ -9,6 +9,7 @@ jobs:
     uses: Enterprise-CMCS/macpro-mdct-core/.github/workflows/pr-notification.yml@main
     with:
       RETRIEVE_ENDPOINT: false  # Set to true or false based on whether you need to retrieve the endpoint
+      INTEGRATIONS_SLACK_WEBHOOK: ${{ secrets.INTEGRATIONS_SLACK_WEBHOOK }}
 
     secrets:
       INTEGRATIONS_SLACK_WEBHOOK: ${{ secrets.INTEGRATIONS_SLACK_WEBHOOK }}
