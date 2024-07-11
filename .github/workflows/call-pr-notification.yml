@@ -11,7 +11,7 @@ jobs:
       RETRIEVE_ENDPOINT: false  # Set to true or false based on whether you need to retrieve the endpoint
       INTEGRATIONS_SLACK_WEBHOOK: ${{ secrets.INTEGRATIONS_SLACK_WEBHOOK }}
 
-      secrets:
+      # secrets:
       # Conditionally provide AWS secrets if RETRIEVE_ENDPOINT is true
       # AWS_OIDC_ROLE_TO_ASSUME: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
       # AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
