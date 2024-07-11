@@ -8,10 +8,6 @@ jobs:
   call-reusable-workflow:
     uses: Enterprise-CMCS/macpro-mdct-core/.github/workflows/pr-notification.yml@main
     with:
-      RETRIEVE_ENDPOINT: false  # Set to true or false based on whether you need to retrieve the endpoint
-      INTEGRATIONS_SLACK_WEBHOOK: ${{ secrets.INTEGRATIONS_SLACK_WEBHOOK }}
-
-      # secrets:
-      # Conditionally provide AWS secrets if RETRIEVE_ENDPOINT is true
-      # AWS_OIDC_ROLE_TO_ASSUME: ${{ secrets.AWS_OIDC_ROLE_TO_ASSUME }}
-      # AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      retrieve_endpoint: false
+    secrets:
+      slack_webhook:  ${{ secrets.INTEGRATIONS_SLACK_WEBHOOK }}
