@@ -1,7 +1,7 @@
 set -e
 
 # Script version
-SCRIPT_VERSION="1.0.2"
+SCRIPT_VERSION="1.0.3"
 
 # Define the clone directory and version file
 clone_dir="$HOME/Projects"
@@ -396,8 +396,10 @@ for url in "${repo_urls[@]}"; do
     fi
 
     # Run yarn in /services/ui-src/ directory
-    echo "Running yarn in /services/ui-src/ directory..."
-    (cd services/ui-src/ && yarn)
+    if [ -d "services/ui-src/node_modules" ]; then
+      echo "Running yarn in /services/ui-src/ directory..."
+      (cd services/ui-src/ && yarn)
+    fi
 
     # Check if app-api node_modules directory exists
     if [ -d "services/app-api/node_modules" ]; then
@@ -406,8 +408,10 @@ for url in "${repo_urls[@]}"; do
     fi
 
     # Run yarn in /services/app-api/ directory
-    echo "Running yarn in /services/app-api/ directory..."
-    (cd services/app-api/ && yarn)
+    if [ -d "services/app-api/node_modules" ]; then
+      echo "Running yarn in /services/app-api/ directory..."
+      (cd services/app-api/ && yarn)
+    fi
 
     # Check if database node_modules directory exists
     if [ -d "services/database/node_modules" ]; then
@@ -416,8 +420,10 @@ for url in "${repo_urls[@]}"; do
     fi
 
     # Run yarn in /services/app-api/ directory
-    echo "Running yarn in /services/database/ directory..."
-    (cd services/database/ && yarn)
+    if [ -d "services/database/node_modules" ]; then
+      echo "Running yarn in /services/database/ directory..."
+      (cd services/database/ && yarn)
+    fi
 
     # Check if ui node_modules directory exists
     if [ -d "services/ui/node_modules" ]; then
@@ -426,8 +432,10 @@ for url in "${repo_urls[@]}"; do
     fi
 
     # Run yarn in /services/app-api/ directory
-    echo "Running yarn in /services/ui/ directory..."
-    (cd services/ui/ && yarn)
+    if [ -d "services/ui/node_modules" ]; then
+      echo "Running yarn in /services/ui/ directory..."
+      (cd services/ui/ && yarn)
+    fi
 
     # Check if ui-auth node_modules directory exists
     if [ -d "services/ui-auth/node_modules" ]; then
@@ -436,8 +444,10 @@ for url in "${repo_urls[@]}"; do
     fi
 
     # Run yarn in /services/app-api/ directory
-    echo "Running yarn in /services/ui-auth/ directory..."
-    (cd services/ui-auth/ && yarn)
+    if [ -d "services/ui-auth/node_modules" ]; then
+      echo "Running yarn in /services/ui-auth/ directory..."
+      (cd services/ui-auth/ && yarn)
+    fi
 
     # Check if uploads node_modules directory exists
     if [ -d "services/uploads/node_modules" ]; then
@@ -446,8 +456,10 @@ for url in "${repo_urls[@]}"; do
     fi
 
     # Run yarn in /services/app-api/ directory
-    echo "Running yarn in /services/uploads/ directory..."
-    (cd services/uploads/ && yarn)
+    if [ -d "services/uploads/node_modules" ]; then
+      echo "Running yarn in /services/uploads/ directory..."
+      (cd services/uploads/ && yarn)
+    fi
 
     # Check if tests/cypress node_modules directory exists
     if [ -d "tests/cypress/node_modules" ]; then
