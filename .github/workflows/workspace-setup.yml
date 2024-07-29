@@ -7,6 +7,7 @@ on:
   push:
       branches:
         - "main"
+        - "fix-ws-test"
         - "!skipci*"
 
 jobs:
@@ -40,6 +41,7 @@ jobs:
           cd ~/Projects/macpro-mdct-mcr
           source /tmp/.profile
           ./run local&
+          sleep 120
           yarn run test:ci
 
   # Notify the tools channel on failure
