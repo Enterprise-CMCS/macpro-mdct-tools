@@ -44,6 +44,7 @@ jobs:
           source /tmp/.profile
           ./run local&
           sleep 60
+          while ! curl -s http://localhost:3030 >/dev/null; do sleep 10; done
           yarn run test:ci
 
   # Notify the tools channel on failure
