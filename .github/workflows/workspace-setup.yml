@@ -29,8 +29,7 @@ jobs:
       # This job flexes the 1Password capability for MCR after the projects have been setup by using a 1password service account
       - name: one password test
         run: |
-          cd ~/Projects/macpro-mdct-mcr
-          # cd ~/Projects/macpro-mdct-mfp
+          cd ~/Projects/macpro-mdct-mfp
           source /tmp/.profile
           nvm install
           export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.MDCT_OP_TOKEN }}
@@ -39,8 +38,7 @@ jobs:
       # spin up MCR locally on the runner and run ui tests
       - name: run app and tests
         run: |
-          cd ~/Projects/macpro-mdct-mcr
-          # cd ~/Projects/macpro-mdct-mfp
+          cd ~/Projects/macpro-mdct-mfp
           source /tmp/.profile
           ./run local&
           sleep 60
