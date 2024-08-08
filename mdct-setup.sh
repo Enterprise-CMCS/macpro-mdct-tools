@@ -290,6 +290,12 @@ if ! which op > /dev/null ; then
   brew install 1password-cli
 fi
 
+# Install snyk cli
+if ! which snyk > /dev/null ; then
+  echo "brew installing Snyk CLI"
+  brew install snyk-cli
+fi
+
 # Install Kion except on CI. 
 if [ "$CI" != "true" ]; then
   # Install Kion
