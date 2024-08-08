@@ -1,7 +1,7 @@
 set -e
 
 # Script version
-SCRIPT_VERSION="1.0.3"
+SCRIPT_VERSION="1.0.4"
 
 # Define the clone directory and version file
 clone_dir="$HOME/Projects"
