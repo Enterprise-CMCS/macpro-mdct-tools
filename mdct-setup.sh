@@ -1,7 +1,7 @@
 set -e
 
 # Script version
-SCRIPT_VERSION="1.0.3"
+SCRIPT_VERSION="1.0.4"
 
 # Define the clone directory and version file
 clone_dir="$HOME/Projects"
@@ -288,6 +288,12 @@ fi
 if ! which op > /dev/null ; then
   echo "brew installing 1Password CLI"
   brew install 1password-cli
+fi
+
+# Install snyk cli
+if ! which snyk > /dev/null ; then
+  echo "brew installing Snyk CLI"
+  brew install snyk-cli
 fi
 
 # Install Kion except on CI. 
