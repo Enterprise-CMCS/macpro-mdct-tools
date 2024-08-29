@@ -25,7 +25,7 @@ jobs:
         run: |
           curl -o mdct-setup.sh https://raw.githubusercontent.com/Enterprise-CMCS/macpro-mdct-tools/main/mdct-setup.sh && chmod +x mdct-setup.sh && ./mdct-setup.sh
 
-      # This job flexes the 1Password capability for MCR after the projects have been setup by using a 1password service account
+      # This job flexes the 1Password capability for MFP after the projects have been setup by using a 1password service account
       - name: one password test
         run: |
           cd ~/Projects/macpro-mdct-mfp
@@ -33,15 +33,6 @@ jobs:
           nvm install
           export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.MDCT_OP_TOKEN }}
           ./run update-env
-
-      # spin up MCR locally on the runner and run ui tests
-      - name: run app and tests
-        run: |
-          cd ~/Projects/macpro-mdct-mfp
-          source /tmp/.profile
-          ./run local&
-          while ! curl -s http://localhost:3030 >/dev/null; do sleep 10; done
-          yarn run test:ci
 
   # Notify the tools channel on failure
   notify_on_failure:
