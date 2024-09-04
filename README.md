@@ -84,6 +84,7 @@ yarn
 git
 github cli
 1password cli
+snyk cli
 kion
 ````
 
