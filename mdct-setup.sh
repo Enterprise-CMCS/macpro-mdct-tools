@@ -503,9 +503,9 @@ for url in "${repo_urls[@]}"; do
 done
 
 # Install serverless
-if ! which sls > /dev/null ; then
-  echo "npm installing serverless v3.38.0"
-  npm install -g serverless@3.38.0
+if ! which serverless > /dev/null || ! serverless --version 2>&1 | grep -q " 4."; then
+  echo "installing serverless v4 globally"
+  yarn global add serverless@4.4.18
 fi
 
 # Install dynamodb-admin
