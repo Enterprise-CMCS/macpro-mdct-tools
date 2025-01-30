@@ -503,7 +503,7 @@ for url in "${repo_urls[@]}"; do
 done
 
 # Install serverless
-if ! which serverless > /dev/null || ! serverless --version 2>&1 | grep -q " 4."; then
+if ! which serverless > /dev/null || ! serverless --version 2>&1 | grep -q "Framework 4."; then
   echo "installing serverless v4 globally"
   yarn global add serverless@4.4.18
 fi
