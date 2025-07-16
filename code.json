@@ -19,26 +19,32 @@
   "repositoryHost": "github.com/Enterprise-CMCS",
   "repositoryVisibility": "public",
   "vcs": "git",
-  "laborHours": 0,
+  "laborHours": 2407,
   "reuseFrequency": {
     "forks": 0
   },
-  "platforms": ["other"],
+  "platforms": [
+    "other"
+  ],
   "categories": [
     "application-development",
     "it-development",
     "project-collaboration"
   ],
   "softwareType": "addon",
-  "languages": ["Shell"],
+  "languages": [
+    "Shell"
+  ],
   "maintenance": "contract",
   "contractNumber": "75FCMC24F0027",
   "date": {
     "created": "2024-02-28T18:33:14Z",
-    "lastModified": "2025-01-30T20:04:40Z",
-    "metaDataLastUpdated": "2025-07-16T19:19:34.067Z"
+    "lastModified": "2025-07-16T20:11:05Z",
+    "metaDataLastUpdated": "2025-07-16T20:12:36.230Z"
   },
-  "tags": ["mdct"],
+  "tags": [
+    "mdct"
+  ],
   "contact": {
     "email": "brendan.myers@coforma.com",
     "name": "Brendan Myers"
@@ -51,10 +57,16 @@
   "userInput": false,
   "fismaLevel": "Moderate",
   "group": "MDCT",
-  "projects": ["MDCT"],
+  "projects": [
+    "MDCT"
+  ],
   "systems": [],
   "upstream": "https://github.com/Enterprise-CMCS/macpro-mdct-tools/network/dependencies",
-  "subsetInHealthcare": ["Medicaid"],
-  "userType": ["Government"],
+  "subsetInHealthcare": [
+    "Medicaid"
+  ],
+  "userType": [
+    "Government"
+  ],
   "maturityModelTier": 3
 }
