@@ -502,10 +502,28 @@ for url in "${repo_urls[@]}"; do
     cd -
 done
 
-# Install serverless
-if ! which serverless > /dev/null || ! serverless --version 2>&1 | grep -q "Framework 4."; then
-  echo "installing serverless v4 globally"
-  yarn global add serverless@4.4.18
+# Install 1Password CLI
+if ! which op > /dev/null; then
+    echo "brew installing --cask 1password-cli"
+    brew install --cask 1password-cli
+fi
+
+# Install Docker
+if ! which docker > /dev/null ; then
+    echo "brew installing docker"
+    brew install docker
+fi
+
+# Install Colima
+if ! which colima > /dev/null ; then
+    echo "brew installing colima"
+    brew install colima
+fi
+
+# Install LocalStack
+if ! which localstack > /dev/null ; then
+    echo "brew installing localstack/tap/localstack-cli"
+    brew install localstack/tap/localstack-cli
 fi
 
 # Install dynamodb-admin
