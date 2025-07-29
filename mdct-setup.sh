@@ -135,7 +135,7 @@ arch=`uname -m`
 homebrewprefix=""
 if [ "$arch" = "arm64" ]; then
   # If we're on Apple Silicon, check that Rosetta 2 has already been installed and is running.
-  if ! /usr/bin/pgrep -q oahd; then
+  if ! /usr/bin/arch -x86_64 /usr/bin/true 2>/dev/null; then
     echo "ERROR:  Rosetta must be installed on this machine before running this script, but was not found." && exit 1
   fi
   echo "homebrew prefix is /opt/homebrew"
