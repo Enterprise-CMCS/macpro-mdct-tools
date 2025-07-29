@@ -284,10 +284,10 @@ if ! which gh > /dev/null ; then
   brew install gh
 fi
 
-# Install 1password
+# Install 1Password CLI
 if ! which op > /dev/null ; then
   echo "brew installing 1Password CLI"
-  brew install 1password-cli
+  brew install --cask 1password-cli
 fi
 
 # Install snyk cli
@@ -502,28 +502,22 @@ for url in "${repo_urls[@]}"; do
     cd -
 done
 
-# Install 1Password CLI
-if ! which op > /dev/null; then
-    echo "brew installing --cask 1password-cli"
-    brew install --cask 1password-cli
-fi
-
 # Install Docker
 if ! which docker > /dev/null ; then
-    echo "brew installing docker"
-    brew install docker
+  echo "brew installing docker"
+  brew install docker
 fi
 
 # Install Colima
 if ! which colima > /dev/null ; then
-    echo "brew installing colima"
-    brew install colima
+  echo "brew installing colima"
+  brew install colima
 fi
 
 # Install LocalStack
 if ! which localstack > /dev/null ; then
-    echo "brew installing localstack/tap/localstack-cli"
-    brew install localstack/tap/localstack-cli
+  echo "brew installing localstack/tap/localstack-cli"
+  brew install localstack/tap/localstack-cli
 fi
 
 # Install dynamodb-admin

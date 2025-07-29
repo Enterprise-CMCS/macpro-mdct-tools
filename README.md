@@ -86,6 +86,9 @@ github cli
 1password cli
 snyk cli
 kion
+docker
+colima
+localstack
 ````
 
 Tools installed via npm:
