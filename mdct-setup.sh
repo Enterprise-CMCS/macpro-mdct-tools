@@ -135,7 +135,7 @@ arch=`uname -m`
 homebrewprefix=""
 if [ "$arch" = "arm64" ]; then
   # If we're on Apple Silicon, check that Rosetta 2 has already been installed and is running.
-  if ! /usr/bin/pgrep -q oahd; then
+  if ! /usr/bin/arch -x86_64 /usr/bin/true 2>/dev/null; then
     echo "ERROR:  Rosetta must be installed on this machine before running this script, but was not found." && exit 1
   fi
   echo "homebrew prefix is /opt/homebrew"
@@ -284,10 +284,10 @@ if ! which gh > /dev/null ; then
   brew install gh
 fi
 
-# Install 1password
+# Install 1Password CLI
 if ! which op > /dev/null ; then
   echo "brew installing 1Password CLI"
-  brew install 1password-cli
+  brew install --cask 1password-cli
 fi
 
 # Install snyk cli
@@ -502,10 +502,22 @@ for url in "${repo_urls[@]}"; do
     cd -
 done
 
-# Install serverless
-if ! which serverless > /dev/null || ! serverless --version 2>&1 | grep -q "Framework 4."; then
-  echo "installing serverless v4 globally"
-  yarn global add serverless@4.4.18
+# Install Docker
+if ! which docker > /dev/null ; then
+  echo "brew installing docker"
+  brew install docker
+fi
+
+# Install Colima
+if ! which colima > /dev/null ; then
+  echo "brew installing colima"
+  brew install colima
+fi
+
+# Install LocalStack
+if ! which localstack > /dev/null ; then
+  echo "brew installing localstack/tap/localstack-cli"
+  brew install localstack/tap/localstack-cli
 fi
 
 # Install dynamodb-admin
