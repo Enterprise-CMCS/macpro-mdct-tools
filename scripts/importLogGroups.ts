@@ -9,7 +9,6 @@ import {
 
 const INPUT = "cdk-import-map.json";
 const OUTPUT = "cdk-import-map.filled.json";
-const SERVICE = "app-api";
 
 function prompt(question: string): Promise<string> {
   const rl = createInterface({ input: process.stdin, output: process.stdout });
@@ -74,12 +73,20 @@ function prompt(question: string): Promise<string> {
       continue;
     }
 
-    const expectedSuffix = `${SERVICE}-${STAGE}-${funcName}`;
-    const matchedGroup = logGroups.find((group) =>
-      group.endsWith(expectedSuffix)
-    );
+    const expectedSuffix = `${STAGE}-${funcName}`;
 
-    if (matchedGroup) {
+    const matches = logGroups.filter((group) => group.endsWith(expectedSuffix));
+
+    if (matches.length > 1) {
+      throw new Error(
+        `Multiple log groups match suffix "${expectedSuffix}" for logical ID "${logicalId}":\n${matches.join(
+          "\n"
+        )}`
+      );
+    }
+
+    if (matches.length === 1) {
+      const matchedGroup = matches[0];
       console.log(`✔ ${logicalId} → ${funcName} → ${matchedGroup}`);
       props.LogGroupName = matchedGroup;
     } else {
