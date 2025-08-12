@@ -1,8 +1,26 @@
 {
+  "name": "scan-resources",
+  "version": "1.0.0",
+  "main": "scanResources.ts",
+  "type": "module",
   "devDependencies": {
-    "@aws-sdk/client-cloudformation": "^3.863.0",
-    "@aws-sdk/client-cloudwatch-logs": "^3.859.0",
-    "@aws-sdk/client-sts": "^3.863.0",
-    "@types/node": "^24.2.1"
+    "@aws-sdk/client-api-gateway": "^3.864.0",
+    "@aws-sdk/client-cloudformation": "^3.864.0",
+    "@aws-sdk/client-cloudfront": "^3.864.0",
+    "@aws-sdk/client-cloudwatch-logs": "^3.864.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.844.0",
+    "@aws-sdk/client-cognito-identity": "^3.864.0",
+    "@aws-sdk/client-dynamodb": "^3.864.0",
+    "@aws-sdk/client-eventbridge": "^3.864.0",
+    "@aws-sdk/client-iam": "^3.864.0",
+    "@aws-sdk/client-lambda": "^3.864.0",
+    "@aws-sdk/client-resource-groups-tagging-api": "^3.844.0",
+    "@aws-sdk/client-s3": "^3.864.0",
+    "@aws-sdk/client-sts": "^3.844.0",
+    "@aws-sdk/client-wafv2": "^3.864.0",
+    "@types/node": "^24.0.12",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.3",
+    "typescript": "^5.9.2"
   }
 }
