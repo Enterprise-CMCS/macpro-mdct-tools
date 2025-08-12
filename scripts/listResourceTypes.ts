@@ -5,73 +5,81 @@ import {
   DescribeStackResourcesCommand,
   StackSummary,
 } from "@aws-sdk/client-cloudformation";
-import { writeFileSync } from "fs";
+import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
+import { mkdirSync, writeFileSync } from "fs";
+import { join } from "path";
 
 const region = "us-east-1";
-const client = new CloudFormationClient({ region });
+const cf = new CloudFormationClient({ region });
+const sts = new STSClient({ region });
 
 const NAME_FILTERS = ["main", "master", "val", "prod"];
+const OUT_DIR = "resource-types";
+
+async function getAccountId(): Promise<string> {
+  const resp = await sts.send(new GetCallerIdentityCommand({}));
+  if (!resp.Account) throw new Error("Unable to determine AWS account ID.");
+  return resp.Account;
+}
 
 async function getAllStacks(): Promise<StackSummary[]> {
   let nextToken: string | undefined = undefined;
   const stacks: StackSummary[] = [];
 
   do {
-    const command: ListStacksCommand = new ListStacksCommand({
-      NextToken: nextToken,
-    });
-    const response = await client.send(command);
-
-    const activeStacks = response.StackSummaries?.filter(
-      (stack) =>
-        stack.StackStatus !== "DELETE_COMPLETE" &&
-        stack.StackName &&
-        NAME_FILTERS.some((filter) => {
-          if (stack && stack.StackName)
-            return stack.StackName.toLowerCase().includes(filter);
-        })
+    const resp = await cf.send(new ListStacksCommand({ NextToken: nextToken }));
+    const active = resp.StackSummaries!.filter(
+      (s) =>
+        s.StackStatus !== "DELETE_COMPLETE" &&
+        s.StackName &&
+        NAME_FILTERS.some((f) => s.StackName!.toLowerCase().includes(f))
     );
-
-    if (activeStacks) {
-      stacks.push(...activeStacks);
-    }
-
-    nextToken = response.NextToken;
+    stacks.push(...active);
+    nextToken = resp.NextToken;
   } while (nextToken);
 
   return stacks;
 }
 
 async function getResourceTypes(stackName: string): Promise<string[]> {
-  const command = new DescribeStackResourcesCommand({ StackName: stackName });
-  const response = await client.send(command);
-
-  return (
-    response.StackResources?.map((res) => res.ResourceType || "").filter(
-      Boolean
-    ) || []
+  const resp = await cf.send(
+    new DescribeStackResourcesCommand({ StackName: stackName })
   );
+  const types = resp
+    .StackResources!.map((r) => r.ResourceType || "")
+    .filter(Boolean);
+  return Array.from(new Set(types)).sort();
+}
+
+function sanitize(name: string): string {
+  // Preserve alphanumerics and '-', '_', '.', replace others with '-'
+  return name
+    .replace(/[^A-Za-z0-9._-]+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 async function main() {
+  const accountId = await getAccountId();
+  mkdirSync(OUT_DIR, { recursive: true });
+
   const stacks = await getAllStacks();
   console.log(`Found ${stacks.length} matching stacks.`);
 
-  const resourceTypeSet = new Set<string>();
+  for (const s of stacks) {
+    const stackName = s.StackName!;
+    console.log(`Processing: ${stackName}`);
+    const types = await getResourceTypes(stackName);
 
-  for (const stack of stacks) {
-    console.log(`Getting resources for stack: ${stack.StackName}`);
-    const types = await getResourceTypes(stack.StackName!);
-    types.forEach((type) => resourceTypeSet.add(type));
+    const filename = `${accountId}-${sanitize(stackName)}.txt`;
+    const outPath = join(OUT_DIR, filename);
+    writeFileSync(outPath, types.join("\n") + "\n", "utf8");
   }
 
-  const resourceTypes = Array.from(resourceTypeSet).sort();
-  writeFileSync("resource-types.txt", resourceTypes.join("\n"));
-
-  console.log(`✅ Done. Found ${resourceTypes.length} unique resource types.`);
+  console.log(`✅ Done. Wrote ${stacks.length} files to ./${OUT_DIR}/`);
 }
 
-main().catch((error) => {
-  console.error("Error:", error);
+main().catch((err) => {
+  console.error("Error:", err);
   process.exit(1);
 });
