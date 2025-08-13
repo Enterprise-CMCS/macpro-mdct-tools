@@ -17,6 +17,12 @@ import { getAllUserPools } from "./scanResourcesComponents/cognitoUserPool";
 import { getAllIdentityPools } from "./scanResourcesComponents/cognitoIdentityPool";
 import { getAllWafv2WebACLsCfnIds } from "./scanResourcesComponents/wafWebACL";
 import { getAllEventRules } from "./scanResourcesComponents/eventsRule";
+import {
+  APIGatewayClient,
+  GetStagesCommand,
+} from "@aws-sdk/client-api-gateway";
+
+const apigw = new APIGatewayClient({ region: "us-east-1" });
 
 function log(line: string = "") {
   console.log(line);
@@ -46,6 +52,20 @@ async function checkGeneric(
   const unmanaged = all.filter((id) => !cfManaged.has(id));
   header(label, all.length, cfManaged.size);
   listUnmanaged(unmanaged);
+}
+
+async function apiGatewayLogGroups(set) {
+  const restApiIds = set("AWS::ApiGateway::RestApi");
+  const apiGatewayLogGroups: string[] = [];
+  for (const restApiId of restApiIds) {
+    const stages = await apigw.send(new GetStagesCommand({ restApiId }));
+    for (const s of stages.item!) {
+      apiGatewayLogGroups.push(
+        `API-Gateway-Execution-Logs_${restApiId}/${s.stageName}`
+      );
+    }
+  }
+  return apiGatewayLogGroups;
 }
 
 async function main() {
@@ -91,6 +111,8 @@ async function main() {
       ...set("AWS::Logs::LogGroup"),
       // Log groups created by Lambda function managed by CloudFormation
       ...Array.from(set("AWS::Lambda::Function"), (i) => `/aws/lambda/${i}`),
+      // Log groups created by API Gateways managed by CloudFormation
+      ...(await apiGatewayLogGroups(set)),
     ])
   );
   await checkGeneric(
