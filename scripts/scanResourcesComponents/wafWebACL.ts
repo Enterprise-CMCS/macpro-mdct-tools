@@ -9,7 +9,6 @@ type Scope = "REGIONAL" | "CLOUDFRONT";
 
 const client = new WAFV2Client({ region: "us-east-1" });
 
-const excludedPrefixes = ["FMManagedWebACLV2-cms-cloud"];
 
 async function listWebAclsByScope(scope: Scope): Promise<WebACLSummary[]> {
   const out: WebACLSummary[] = [];
@@ -21,9 +20,7 @@ async function listWebAclsByScope(scope: Scope): Promise<WebACLSummary[]> {
     );
 
     for (const acl of r.WebACLs) {
-      if (!excludedPrefixes.some((prefix) => acl.Name.startsWith(prefix))) {
-        out.push(acl);
-      }
+      out.push(acl);
     }
 
     NextMarker = r.NextMarker;
