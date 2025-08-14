@@ -15,13 +15,8 @@ export async function getAllLogGroups(): Promise<string[]> {
 
     for (const g of r.logGroups!) {
       const n = g.logGroupName!;
-      if (
-        (n.startsWith("API-Gateway-Execution-Logs_") ||
-          n.startsWith("/aws/lambda/")) &&
         !n.toLowerCase().startsWith("/aws/lambda/cms-cloud")
-      ) {
-        names.push(n);
-      }
+      names.push(n);
     }
 
     nextToken = r.nextToken;
