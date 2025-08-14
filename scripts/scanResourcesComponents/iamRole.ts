@@ -1,9 +1,5 @@
 #!npx tsx
-import {
-  IAMClient,
-  ListRolesCommand,
-  ThrottlingException,
-} from "@aws-sdk/client-iam";
+import { IAMClient, ListRolesCommand } from "@aws-sdk/client-iam";
 
 const client = new IAMClient({ region: "us-east-1" });
 
