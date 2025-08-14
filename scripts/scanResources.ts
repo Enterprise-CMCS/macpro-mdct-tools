@@ -11,7 +11,6 @@ import { getAllLogGroups } from "./scanResourcesComponents/cloudWatchLogs";
 import { getAllLambdaFunctions } from "./scanResourcesComponents/lambdaFunction";
 import { getAllTableNames } from "./scanResourcesComponents/dynamoDb";
 import { getAllIamRoles } from "./scanResourcesComponents/iamRole";
-import { getAllCustomerManagedPolicies } from "./scanResourcesComponents/iamManagedPolicies";
 import { getAllLayerVersionArns } from "./scanResourcesComponents/lambdaLayers";
 import { getAllUserPools } from "./scanResourcesComponents/cognitoUserPool";
 import { getAllIdentityPools } from "./scanResourcesComponents/cognitoIdentityPool";
@@ -104,15 +103,22 @@ async function main() {
     await getAllS3Buckets(),
     set("AWS::S3::Bucket")
   );
+
+  const allLogGroups = await getAllLogGroups();
+  const cmsCloudTeamLambdaLogGroups = allLogGroups.filter((n) =>
+    n.toLowerCase().startsWith("/aws/lambda/cms-cloud")
+  );
+
   await checkGeneric(
-    "CloudWatch Log Groups",
-    await getAllLogGroups(),
+    `CloudWatch Log Groups\nLambda Log Groups associated with CMS Cloud Team Lambda Functions: ${cmsCloudTeamLambdaLogGroups.length}`,
+    allLogGroups,
     new Set<string>([
       ...set("AWS::Logs::LogGroup"),
-      // Log groups created by Lambda function managed by CloudFormation
+      // Log groups created by Lambda functions managed by CloudFormation
       ...Array.from(set("AWS::Lambda::Function"), (i) => `/aws/lambda/${i}`),
       // Log groups created by API Gateways managed by CloudFormation
       ...(await apiGatewayLogGroups(set)),
+      ...cmsCloudTeamLambdaLogGroups,
     ])
   );
   await checkGeneric(
@@ -130,17 +136,17 @@ async function main() {
     await getAllTableNames(),
     set("AWS::DynamoDB::Table")
   );
+
+  const allIamRoles = await getAllIamRoles();
+  log("All IAM Roles: " + allIamRoles.length);
+  const ourIamRoles = allIamRoles.filter((name) =>
+    name.toLowerCase().match(/^(seds|qmr|mcr|mfp|hcbs|carts)/)
+  );
   await checkGeneric(
     "IAM Roles (excluding service-linked)",
-    await getAllIamRoles(),
+    ourIamRoles,
     set("AWS::IAM::Role")
   );
-  // excluding this for now as these seem to be all CMS Cloud Team
-  // await checkGeneric(
-  //   "IAM Managed Policies (AWS::IAM::ManagedPolicy, customer-managed)",
-  //   await getAllCustomerManagedPolicies(),
-  //   set("AWS::IAM::ManagedPolicy")
-  // );
   await checkGeneric(
     "Cognito User Pools",
     await getAllUserPools(),
@@ -151,9 +157,18 @@ async function main() {
     await getAllIdentityPools(),
     set("AWS::Cognito::IdentityPool")
   );
+
+  const allWebAcls = await getAllWafv2WebACLsCfnIds();
+  const webAclExcludedPrefixes = ["FMManagedWebACLV2-cms-cloud"];
+  webAclExcludedPrefixes.map((w) => allWebAcls.filter((a) => a.startsWith(w)));
+  // TODO: log the prefix and count from the line above.
+  const ourWebAcls = allWebAcls.filter(
+    (w) => !webAclExcludedPrefixes.some((prefix) => w.startsWith(prefix))
+  );
+
   await checkGeneric(
     "WAFv2 WebACLs (REGIONAL & CLOUDFRONT)",
-    await getAllWafv2WebACLsCfnIds(),
+    ourWebAcls,
     set("AWS::WAFv2::WebACL")
   );
   await checkGeneric(
