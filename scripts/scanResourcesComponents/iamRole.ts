@@ -21,9 +21,7 @@ export async function getAllIamRoles(): Promise<string[]> {
 
       for (const role of r.Roles!) {
         const name = role.RoleName!;
-        if (name.toLowerCase().match(/^(seds|qmr|mcr|mfp|hcbs|carts)/)) {
-          names.push(name);
-        }
+        names.push(name);
       }
 
       Marker = r.Marker;
