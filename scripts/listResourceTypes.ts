@@ -14,6 +14,7 @@ const cf = new CloudFormationClient({ region });
 const sts = new STSClient({ region });
 
 const NAME_FILTERS = ["main", "master", "val", "prod"];
+const PROJECTS = ["mcr", "mfp", "carts", "qmr", "seds", "hcbs"];
 const OUT_DIR = "resource-types";
 
 async function getAccountId(): Promise<string> {
