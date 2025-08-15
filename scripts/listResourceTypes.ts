@@ -13,9 +13,13 @@ const region = "us-east-1";
 const cf = new CloudFormationClient({ region });
 const sts = new STSClient({ region });
 
-const NAME_FILTERS = ["main", "master", "val", "prod"];
 const PROJECTS = ["mcr", "mfp", "carts", "qmr", "seds", "hcbs"];
+const ENVS = ["main", "master", "val", "prod", "production"];
 const OUT_DIR = "resource-types";
+
+const PERSISTENT_STACKS = new Set(
+  PROJECTS.flatMap((p) => ENVS.map((e) => `${p}-${e}`))
+);
 
 async function getAccountId(): Promise<string> {
   const resp = await sts.send(new GetCallerIdentityCommand({}));
@@ -33,7 +37,7 @@ async function getAllStacks(): Promise<StackSummary[]> {
       (s) =>
         s.StackStatus !== "DELETE_COMPLETE" &&
         s.StackName &&
-        NAME_FILTERS.some((f) => s.StackName!.toLowerCase().includes(f))
+        PERSISTENT_STACKS.has(s.StackName)
     );
     stacks.push(...active);
     nextToken = resp.NextToken;
