@@ -60,7 +60,11 @@ async function checkGeneric(
   additionalExcludes?: { [key: string]: number },
   additionalExactExcludes?: { [key: string]: number }
 ) {
-  const excludePrefixes: string[] = Object.keys(additionalExcludes ?? []);
+  const excludePrefixes: string[] = Object.keys(additionalExcludes ?? {});
+  const excludeExact: Set<string> = new Set(
+    Object.keys(additionalExactExcludes ?? {})
+  );
+
   let managedCount = 0;
   const unmanaged: string[] = [];
 
@@ -70,23 +74,33 @@ async function checkGeneric(
       continue;
     }
 
-    const isExcluded =
+    const excludedByPrefix =
       excludePrefixes.length > 0 &&
       excludePrefixes.some((p) => (p ? id.startsWith(p) : false));
 
-    if (!isExcluded) unmanaged.push(id);
+    const excludedByExact = excludeExact.size > 0 && excludeExact.has(id);
+
+    if (!(excludedByPrefix || excludedByExact)) {
+      unmanaged.push(id);
+    }
   }
 
-  header(label, all.length, managedCount, additionalExcludes);
+  const combinedCounts = {
+    ...(additionalExcludes ?? {}),
+    ...(additionalExactExcludes ?? {}),
+  };
+
+  header(label, all.length, managedCount, combinedCounts);
   listUnmanaged(unmanaged);
 }
 
-async function apiGatewayLogGroups(set) {
+async function apiGatewayLogGroups(set: (k: string) => Set<string>) {
   const restApiIds = set("AWS::ApiGateway::RestApi");
   const apiGatewayLogGroups: string[] = [];
   for (const restApiId of restApiIds) {
     const stages = await apigw.send(new GetStagesCommand({ restApiId }));
     for (const s of stages.item!) {
+      if (!s.stageName) continue;
       apiGatewayLogGroups.push(
         `API-Gateway-Execution-Logs_${restApiId}/${s.stageName}`
       );
@@ -138,16 +152,35 @@ async function main() {
   );
 
   const allLogGroups = await getAllLogGroups();
-  const cmsCloudTeamLambdaLogGroups = allLogGroups.filter((n) =>
-    n.toLowerCase().startsWith("/aws/lambda/cms-cloud")
-  );
-
   const treatedAsManagedLogGroups = new Set<string>([
     ...set("AWS::Logs::LogGroup"),
     ...Array.from(set("AWS::Lambda::Function"), (fn) => `/aws/lambda/${fn}`),
     ...(await apiGatewayLogGroups(set)),
-    ...cmsCloudTeamLambdaLogGroups,
   ]);
+  const logGroupExcludedPrefixes = [
+    "/aws/ec2",
+    "/aws/rds",
+    "/aws/lambda/CMS-Cloud",
+    "/aws/lambda/cms-cloud",
+  ];
+  const logGroupExactExcludes = [
+    "/aws/ssm/CMS-Cloud-Security-RunInspec",
+    "amazon-ssm-agent.log",
+    "cms-cloud-vpc-querylogs",
+  ];
+  const cwAdditionalExcludePrefixes: { [k: string]: number } = {};
+  for (const prefix of logGroupExcludedPrefixes) {
+    cwAdditionalExcludePrefixes[prefix] = allLogGroups.filter((n) =>
+      n.startsWith(prefix)
+    ).length;
+  }
+
+  const cwAdditionalExactExcludes: { [k: string]: number } = {};
+  for (const exact of logGroupExactExcludes) {
+    cwAdditionalExactExcludes[exact] = allLogGroups.filter(
+      (n) => n === exact
+    ).length;
+  }
 
   await checkGeneric(
     "CloudWatch Log Groups",
