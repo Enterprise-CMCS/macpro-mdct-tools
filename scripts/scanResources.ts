@@ -59,8 +59,24 @@ async function checkGeneric(
   cfManaged: Set<string>,
   additionalExcludes?: { [key: string]: number }
 ) {
-  const unmanaged = all.filter((id) => !cfManaged.has(id));
-  header(label, all.length, cfManaged.size, additionalExcludes);
+  const excludePrefixes: string[] = Object.keys(additionalExcludes ?? []);
+  let managedCount = 0;
+  const unmanaged: string[] = [];
+
+  for (const id of all) {
+    if (cfManaged.has(id)) {
+      managedCount++;
+      continue;
+    }
+
+    const isExcluded =
+      excludePrefixes.length > 0 &&
+      excludePrefixes.some((p) => (p ? id.startsWith(p) : false));
+
+    if (!isExcluded) unmanaged.push(id);
+  }
+
+  header(label, all.length, managedCount, additionalExcludes);
   listUnmanaged(unmanaged);
 }
 
