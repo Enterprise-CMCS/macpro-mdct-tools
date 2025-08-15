@@ -15,7 +15,6 @@ export async function getAllLogGroups(): Promise<string[]> {
 
     for (const g of r.logGroups!) {
       const n = g.logGroupName!;
-        !n.toLowerCase().startsWith("/aws/lambda/cms-cloud")
       names.push(n);
     }
 
