@@ -57,7 +57,8 @@ async function checkGeneric(
   label: string,
   all: string[],
   cfManaged: Set<string>,
-  additionalExcludes?: { [key: string]: number }
+  additionalExcludes?: { [key: string]: number },
+  additionalExactExcludes?: { [key: string]: number }
 ) {
   const excludePrefixes: string[] = Object.keys(additionalExcludes ?? []);
   let managedCount = 0;
