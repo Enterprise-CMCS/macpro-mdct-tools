@@ -50,8 +50,8 @@ async function getResourceTypes(stackName: string): Promise<string[]> {
   const resp = await cf.send(
     new DescribeStackResourcesCommand({ StackName: stackName })
   );
-  const types = resp
-    .StackResources!.map((r) => r.ResourceType || "")
+  const types: string[] = resp
+    .StackResources!.map((r: { ResourceType: string }) => r.ResourceType!)
     .filter(Boolean);
   return Array.from(new Set(types)).sort();
 }
