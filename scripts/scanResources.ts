@@ -141,18 +141,22 @@ async function main() {
     n.toLowerCase().startsWith("/aws/lambda/cms-cloud")
   );
 
+  const treatedAsManagedLogGroups = new Set<string>([
+    ...set("AWS::Logs::LogGroup"),
+    ...Array.from(set("AWS::Lambda::Function"), (fn) => `/aws/lambda/${fn}`),
+    ...(await apiGatewayLogGroups(set)),
+    ...cmsCloudTeamLambdaLogGroups,
+  ]);
 
   await checkGeneric(
-    `CloudWatch Log Groups\nLambda Log Groups associated with CMS Cloud Team Lambda Functions: ${cmsCloudTeamLambdaLogGroups.length}`,
+    "CloudWatch Log Groups",
     allLogGroups,
-    new Set<string>([
-      ...set("AWS::Logs::LogGroup"),
-      // Log groups created by Lambda functions managed by CloudFormation
-      ...Array.from(set("AWS::Lambda::Function"), (i) => `/aws/lambda/${i}`),
-      // Log groups created by API Gateways managed by CloudFormation
-      ...(await apiGatewayLogGroups(set)),
-      ...cmsCloudTeamLambdaLogGroups,
-    ])
+    treatedAsManagedLogGroups
+    // TODO:
+    // undefined,
+    // [
+    //   `Lambda Log Groups associated with CMS Cloud Team Lambda Functions: ${cmsCloudTeamLambdaLogGroups.length}`,
+    // ]
   );
 
   await checkGeneric(
@@ -175,9 +179,6 @@ async function main() {
 
   const allIamRoles = await getAllIamRoles();
   log("All IAM Roles: " + allIamRoles.length);
-  const ourIamRoles = allIamRoles.filter((name) =>
-    name.toLowerCase().match(/^(seds|qmr|mcr|mfp|hcbs|carts)/)
-  );
   await checkGeneric(
     "IAM Roles (excluding service-linked)",
     allIamRoles,
@@ -199,15 +200,12 @@ async function main() {
   const allWebAcls = await getAllWafv2WebACLsCfnIds();
   const webAclExcludedPrefixes = ["FMManagedWebACLV2-cms-cloud"];
 
-  const wafAdditionalExcludes = {};
+  const wafAdditionalExcludes: { [k: string]: number } = {};
   for (const prefix of webAclExcludedPrefixes) {
-    const matches = allWebAcls.filter((a) => a.startsWith(prefix));
-    wafAdditionalExcludes[`${prefix} prefix`] = matches.length;
+    wafAdditionalExcludes[prefix] = allWebAcls.filter((a) =>
+      a.startsWith(prefix)
+    ).length;
   }
-
-  const ourWebAcls = allWebAcls.filter(
-    (w) => !webAclExcludedPrefixes.some((prefix) => w.startsWith(prefix))
-  );
 
   await checkGeneric(
     "WAFv2 WebACLs (REGIONAL & CLOUDFRONT)",
@@ -224,14 +222,13 @@ async function main() {
     "custodian",
   ];
 
-  const eventRulesAdditionalExcludes = {};
+  const eventRulesAdditionalExcludes: { [k: string]: number } = {};
   for (const prefix of eventRulesExcludedPrefixes) {
-    const matches = allEventRules.filter((a) => a.startsWith(prefix));
-    eventRulesAdditionalExcludes[`${prefix} prefix`] = matches.length;
+    eventRulesAdditionalExcludes[prefix] = allEventRules.filter((a) =>
+      a.startsWith(prefix)
+    ).length;
   }
-  const ourEventRules = allEventRules.filter(
-    (w) => !eventRulesExcludedPrefixes.some((prefix) => w.startsWith(prefix))
-  );
+
   await checkGeneric(
     "Event Rules",
     allEventRules,
