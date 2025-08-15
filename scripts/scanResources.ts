@@ -28,9 +28,19 @@ function log(line: string = "") {
   fs.appendFileSync("unmanaged-resources.txt", line + "\n");
 }
 
-function header(label: string, total: number, managed: number) {
+function header(
+  label: string,
+  total: number,
+  managed: number,
+  additionalExcludes?: { [key: string]: number }
+) {
   log(`${label} (total: ${total})`);
   log(`Managed by CloudFormation: ${managed}`);
+  if (additionalExcludes) {
+    Object.entries(additionalExcludes).forEach(([key, value]) => {
+      console.log(`Excluded for ${key}: ${value}`);
+    });
+  }
 }
 
 function listUnmanaged(items: string[]) {
@@ -46,10 +56,11 @@ function listUnmanaged(items: string[]) {
 async function checkGeneric(
   label: string,
   all: string[],
-  cfManaged: Set<string>
+  cfManaged: Set<string>,
+  additionalExcludes?: { [key: string]: number }
 ) {
   const unmanaged = all.filter((id) => !cfManaged.has(id));
-  header(label, all.length, cfManaged.size);
+  header(label, all.length, cfManaged.size, additionalExcludes);
   listUnmanaged(unmanaged);
 }
 
@@ -160,8 +171,13 @@ async function main() {
 
   const allWebAcls = await getAllWafv2WebACLsCfnIds();
   const webAclExcludedPrefixes = ["FMManagedWebACLV2-cms-cloud"];
-  webAclExcludedPrefixes.map((w) => allWebAcls.filter((a) => a.startsWith(w)));
-  // TODO: log the prefix and count from the line above.
+
+  const wafAdditionalExcludes = {};
+  for (const prefix of webAclExcludedPrefixes) {
+    const matches = allWebAcls.filter((a) => a.startsWith(prefix));
+    wafAdditionalExcludes[`${prefix} prefix`] = matches.length;
+  }
+
   const ourWebAcls = allWebAcls.filter(
     (w) => !webAclExcludedPrefixes.some((prefix) => w.startsWith(prefix))
   );
@@ -169,7 +185,8 @@ async function main() {
   await checkGeneric(
     "WAFv2 WebACLs (REGIONAL & CLOUDFRONT)",
     ourWebAcls,
-    set("AWS::WAFv2::WebACL")
+    set("AWS::WAFv2::WebACL"),
+    wafAdditionalExcludes
   );
   await checkGeneric(
     "Event Rules",
