@@ -181,8 +181,8 @@ async function main() {
   const allIamRoles = await getAllIamRoles();
   log("All IAM Roles: " + allIamRoles.length);
   await checkGeneric(
-    "IAM Roles (excluding service-linked)",
-    allIamRoles,
+    "IAM Roles (project-scoped, excluding service-linked)",
+    projectIamRoles,
     set("AWS::IAM::Role")
   );
 
