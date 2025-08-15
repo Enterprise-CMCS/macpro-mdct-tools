@@ -180,6 +180,10 @@ async function main() {
 
   const allIamRoles = await getAllIamRoles();
   log("All IAM Roles: " + allIamRoles.length);
+  const projectRolePattern = /^(seds|qmr|mcr|mfp|hcbs|carts)/i;
+  const projectIamRoles = allIamRoles.filter((name) =>
+    projectRolePattern.test(name)
+  );
   await checkGeneric(
     "IAM Roles (project-scoped, excluding service-linked)",
     projectIamRoles,
