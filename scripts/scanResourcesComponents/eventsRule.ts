@@ -6,12 +6,6 @@ import {
 
 const client = new EventBridgeClient({ region: "us-east-1" });
 
-const excludedPrefixes = [
-  "SSMExplorerManagedRule",
-  "billing-alerts",
-  "health-events",
-  "custodian",
-];
 
 export async function getAllEventRules(): Promise<string[]> {
   const names: string[] = [];
@@ -24,9 +18,9 @@ export async function getAllEventRules(): Promise<string[]> {
 
     for (const rule of r.Rules!) {
       const name = rule.Name!;
-      if (!excludedPrefixes.some((prefix) => name.startsWith(prefix))) {
-        names.push(name);
-      }
+      // if (!excludedPrefixes.some((prefix) => name.startsWith(prefix))) {
+      names.push(name);
+      // }
     }
 
     nextToken = r.NextToken;
