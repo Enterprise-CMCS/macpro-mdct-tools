@@ -45,7 +45,7 @@ function header(
 
 function listUnmanaged(items: string[]) {
   if (items.length === 0) {
-    log("✅ All are managed by CloudFormation.\n");
+    log("✅ All are managed by CloudFormation or excluded.\n");
   } else {
     log("❌ Unmanaged:");
     for (const it of items) log(`- ${it}`);
@@ -89,26 +89,31 @@ async function main() {
     await getAllRestApis(),
     set("AWS::ApiGateway::RestApi")
   );
+
   await checkGeneric(
     "CloudFront Distributions",
     await getAllDistributions(),
     set("AWS::CloudFront::Distribution")
   );
+
   await checkGeneric(
     "CloudFront Custom Response Headers Policies",
     await getAllCustomResponseHeadersPolicies(),
     set("AWS::CloudFront::ResponseHeadersPolicy")
   );
+
   await checkGeneric(
     "CloudFront Custom Cache Policies",
     await getAllCustomCachePolicies(),
     set("AWS::CloudFront::CachePolicy")
   );
+
   await checkGeneric(
     "CloudFront Origin Access Controls",
     await getAllOriginAccessControls(),
     set("AWS::CloudFront::OriginAccessControl")
   );
+
   await checkGeneric(
     "S3 Buckets",
     await getAllS3Buckets(),
@@ -119,6 +124,7 @@ async function main() {
   const cmsCloudTeamLambdaLogGroups = allLogGroups.filter((n) =>
     n.toLowerCase().startsWith("/aws/lambda/cms-cloud")
   );
+
 
   await checkGeneric(
     `CloudWatch Log Groups\nLambda Log Groups associated with CMS Cloud Team Lambda Functions: ${cmsCloudTeamLambdaLogGroups.length}`,
@@ -132,16 +138,19 @@ async function main() {
       ...cmsCloudTeamLambdaLogGroups,
     ])
   );
+
   await checkGeneric(
     "Lambda Functions",
     await getAllLambdaFunctions(),
     set("AWS::Lambda::Function")
   );
+
   await checkGeneric(
     "Lambda LayerVersions",
     await getAllLayerVersionArns(),
     set("AWS::Lambda::LayerVersion")
   );
+
   await checkGeneric(
     "DynamoDB Tables",
     await getAllTableNames(),
@@ -158,11 +167,13 @@ async function main() {
     allIamRoles,
     set("AWS::IAM::Role")
   );
+
   await checkGeneric(
     "Cognito User Pools",
     await getAllUserPools(),
     set("AWS::Cognito::UserPool")
   );
+
   await checkGeneric(
     "Cognito Identity Pools",
     await getAllIdentityPools(),
