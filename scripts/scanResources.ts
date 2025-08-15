@@ -37,9 +37,9 @@ function header(
   log(`${label} (total: ${total})`);
   log(`Managed by CloudFormation: ${managed}`);
   if (additionalExcludes) {
-    Object.entries(additionalExcludes).forEach(([key, value]) => {
-      console.log(`Excluded for ${key}: ${value}`);
-    });
+    for (const [reason, count] of Object.entries(additionalExcludes)) {
+      if (count > 0) log(`Excluded for ${reason}: ${count}`);
+    }
   }
 }
 
