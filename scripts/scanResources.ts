@@ -155,7 +155,7 @@ async function main() {
   );
   await checkGeneric(
     "IAM Roles (excluding service-linked)",
-    ourIamRoles,
+    allIamRoles,
     set("AWS::IAM::Role")
   );
   await checkGeneric(
@@ -184,14 +184,32 @@ async function main() {
 
   await checkGeneric(
     "WAFv2 WebACLs (REGIONAL & CLOUDFRONT)",
-    ourWebAcls,
+    allWebAcls,
     set("AWS::WAFv2::WebACL"),
     wafAdditionalExcludes
   );
+
+  const allEventRules = await getAllEventRules();
+  const eventRulesExcludedPrefixes = [
+    "SSMExplorerManagedRule",
+    "billing-alerts",
+    "health-events",
+    "custodian",
+  ];
+
+  const eventRulesAdditionalExcludes = {};
+  for (const prefix of eventRulesExcludedPrefixes) {
+    const matches = allEventRules.filter((a) => a.startsWith(prefix));
+    eventRulesAdditionalExcludes[`${prefix} prefix`] = matches.length;
+  }
+  const ourEventRules = allEventRules.filter(
+    (w) => !eventRulesExcludedPrefixes.some((prefix) => w.startsWith(prefix))
+  );
   await checkGeneric(
     "Event Rules",
-    await getAllEventRules(),
-    set("AWS::Events::Rule")
+    allEventRules,
+    set("AWS::Events::Rule"),
+    eventRulesAdditionalExcludes
   );
 
   console.log("Scan complete. See unmanaged-resources.txt");
