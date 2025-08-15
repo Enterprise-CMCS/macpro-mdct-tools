@@ -9,7 +9,6 @@ type Scope = "REGIONAL" | "CLOUDFRONT";
 
 const client = new WAFV2Client({ region: "us-east-1" });
 
-
 async function listWebAclsByScope(scope: Scope): Promise<WebACLSummary[]> {
   const out: WebACLSummary[] = [];
   let NextMarker: string | undefined;
