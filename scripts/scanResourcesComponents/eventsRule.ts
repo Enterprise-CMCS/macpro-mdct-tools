@@ -6,7 +6,6 @@ import {
 
 const client = new EventBridgeClient({ region: "us-east-1" });
 
-
 export async function getAllEventRules(): Promise<string[]> {
   const names: string[] = [];
   let nextToken: string | undefined;
