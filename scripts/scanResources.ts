@@ -152,12 +152,9 @@ async function main() {
   await checkGeneric(
     "CloudWatch Log Groups",
     allLogGroups,
-    treatedAsManagedLogGroups
-    // TODO:
-    // undefined,
-    // [
-    //   `Lambda Log Groups associated with CMS Cloud Team Lambda Functions: ${cmsCloudTeamLambdaLogGroups.length}`,
-    // ]
+    treatedAsManagedLogGroups,
+    cwAdditionalExcludePrefixes,
+    cwAdditionalExactExcludes
   );
 
   await checkGeneric(
