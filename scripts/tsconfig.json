@@ -6,7 +6,6 @@
     "moduleResolution": "Bundler",
     "allowImportingTsExtensions": true,
     "noEmit": true,
-    "verbatimModuleSyntax": true,
     "strict": true
   }
 }
