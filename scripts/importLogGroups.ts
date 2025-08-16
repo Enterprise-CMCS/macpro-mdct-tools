@@ -1,24 +1,14 @@
 #!/usr/bin/env -S tsx
 import { readFileSync, writeFileSync } from "fs";
 import { execSync } from "child_process";
-import { createInterface } from "readline";
 import {
   CloudWatchLogsClient,
   DescribeLogGroupsCommand,
 } from "@aws-sdk/client-cloudwatch-logs";
+import { prompt } from "./utils.ts";
 
 const INPUT = "cdk-import-map.json";
 const OUTPUT = "cdk-import-map.filled.json";
-
-function prompt(question: string): Promise<string> {
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise((resolve) =>
-    rl.question(question, (answer) => {
-      rl.close();
-      resolve(answer.trim());
-    })
-  );
-}
 
 (async () => {
   const PROJECT = (await prompt("Enter PROJECT: ")).toLowerCase();
