@@ -16,10 +16,7 @@ export async function getAllEventRules(): Promise<string[]> {
     );
 
     for (const rule of r.Rules!) {
-      const name = rule.Name!;
-      // if (!excludedPrefixes.some((prefix) => name.startsWith(prefix))) {
-      names.push(name);
-      // }
+      names.push(rule.Name!);
     }
 
     nextToken = r.NextToken;

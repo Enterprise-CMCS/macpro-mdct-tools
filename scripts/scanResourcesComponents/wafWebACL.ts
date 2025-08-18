@@ -18,7 +18,7 @@ async function listWebAclsByScope(scope: Scope): Promise<WebACLSummary[]> {
       new ListWebACLsCommand({ Scope: scope, NextMarker, Limit: 100 })
     );
 
-    for (const acl of r.WebACLs) {
+    for (const acl of r.WebACLs!) {
       out.push(acl);
     }
 
