@@ -1,4 +1,4 @@
-#!npx tsx
+#!/usr/bin/env -S tsx
 import { S3Client, ListBucketsCommand } from "@aws-sdk/client-s3";
 
 const client = new S3Client({ region: "us-east-1" });

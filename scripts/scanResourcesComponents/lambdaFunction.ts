@@ -1,4 +1,4 @@
-#!npx tsx
+#!/usr/bin/env -S tsx
 import { LambdaClient, paginateListFunctions } from "@aws-sdk/client-lambda";
 
 const client = new LambdaClient({ region: "us-east-1" });

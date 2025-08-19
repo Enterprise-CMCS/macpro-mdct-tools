@@ -1,4 +1,4 @@
-#!npx tsx
+#!/usr/bin/env -S tsx
 import fs from "fs";
 import { getAllRestApis } from "./scanResourcesComponents/apiGateway";
 import { getSelectedCfResourceIds } from "./scanResourcesComponents/cloudFormation";

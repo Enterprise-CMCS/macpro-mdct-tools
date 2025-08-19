@@ -1,4 +1,4 @@
-#!npx tsx
+#!/usr/bin/env -S tsx
 import { DynamoDBClient, paginateListTables } from "@aws-sdk/client-dynamodb";
 
 const client = new DynamoDBClient({ region: "us-east-1" });

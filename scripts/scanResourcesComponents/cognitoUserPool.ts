@@ -1,4 +1,4 @@
-#!npx tsx
+#!/usr/bin/env -S tsx
 import {
   CognitoIdentityProviderClient,
   paginateListUserPools,

@@ -1,4 +1,4 @@
-#!npx tsx
+#!/usr/bin/env -S tsx
 import { IAMClient, paginateListRoles } from "@aws-sdk/client-iam";
 
 const client = new IAMClient({ region: "us-east-1" });
