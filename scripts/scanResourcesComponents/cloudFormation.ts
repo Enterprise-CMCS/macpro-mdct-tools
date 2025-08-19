@@ -29,7 +29,7 @@ async function getAllStacks(): Promise<StackSummary[]> {
 export async function getSelectedCfResourceIds(): Promise<
   Record<string, string[]>
 > {
-  const interestedTypes = new Set([
+  const interestedTypes = [
     "AWS::ApiGateway::RestApi",
     "AWS::CloudFront::CachePolicy",
     "AWS::CloudFront::Distribution",
@@ -47,7 +47,7 @@ export async function getSelectedCfResourceIds(): Promise<
     "AWS::Logs::LogGroup",
     "AWS::S3::Bucket",
     "AWS::WAFv2::WebACL",
-  ]);
+  ];
 
   const stacks = await getAllStacks();
   const result: Record<string, string[]> = {};
@@ -59,9 +59,9 @@ export async function getSelectedCfResourceIds(): Promise<
       { client },
       { StackName: stackName }
     )) {
-      for (const r of page.StackResourceSummaries) {
+      for (const r of page.StackResourceSummaries!) {
         const type = r.ResourceType;
-        if (!type || !interestedTypes.has(type)) continue;
+        if (!type || !interestedTypes.includes(type)) continue;
         if (!r.PhysicalResourceId) continue;
         (result[type] ||= []).push(r.PhysicalResourceId);
       }

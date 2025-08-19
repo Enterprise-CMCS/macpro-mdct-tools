@@ -56,20 +56,18 @@ function listUnmanaged(items: string[]) {
 async function checkGeneric(
   label: string,
   all: string[],
-  cfManaged: Set<string>,
+  cfManaged: string[],
   additionalExcludes?: { [key: string]: number },
   additionalExactExcludes?: { [key: string]: number }
 ) {
   const excludePrefixes: string[] = Object.keys(additionalExcludes ?? {});
-  const excludeExact: Set<string> = new Set(
-    Object.keys(additionalExactExcludes ?? {})
-  );
+  const excludeExact: string[] = Object.keys(additionalExactExcludes ?? {});
 
   let managedCount = 0;
   const unmanaged: string[] = [];
 
   for (const id of all) {
-    if (cfManaged.has(id)) {
+    if (cfManaged.includes(id)) {
       managedCount++;
       continue;
     }
@@ -78,7 +76,8 @@ async function checkGeneric(
       excludePrefixes.length > 0 &&
       excludePrefixes.some((p) => (p ? id.startsWith(p) : false));
 
-    const excludedByExact = excludeExact.size > 0 && excludeExact.has(id);
+    const excludedByExact =
+      excludeExact.length > 0 && excludeExact.includes(id);
 
     if (!(excludedByPrefix || excludedByExact)) {
       unmanaged.push(id);
@@ -94,8 +93,8 @@ async function checkGeneric(
   listUnmanaged(unmanaged);
 }
 
-async function apiGatewayLogGroups(set: (k: string) => Set<string>) {
-  const restApiIds = set("AWS::ApiGateway::RestApi");
+async function apiGatewayLogGroups(getArray: (k: string) => string[]) {
+  const restApiIds = getArray("AWS::ApiGateway::RestApi");
   const apiGatewayLogGroups: string[] = [];
   for (const restApiId of restApiIds) {
     const stages = await apigw.send(new GetStagesCommand({ restApiId }));
@@ -113,50 +112,51 @@ async function main() {
   fs.writeFileSync("unmanaged-resources.txt", "");
 
   const cf = await getSelectedCfResourceIds();
-  const set = (k: string) => new Set(cf[k]!);
+  const getArray = (k: string) => cf[k] || [];
 
   await checkGeneric(
     "API Gateway REST APIs",
     await getAllRestApis(),
-    set("AWS::ApiGateway::RestApi")
+    getArray("AWS::ApiGateway::RestApi")
   );
 
   await checkGeneric(
     "CloudFront Distributions",
     await getAllDistributions(),
-    set("AWS::CloudFront::Distribution")
+    getArray("AWS::CloudFront::Distribution")
   );
 
   await checkGeneric(
     "CloudFront Custom Response Headers Policies",
     await getAllCustomResponseHeadersPolicies(),
-    set("AWS::CloudFront::ResponseHeadersPolicy")
+    getArray("AWS::CloudFront::ResponseHeadersPolicy")
   );
 
   await checkGeneric(
     "CloudFront Custom Cache Policies",
     await getAllCustomCachePolicies(),
-    set("AWS::CloudFront::CachePolicy")
+    getArray("AWS::CloudFront::CachePolicy")
   );
 
   await checkGeneric(
     "CloudFront Origin Access Controls",
     await getAllOriginAccessControls(),
-    set("AWS::CloudFront::OriginAccessControl")
+    getArray("AWS::CloudFront::OriginAccessControl")
   );
 
   await checkGeneric(
     "S3 Buckets",
     await getAllS3Buckets(),
-    set("AWS::S3::Bucket")
+    getArray("AWS::S3::Bucket")
   );
 
   const allLogGroups = await getAllLogGroups();
-  const treatedAsManagedLogGroups = new Set<string>([
-    ...set("AWS::Logs::LogGroup"),
-    ...Array.from(set("AWS::Lambda::Function"), (fn) => `/aws/lambda/${fn}`),
-    ...(await apiGatewayLogGroups(set)),
-  ]);
+  const treatedAsManagedLogGroups: string[] = [
+    ...getArray("AWS::Logs::LogGroup"),
+    ...getArray("AWS::Lambda::Function").map((fn) => `/aws/lambda/${fn}`),
+    ...(await apiGatewayLogGroups(getArray)),
+  ];
+
   const logGroupExcludedPrefixes = [
     "/aws/ec2",
     "/aws/rds",
@@ -168,6 +168,7 @@ async function main() {
     "amazon-ssm-agent.log",
     "cms-cloud-vpc-querylogs",
   ];
+
   const cwAdditionalExcludePrefixes: { [k: string]: number } = {};
   for (const prefix of logGroupExcludedPrefixes) {
     cwAdditionalExcludePrefixes[prefix] = allLogGroups.filter((n) =>
@@ -193,19 +194,19 @@ async function main() {
   await checkGeneric(
     "Lambda Functions",
     await getAllLambdaFunctions(),
-    set("AWS::Lambda::Function")
+    getArray("AWS::Lambda::Function")
   );
 
   await checkGeneric(
     "Lambda LayerVersions",
     await getAllLayerVersionArns(),
-    set("AWS::Lambda::LayerVersion")
+    getArray("AWS::Lambda::LayerVersion")
   );
 
   await checkGeneric(
     "DynamoDB Tables",
     await getAllTableNames(),
-    set("AWS::DynamoDB::Table")
+    getArray("AWS::DynamoDB::Table")
   );
 
   const allIamRoles = await getAllIamRoles();
@@ -217,19 +218,19 @@ async function main() {
   await checkGeneric(
     "IAM Roles (project-scoped, excluding service-linked)",
     projectIamRoles,
-    set("AWS::IAM::Role")
+    getArray("AWS::IAM::Role")
   );
 
   await checkGeneric(
     "Cognito User Pools",
     await getAllUserPools(),
-    set("AWS::Cognito::UserPool")
+    getArray("AWS::Cognito::UserPool")
   );
 
   await checkGeneric(
     "Cognito Identity Pools",
     await getAllIdentityPools(),
-    set("AWS::Cognito::IdentityPool")
+    getArray("AWS::Cognito::IdentityPool")
   );
 
   const allWebAcls = await getAllWafv2WebACLsCfnIds();
@@ -245,7 +246,7 @@ async function main() {
   await checkGeneric(
     "WAFv2 WebACLs (REGIONAL & CLOUDFRONT)",
     allWebAcls,
-    set("AWS::WAFv2::WebACL"),
+    getArray("AWS::WAFv2::WebACL"),
     wafAdditionalExcludes
   );
 
@@ -267,7 +268,7 @@ async function main() {
   await checkGeneric(
     "Event Rules",
     allEventRules,
-    set("AWS::Events::Rule"),
+    getArray("AWS::Events::Rule"),
     eventRulesAdditionalExcludes
   );
 
