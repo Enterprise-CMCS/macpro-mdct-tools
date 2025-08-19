@@ -1,7 +1,7 @@
 #!npx tsx
 import {
   CloudFormationClient,
-  ListStackResourcesCommand,
+  paginateListStackResources,
 } from "@aws-sdk/client-cloudformation";
 import { LambdaClient, GetFunctionCommand } from "@aws-sdk/client-lambda";
 import AdmZip from "adm-zip";
@@ -9,22 +9,23 @@ import { prompt } from "./utils.ts";
 
 const REGION = "us-east-1";
 const STACK_NAME = await prompt("Enter STACK NAME: ");
+
 const cf = new CloudFormationClient({ region: REGION });
 const lambda = new LambdaClient({ region: REGION });
 
 async function listLambdaPhysicalIds(stackName: string): Promise<string[]> {
   const ids: string[] = [];
-  let NextToken: string | undefined;
-  do {
-    const r = await cf.send(
-      new ListStackResourcesCommand({ StackName: stackName, NextToken })
-    );
-    for (const s of r.StackResourceSummaries!) {
+  const paginator = paginateListStackResources(
+    { client: cf },
+    { StackName: stackName }
+  );
+
+  for await (const page of paginator) {
+    for (const s of page.StackResourceSummaries!) {
       if (s.ResourceType === "AWS::Lambda::Function" && s.PhysicalResourceId)
         ids.push(s.PhysicalResourceId);
     }
-    NextToken = r.NextToken;
-  } while (NextToken);
+  }
   return ids;
 }
 

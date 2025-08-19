@@ -1,10 +1,9 @@
 #!/usr/bin/env -S tsx
 import {
   CloudFormationClient,
-  ListStacksCommand,
+  paginateListStacks,
   DescribeStackResourcesCommand,
   StackSummary,
-  ListStacksCommandOutput,
 } from "@aws-sdk/client-cloudformation";
 import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import { mkdirSync, writeFileSync } from "fs";
@@ -29,22 +28,17 @@ async function getAccountId(): Promise<string> {
 }
 
 async function getAllStacks(): Promise<StackSummary[]> {
-  let nextToken: string | undefined = undefined;
   const stacks: StackSummary[] = [];
 
-  do {
-    const resp: ListStacksCommandOutput = await cf.send(
-      new ListStacksCommand({ NextToken: nextToken })
-    );
-    const active = resp.StackSummaries!.filter(
+  for await (const page of paginateListStacks({ client: cf }, {})) {
+    const active = page.StackSummaries!.filter(
       (s) =>
         s.StackStatus !== "DELETE_COMPLETE" &&
         s.StackName &&
         PERSISTENT_STACKS.has(s.StackName)
     );
     stacks.push(...active);
-    nextToken = resp.NextToken;
-  } while (nextToken);
+  }
 
   return stacks;
 }

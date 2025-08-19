@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { execSync } from "child_process";
 import {
   CloudWatchLogsClient,
-  DescribeLogGroupsCommand,
+  paginateDescribeLogGroups,
 } from "@aws-sdk/client-cloudwatch-logs";
 import { prompt } from "./utils.ts";
 
@@ -30,20 +30,17 @@ const OUTPUT = "cdk-import-map.filled.json";
   const client = new CloudWatchLogsClient({ region: "us-east-1" });
 
   const logGroups: string[] = [];
-  let nextToken: string | undefined;
 
-  do {
-    const response = await client.send(
-      new DescribeLogGroupsCommand({ nextToken, limit: 50 })
+  for await (const page of paginateDescribeLogGroups(
+    { client },
+    { limit: 50 }
+  )) {
+    logGroups.push(
+      ...page
+        .logGroups!.map((lg) => lg.logGroupName)
+        .filter((name) => typeof name === "string")
     );
-    if (response.logGroups)
-      logGroups.push(
-        ...response.logGroups
-          .map((lg) => lg.logGroupName)
-          .filter((name) => typeof name === "string")
-      );
-    nextToken = response.nextToken;
-  } while (nextToken);
+  }
 
   const inputData: { [key: string]: { [key: string]: string } } = JSON.parse(
     readFileSync(INPUT, "utf8")

@@ -1,22 +1,17 @@
 #!npx tsx
 import {
   APIGatewayClient,
-  GetRestApisCommand,
+  paginateGetRestApis,
 } from "@aws-sdk/client-api-gateway";
 
 const client = new APIGatewayClient({ region: "us-east-1" });
 
 export async function getAllRestApis(): Promise<string[]> {
   const ids: string[] = [];
-  let position: string | undefined;
 
-  do {
-    const r = await client.send(
-      new GetRestApisCommand({ position, limit: 500 })
-    );
-    for (const api of r.items!) ids.push(api.id!);
-    position = r.position;
-  } while (position);
+  for await (const page of paginateGetRestApis({ client }, { limit: 500 })) {
+    for (const api of page.items!) ids.push(api.id!);
+  }
 
   return ids;
 }
