@@ -15,11 +15,11 @@ export async function getAllCustomResponseHeadersPolicies(): Promise<string[]> {
       new ListResponseHeadersPoliciesCommand({ Marker: marker })
     );
 
-    for (const item of r.ResponseHeadersPolicyList?.Items!) {
+    for (const item of r.ResponseHeadersPolicyList!.Items!) {
       if (item.Type === "custom") ids.push(item.ResponseHeadersPolicy!.Id!);
     }
 
-    marker = r.ResponseHeadersPolicyList?.NextMarker;
+    marker = r.ResponseHeadersPolicyList!.NextMarker;
   } while (marker);
 
   return ids;

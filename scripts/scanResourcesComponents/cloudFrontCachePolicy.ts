@@ -15,11 +15,11 @@ export async function getAllCustomCachePolicies(): Promise<string[]> {
       new ListCachePoliciesCommand({ Marker: marker })
     );
 
-    for (const item of r.CachePolicyList?.Items!) {
+    for (const item of r.CachePolicyList!.Items!) {
       if (item.Type === "custom") ids.push(item.CachePolicy!.Id!);
     }
 
-    marker = r.CachePolicyList?.NextMarker;
+    marker = r.CachePolicyList!.NextMarker;
   } while (marker);
 
   return ids;

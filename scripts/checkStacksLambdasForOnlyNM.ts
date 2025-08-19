@@ -52,7 +52,7 @@ async function checkLambdaFunction(functionId: string): Promise<{
     const r = await lambda.send(
       new GetFunctionCommand({ FunctionName: functionId })
     );
-    const pkg = r.Configuration?.PackageType;
+    const pkg = r.Configuration!.PackageType;
     if (pkg !== "Zip") {
       return {
         id: functionId,
@@ -60,9 +60,9 @@ async function checkLambdaFunction(functionId: string): Promise<{
         ignored: `This only checks zip file package types, this function is a ${pkg}`,
       };
     }
-    const url = r.Code?.Location;
+    const url = r.Code!.Location;
 
-    const resp = await fetch(url);
+    const resp = await fetch(url!);
     if (!resp.ok)
       return {
         id: functionId,
@@ -76,7 +76,7 @@ async function checkLambdaFunction(functionId: string): Promise<{
     return {
       id: functionId,
       onlyNodeModules: false,
-      error: e?.message || String(e),
+      error: e.message || String(e),
     };
   }
 }

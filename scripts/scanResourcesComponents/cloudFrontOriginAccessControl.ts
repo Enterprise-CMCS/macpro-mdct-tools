@@ -1,26 +1,19 @@
 #!npx tsx
 import {
   CloudFrontClient,
-  ListOriginAccessControlsCommand,
+  paginateListOriginAccessControls,
 } from "@aws-sdk/client-cloudfront";
 
 const client = new CloudFrontClient({ region: "us-east-1" });
 
 export async function getAllOriginAccessControls(): Promise<string[]> {
   const ids: string[] = [];
-  let marker: string | undefined;
 
-  do {
-    const r = await client.send(
-      new ListOriginAccessControlsCommand({ Marker: marker })
-    );
-
-    for (const item of r.OriginAccessControlList?.Items!) {
+  for await (const page of paginateListOriginAccessControls({ client }, {})) {
+    for (const item of page.OriginAccessControlList!.Items!) {
       ids.push(item.Id!);
     }
-
-    marker = r.OriginAccessControlList?.NextMarker;
-  } while (marker);
+  }
 
   return ids;
 }

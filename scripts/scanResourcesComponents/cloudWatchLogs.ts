@@ -1,25 +1,19 @@
 #!npx tsx
 import {
   CloudWatchLogsClient,
-  DescribeLogGroupsCommand,
+  paginateDescribeLogGroups,
 } from "@aws-sdk/client-cloudwatch-logs";
 
 const client = new CloudWatchLogsClient({ region: "us-east-1" });
 
 export async function getAllLogGroups(): Promise<string[]> {
   const names: string[] = [];
-  let nextToken: string | undefined;
 
-  do {
-    const r = await client.send(new DescribeLogGroupsCommand({ nextToken }));
-
-    for (const g of r.logGroups!) {
-      const n = g.logGroupName!;
-      names.push(n);
+  for await (const page of paginateDescribeLogGroups({ client }, {})) {
+    for (const g of page.logGroups!) {
+      names.push(g.logGroupName!);
     }
-
-    nextToken = r.nextToken;
-  } while (nextToken);
+  }
 
   return names;
 }

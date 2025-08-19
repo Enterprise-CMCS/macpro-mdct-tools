@@ -1,8 +1,8 @@
 #!npx tsx
 import {
   CloudFormationClient,
-  ListStackResourcesCommand,
-  ListStacksCommand,
+  paginateListStacks,
+  paginateListStackResources,
   StackStatus,
   StackSummary,
 } from "@aws-sdk/client-cloudformation";
@@ -11,20 +11,17 @@ const client = new CloudFormationClient({ region: "us-east-1" });
 
 async function getAllStacks(): Promise<StackSummary[]> {
   const stacks: StackSummary[] = [];
-  let nextToken: string | undefined;
 
-  do {
-    const response = await client.send(
-      new ListStacksCommand({
-        NextToken: nextToken,
-        StackStatusFilter: Object.values(StackStatus).filter(
-          (s) => s !== StackStatus.DELETE_COMPLETE
-        ),
-      })
-    );
-    if (response.StackSummaries) stacks.push(...response.StackSummaries);
-    nextToken = response.NextToken;
-  } while (nextToken);
+  for await (const page of paginateListStacks(
+    { client },
+    {
+      StackStatusFilter: Object.values(StackStatus).filter(
+        (s) => s !== StackStatus.DELETE_COMPLETE
+      ),
+    }
+  )) {
+    stacks.push(...page.StackSummaries!);
+  }
 
   return stacks;
 }
@@ -57,26 +54,18 @@ export async function getSelectedCfResourceIds(): Promise<
 
   for (const stack of stacks) {
     const stackName = stack.StackName!;
-    let nextToken: string | undefined;
 
-    do {
-      const response = await client.send(
-        new ListStackResourcesCommand({
-          StackName: stackName,
-          NextToken: nextToken,
-        })
-      );
-
-      for (const r of response.StackResourceSummaries!) {
+    for await (const page of paginateListStackResources(
+      { client },
+      { StackName: stackName }
+    )) {
+      for (const r of page.StackResourceSummaries) {
         const type = r.ResourceType;
         if (!type || !interestedTypes.has(type)) continue;
         if (!r.PhysicalResourceId) continue;
-
         (result[type] ||= []).push(r.PhysicalResourceId);
       }
-
-      nextToken = response.NextToken;
-    } while (nextToken);
+    }
   }
 
   return result;

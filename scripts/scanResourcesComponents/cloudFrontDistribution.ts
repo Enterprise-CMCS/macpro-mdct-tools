@@ -1,26 +1,19 @@
 #!npx tsx
 import {
   CloudFrontClient,
-  ListDistributionsCommand,
+  paginateListDistributions,
 } from "@aws-sdk/client-cloudfront";
 
 const client = new CloudFrontClient({ region: "us-east-1" });
 
 export async function getAllDistributions(): Promise<string[]> {
   const ids: string[] = [];
-  let marker: string | undefined;
 
-  do {
-    const r = await client.send(
-      new ListDistributionsCommand({ Marker: marker })
-    );
-
-    for (const d of r.DistributionList?.Items!) {
+  for await (const page of paginateListDistributions({ client }, {})) {
+    for (const d of page.DistributionList!.Items!) {
       ids.push(d.Id!);
     }
-
-    marker = r.DistributionList?.NextMarker;
-  } while (marker);
+  }
 
   return ids;
 }

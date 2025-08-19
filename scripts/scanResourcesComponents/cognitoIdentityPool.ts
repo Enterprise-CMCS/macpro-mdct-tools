@@ -1,24 +1,22 @@
 #!npx tsx
 import {
   CognitoIdentityClient,
-  ListIdentityPoolsCommand,
+  paginateListIdentityPools,
 } from "@aws-sdk/client-cognito-identity";
 
 const client = new CognitoIdentityClient({ region: "us-east-1" });
 
 export async function getAllIdentityPools(): Promise<string[]> {
   const ids: string[] = [];
-  let token: string | undefined;
 
-  do {
-    const r = await client.send(
-      new ListIdentityPoolsCommand({ MaxResults: 60, NextToken: token })
-    );
-    for (const p of r.IdentityPools!) {
+  for await (const page of paginateListIdentityPools(
+    { client },
+    { MaxResults: 60 }
+  )) {
+    for (const p of page.IdentityPools!) {
       ids.push(p.IdentityPoolId!);
     }
-    token = r.NextToken;
-  } while (token);
+  }
 
   return ids;
 }

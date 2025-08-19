@@ -4,6 +4,7 @@ import {
   ListStacksCommand,
   DescribeStackResourcesCommand,
   StackSummary,
+  ListStacksCommandOutput,
 } from "@aws-sdk/client-cloudformation";
 import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
 import { mkdirSync, writeFileSync } from "fs";
@@ -32,7 +33,9 @@ async function getAllStacks(): Promise<StackSummary[]> {
   const stacks: StackSummary[] = [];
 
   do {
-    const resp = await cf.send(new ListStacksCommand({ NextToken: nextToken }));
+    const resp: ListStacksCommandOutput = await cf.send(
+      new ListStacksCommand({ NextToken: nextToken })
+    );
     const active = resp.StackSummaries!.filter(
       (s) =>
         s.StackStatus !== "DELETE_COMPLETE" &&
@@ -51,8 +54,8 @@ async function getResourceTypes(stackName: string): Promise<string[]> {
     new DescribeStackResourcesCommand({ StackName: stackName })
   );
   const types: string[] = resp
-    .StackResources!.map((r: { ResourceType: string }) => r.ResourceType!)
-    .filter(Boolean);
+    .StackResources!.map((r) => r.ResourceType)
+    .filter((type): type is string => Boolean(type));
   return Array.from(new Set(types)).sort();
 }
 
