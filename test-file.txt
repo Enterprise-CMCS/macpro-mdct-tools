@@ -1,2 +1,1 @@
-wrong thing
-seriously
+This is a test file.
