@@ -14,7 +14,7 @@ const cf = new CloudFormationClient({ region });
 const sts = new STSClient({ region });
 
 const PROJECTS = ["mcr", "mfp", "carts", "qmr", "seds", "hcbs"];
-const ENVS = ["main", "master", "val", "prod", "production"];
+const ENVS = ["main", "val", "prod", "production"];
 const OUT_DIR = "resource-types";
 
 const PERSISTENT_STACKS = new Set(
