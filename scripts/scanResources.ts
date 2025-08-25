@@ -97,13 +97,15 @@ async function apiGatewayLogGroups(getArray: (k: string) => string[]) {
   const restApiIds = getArray("AWS::ApiGateway::RestApi");
   const apiGatewayLogGroups: string[] = [];
   for (const restApiId of restApiIds) {
-    const stages = await apigw.send(new GetStagesCommand({ restApiId }));
-    for (const s of stages.item!) {
-      if (!s.stageName) continue;
-      apiGatewayLogGroups.push(
-        `API-Gateway-Execution-Logs_${restApiId}/${s.stageName}`
-      );
-    }
+    try {
+      const stages = await apigw.send(new GetStagesCommand({ restApiId }));
+      for (const s of stages.item!) {
+        if (!s.stageName) continue;
+        apiGatewayLogGroups.push(
+          `API-Gateway-Execution-Logs_${restApiId}/${s.stageName}`
+        );
+      }
+    } catch {}
   }
   return apiGatewayLogGroups;
 }
