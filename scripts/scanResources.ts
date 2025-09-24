@@ -33,18 +33,9 @@ function log(line: string = "") {
 }
 
 async function getAccountIdentifier(): Promise<string> {
-  const sts = new STSClient({});
   const iam = new IAMClient({});
-  let accountId: string | undefined;
   let alias: string | undefined;
-
-  try {
-    const idResp = await sts.send(new GetCallerIdentityCommand({}));
-    accountId = idResp.Account;
-  } catch {
-    // ignore
-  }
-
+  const accountId = await getAccountId();
   try {
     const aliasResp = await iam.send(new ListAccountAliasesCommand({}));
     if (aliasResp.AccountAliases && aliasResp.AccountAliases.length > 0) {
@@ -58,6 +49,16 @@ async function getAccountIdentifier(): Promise<string> {
     /[^a-zA-Z0-9-_]/g,
     "_"
   );
+}
+
+async function getAccountId(): Promise<string | undefined> {
+  try {
+    const sts = new STSClient({});
+    const idResp = await sts.send(new GetCallerIdentityCommand({}));
+    return idResp.Account;
+  } catch {
+    return undefined;
+  }
 }
 
 function header(
@@ -90,10 +91,14 @@ async function checkGeneric(
   all: string[],
   cfManaged: string[],
   additionalExcludes?: { [key: string]: number },
-  additionalExactExcludes?: { [key: string]: number }
+  additionalExactExcludes?: { [key: string]: number },
+  additionalContainsExcludes?: { [key: string]: number }
 ) {
   const excludePrefixes: string[] = Object.keys(additionalExcludes ?? {});
   const excludeExact: string[] = Object.keys(additionalExactExcludes ?? {});
+  const excludeContains: string[] = Object.keys(
+    additionalContainsExcludes ?? {}
+  );
 
   let managedCount = 0;
   const unmanaged: string[] = [];
@@ -111,7 +116,11 @@ async function checkGeneric(
     const excludedByExact =
       excludeExact.length > 0 && excludeExact.includes(id);
 
-    if (!(excludedByPrefix || excludedByExact)) {
+    const excludedByContains =
+      excludeContains.length > 0 &&
+      excludeContains.some((s) => (s ? id.includes(s) : false));
+
+    if (!(excludedByPrefix || excludedByExact || excludedByContains)) {
       unmanaged.push(id);
     }
   }
@@ -119,6 +128,7 @@ async function checkGeneric(
   const combinedCounts = {
     ...(additionalExcludes ?? {}),
     ...(additionalExactExcludes ?? {}),
+    ...(additionalContainsExcludes ?? {}),
   };
 
   header(label, all.length, managedCount, combinedCounts);
@@ -144,6 +154,7 @@ async function apiGatewayLogGroups(getArray: (k: string) => string[]) {
 
 async function main() {
   const accountIdent = await getAccountIdentifier();
+  const accountId = await getAccountId();
   outputFile = `unmanaged-resources-${accountIdent}.txt`;
   fs.writeFileSync(outputFile, "");
   console.log(`Writing scan results to ${outputFile}`);
@@ -181,10 +192,23 @@ async function main() {
     getArray("AWS::CloudFront::OriginAccessControl")
   );
 
+  const allS3Buckets = await getAllS3Buckets();
+  const s3SubstringExcludes: string[] = [
+    "prod",
+    "us-west-2",
+    ...(accountId ? [accountId] : []),
+  ];
+  const s3ContainsCounts: { [k: string]: number } = {};
+  for (const sub of s3SubstringExcludes) {
+    s3ContainsCounts[sub] = allS3Buckets.filter((b) => b.includes(sub)).length;
+  }
   await checkGeneric(
     "S3 Buckets",
-    await getAllS3Buckets(),
-    getArray("AWS::S3::Bucket")
+    allS3Buckets,
+    getArray("AWS::S3::Bucket"),
+    undefined,
+    undefined,
+    s3ContainsCounts
   );
 
   const allLogGroups = await getAllLogGroups();
