@@ -20,12 +20,44 @@ import {
   APIGatewayClient,
   GetStagesCommand,
 } from "@aws-sdk/client-api-gateway";
+import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
+import { IAMClient, ListAccountAliasesCommand } from "@aws-sdk/client-iam";
 
 const apigw = new APIGatewayClient({ region: "us-east-1" });
 
+let outputFile = "unmanaged-resources.txt";
+
 function log(line: string = "") {
   console.log(line);
-  fs.appendFileSync("unmanaged-resources.txt", line + "\n");
+  fs.appendFileSync(outputFile, line + "\n");
+}
+
+async function getAccountIdentifier(): Promise<string> {
+  const sts = new STSClient({});
+  const iam = new IAMClient({});
+  let accountId: string | undefined;
+  let alias: string | undefined;
+
+  try {
+    const idResp = await sts.send(new GetCallerIdentityCommand({}));
+    accountId = idResp.Account;
+  } catch {
+    // ignore
+  }
+
+  try {
+    const aliasResp = await iam.send(new ListAccountAliasesCommand({}));
+    if (aliasResp.AccountAliases && aliasResp.AccountAliases.length > 0) {
+      alias = aliasResp.AccountAliases[0];
+    }
+  } catch {
+    // ignore
+  }
+
+  return (alias || accountId || "unknown-account").replace(
+    /[^a-zA-Z0-9-_]/g,
+    "_"
+  );
 }
 
 function header(
@@ -111,7 +143,10 @@ async function apiGatewayLogGroups(getArray: (k: string) => string[]) {
 }
 
 async function main() {
-  fs.writeFileSync("unmanaged-resources.txt", "");
+  const accountIdent = await getAccountIdentifier();
+  outputFile = `unmanaged-resources-${accountIdent}.txt`;
+  fs.writeFileSync(outputFile, "");
+  console.log(`Writing scan results to ${outputFile}`);
 
   const cf = await getSelectedCfResourceIds();
   const getArray = (k: string) => cf[k] || [];
@@ -274,7 +309,7 @@ async function main() {
     eventRulesAdditionalExcludes
   );
 
-  console.log("Scan complete. See unmanaged-resources.txt");
+  console.log(`Scan complete. See ${outputFile}`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
