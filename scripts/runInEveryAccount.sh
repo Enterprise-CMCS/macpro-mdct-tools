@@ -8,7 +8,16 @@ if [[ ! -f "${ACCOUNTS_FILE}" ]]; then
   exit 1
 fi
 
-echo "Using accounts file: ${ACCOUNTS_FILE}"\n
+if [[ $# -eq 0 ]]; then
+  echo "Usage: $0 \"<command to run in each account>\"" >&2
+  echo "Example: $0 \"aws sts get-caller-identity\"" >&2
+  exit 1
+fi
+
+USER_COMMAND="$*"
+echo "Using accounts file: ${ACCOUNTS_FILE}"
+echo "Command to run: ${USER_COMMAND}"
+echo "------------------------------------"
 
 # Read each non-empty, non-comment line (format: Friendly|AccountId|RoleName)
 while IFS='|' read -r friendly account_id role || [[ -n "$friendly" ]]; do
@@ -21,7 +30,7 @@ while IFS='|' read -r friendly account_id role || [[ -n "$friendly" ]]; do
   echo "Account:  $account_id"
   echo "Role:     $role"
 
-  if kion run --account "$account_id" --car "$role" -- bash -c 'aws sts get-caller-identity'; then
+  if kion run --account "$account_id" --car "$role" -- bash -c "$USER_COMMAND"; then
     echo "✅ Success for $friendly"
   else
     echo "❌ Failed for $friendly"
