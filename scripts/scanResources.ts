@@ -223,11 +223,16 @@ async function main() {
     "/aws/rds",
     "/aws/lambda/CMS-Cloud",
     "/aws/lambda/cms-cloud",
+    "/aws/lambda/NewRelicInfrastructure-Integrations-LambdaFunction",
   ];
   const logGroupExactExcludes = [
     "/aws/ssm/CMS-Cloud-Security-RunInspec",
     "amazon-ssm-agent.log",
     "cms-cloud-vpc-querylogs",
+    "/aws/apigateway/welcome",
+    "/aws/lambda/CF-Custom-Resource-SSM-Association",
+    "/aws/lambda/CMS-Custom-Resource-Placeholder-Document",
+    "/aws/lambda/ITOPS-Security-Attach-Inspector-to-SNS",
   ];
 
   const cwAdditionalExcludePrefixes: { [k: string]: number } = {};
