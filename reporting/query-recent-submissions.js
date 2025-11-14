@@ -103,27 +103,32 @@ async function getS3FieldData(bucketName, fieldDataId, state) {
   return JSON.parse(bodyString);
 }
 
+const authTableCache = new Map();
+
+async function loadAuthTableCache(tableName) {
+  if (authTableCache.has(tableName)) {
+    return; // Already loaded
+  }
+
+  console.log(`    Loading auth-user table into cache...`);
+  // Note: This table has no GSI on username, so we must scan
+  const items = await scanTable(tableName);
+
+  // Build a map of username -> email
+  const userMap = new Map();
+  for (const item of items) {
+    if (item.username && item.email) {
+      userMap.set(item.username, item.email);
+    }
+  }
+
+  authTableCache.set(tableName, userMap);
+  console.log(`    Cached ${userMap.size} users from auth table`);
+}
+
 async function getUserEmailFromAuthTable(tableName, username) {
   if (!username || username === "N/A") {
     return "N/A";
-  }
-
-  const ddbClient = DynamoDBDocumentClient.from(new DynamoDBClient({ region: "us-east-1" }));
-  const params = {
-    TableName: tableName,
-    FilterExpression: "username = :username",
-    ExpressionAttributeValues: {
-      ":username": username,
-    },
-  };
-
-  const items = [];
-  for await (const page of paginateScan({ client: ddbClient }, params)) {
-    items.push(...(page.Items ?? []));
-  }
-
-  if (items.length > 0 && items[0].email) {
-    return items[0].email;
   }
 
   // Username might be an email itself (fallback case in SEDS)
@@ -131,7 +136,11 @@ async function getUserEmailFromAuthTable(tableName, username) {
     return username;
   }
 
-  return "N/A (user not found)";
+  // Ensure auth table is loaded
+  await loadAuthTableCache(tableName);
+
+  const userMap = authTableCache.get(tableName);
+  return userMap.get(username) || "N/A (user not found)";
 }
 
 function filterRecentSubmissions(items, config, sinceTimestamp) {
