@@ -1,7 +1,6 @@
 export const getApplicationsConfig = (environment) => ({
   mcr: {
     name: "MCR",
-    description: "Report submissions with clear submission dates",
     reportTypes: [
       {
         type: "mcpar",
@@ -31,7 +30,6 @@ export const getApplicationsConfig = (environment) => ({
   },
   mfp: {
     name: "MFP",
-    description: "Report submissions with clear submission dates",
     reportTypes: [
       {
         type: "sar",
@@ -61,7 +59,6 @@ export const getApplicationsConfig = (environment) => ({
   },
   hcbs: {
     name: "HCBS",
-    description: "Report submissions with clear submission dates",
     reportTypes: [
       {
         type: "qms",
@@ -95,7 +92,8 @@ export const getApplicationsConfig = (environment) => ({
   },
   carts: {
     name: "CARTS",
-    description: "⚠️  State certifications - lastChanged tracks ANY status change (username stored, email only in Cognito)",
+    // State certifications tracked by lastChanged timestamp
+    // Note: Username stored in DDB, email requires Cognito lookup
     queryType: "stateStatus",
     reportTypes: [
       {
@@ -109,7 +107,7 @@ export const getApplicationsConfig = (environment) => ({
   },
   seds: {
     name: "SEDS",
-    description: "⚠️  Form certifications - status_date tracks certification changes",
+    // Forms track provisional (2) and final (3) certifications via status_date
     queryType: "forms",
     needsUserLookup: true,
     reportTypes: [
@@ -124,7 +122,8 @@ export const getApplicationsConfig = (environment) => ({
   },
   qmr: {
     name: "QMR",
-    description: "⚠️  Core set submissions - lastAltered tracks ANY update (username stored, email only in Cognito)",
+    // Core sets use boolean submitted flag with lastAltered timestamp
+    // Note: Username stored in DDB, email requires Cognito lookup
     queryType: "coreSets",
     reportTypes: [
       {
