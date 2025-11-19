@@ -1,6 +1,6 @@
 /**
  * Query recent submissions/certifications for MDCT applications.
- * 
+ *
  * Usage: node query-recent-submissions.js <application> <environment>
  * Example: node query-recent-submissions.js mcr production
  */
@@ -20,15 +20,24 @@ const authTableCache = new Map();
 const [application, environment] = process.argv.slice(2);
 
 function validateArgs() {
-  const usage = "Usage: node query-recent-submissions.js <application> <environment>";
+  const usage =
+    "Usage: node query-recent-submissions.js <application> <environment>";
 
   if (!application) {
-    console.error(`\nError: Application parameter is required\n${usage}\nValid applications: ${VALID_APPS.join(", ")}\n`);
+    console.error(
+      `\nError: Application parameter is required\n${usage}\nValid applications: ${VALID_APPS.join(
+        ", "
+      )}\n`
+    );
     process.exit(1);
   }
 
   if (!VALID_APPS.includes(application)) {
-    console.error(`\nError: Invalid application "${application}"\nValid applications: ${VALID_APPS.join(", ")}\n`);
+    console.error(
+      `\nError: Invalid application "${application}"\nValid applications: ${VALID_APPS.join(
+        ", "
+      )}\n`
+    );
     process.exit(1);
   }
 
@@ -43,18 +52,29 @@ validateArgs();
 const sinceDate = new Date(Date.now() - DAYS_TO_QUERY * 24 * 60 * 60 * 1000);
 const sinceTimestamp = sinceDate.getTime();
 
-console.log(`\nQuerying ${application} ${environment} for submissions since ${sinceDate.toISOString().split("T")[0]} (${DAYS_TO_QUERY} days)`);
+console.log(
+  `\nQuerying ${application} ${environment} for submissions since ${
+    sinceDate.toISOString().split("T")[0]
+  } (${DAYS_TO_QUERY} days)`
+);
 
 const appConfig = getApplicationsConfig(environment)[application];
 if (!appConfig) {
-  console.error(`\nError: Application configuration not found for "${application}"\n`);
+  console.error(
+    `\nError: Application configuration not found for "${application}"\n`
+  );
   process.exit(1);
 }
 
 async function scanTable(tableName) {
-  const ddbClient = DynamoDBDocumentClient.from(new DynamoDBClient({ region: AWS_REGION }));
+  const ddbClient = DynamoDBDocumentClient.from(
+    new DynamoDBClient({ region: AWS_REGION })
+  );
   const items = [];
-  for await (const page of paginateScan({ client: ddbClient }, { TableName: tableName })) {
+  for await (const page of paginateScan(
+    { client: ddbClient },
+    { TableName: tableName }
+  )) {
     items.push(...(page.Items ?? []));
   }
   return items;
@@ -124,7 +144,9 @@ function formatReportSummary(report, dateField, appName, reportType = null) {
     return {
       application: "CARTS",
       reportType: "CARTS",
-      reportName: `${report.stateId} ${report.year} (${report.programType || "N/A"})`,
+      reportName: `${report.stateId} ${report.year} (${
+        report.programType || "N/A"
+      })`,
       state: report.stateId || "N/A",
       submissionDate,
       submittedBy: report.username || "N/A",
@@ -133,11 +155,18 @@ function formatReportSummary(report, dateField, appName, reportType = null) {
   }
 
   if (appName === "SEDS") {
-    const statusName = report.status_id === 2 ? "Provisional" : report.status_id === 3 ? "Final" : "Unknown";
+    const statusName =
+      report.status_id === 2
+        ? "Provisional"
+        : report.status_id === 3
+        ? "Final"
+        : "Unknown";
     return {
       application: "SEDS",
       reportType: "SEDS",
-      reportName: `${report.form || "N/A"} Q${report.quarter || "?"} ${report.year || ""}`,
+      reportName: `${report.form || "N/A"} Q${report.quarter || "?"} ${
+        report.year || ""
+      }`,
       state: report.state_id || "N/A",
       submissionDate,
       submittedBy: report.status_modified_by || "N/A",
@@ -151,12 +180,16 @@ function formatReportSummary(report, dateField, appName, reportType = null) {
     return {
       application: "QMR",
       reportType: `${report.coreSet || "N/A"} Core Set`,
-      reportName: `${report.coreSet || "N/A"} Core Set - ${report.year || "N/A"}`,
+      reportName: `${report.coreSet || "N/A"} Core Set - ${
+        report.year || "N/A"
+      }`,
       state: report.state || "N/A",
       submissionDate,
       submittedBy: report.lastAlteredBy || "N/A",
       submitterEmail: "N/A (not stored)",
-      notes: `${report.progress?.numComplete || 0}/${report.progress?.numAvailable || 0} measures`,
+      notes: `${report.progress?.numComplete || 0}/${
+        report.progress?.numAvailable || 0
+      } measures`,
     };
   }
 
@@ -164,7 +197,8 @@ function formatReportSummary(report, dateField, appName, reportType = null) {
     return {
       application: "HCBS",
       reportType: reportType || "N/A",
-      reportName: report.submissionName || report.name || report.programName || "N/A",
+      reportName:
+        report.submissionName || report.name || report.programName || "N/A",
       state: report.state || "N/A",
       submissionDate,
       submittedBy: report.submittedBy || "N/A",
@@ -175,7 +209,8 @@ function formatReportSummary(report, dateField, appName, reportType = null) {
   return {
     application: appName,
     reportType: reportType || "N/A",
-    reportName: report.submissionName || report.name || report.programName || "N/A",
+    reportName:
+      report.submissionName || report.name || report.programName || "N/A",
     state: report.state || "N/A",
     submissionDate,
     submittedBy: report.submittedBy || "N/A",
@@ -189,7 +224,11 @@ async function queryApplication(app) {
 
   for (const reportType of app.reportTypes) {
     const items = await scanTable(reportType.tableName);
-    const recentSubmissions = filterRecentSubmissions(items, reportType, sinceTimestamp);
+    const recentSubmissions = filterRecentSubmissions(
+      items,
+      reportType,
+      sinceTimestamp
+    );
 
     const formattedSubmissions = recentSubmissions.map((r) =>
       formatReportSummary(r, reportType.dateField, app.name, reportType.type)
@@ -197,22 +236,34 @@ async function queryApplication(app) {
 
     // For MCR and MFP, fetch email addresses from S3
     if ((app.name === "MCR" || app.name === "MFP") && reportType.bucketName) {
-      await Promise.all(formattedSubmissions.map(async (submission) => {
-        if (submission.fieldDataId && submission.state) {
-          const fieldData = await getS3FieldData(reportType.bucketName, submission.fieldDataId, submission.state);
-          submission.submitterEmail = fieldData?.submitterEmailAddress || "N/A (not found in S3)";
-        }
-      }));
+      await Promise.all(
+        formattedSubmissions.map(async (submission) => {
+          if (submission.fieldDataId && submission.state) {
+            const fieldData = await getS3FieldData(
+              reportType.bucketName,
+              submission.fieldDataId,
+              submission.state
+            );
+            submission.submitterEmail =
+              fieldData?.submitterEmailAddress || "N/A (not found in S3)";
+          }
+        })
+      );
     }
 
     // For SEDS, fetch email addresses from auth-user table
     if (app.needsUserLookup) {
       const authUserTable = `${environment}-auth-user`;
-      await Promise.all(formattedSubmissions.map(async (submission) => {
-        if (submission.username) {
-          submission.submitterEmail = await getUserEmailFromAuthTable(authUserTable, submission.username);
-        }
-      }));
+      await Promise.all(
+        formattedSubmissions.map(async (submission) => {
+          if (submission.username) {
+            submission.submitterEmail = await getUserEmailFromAuthTable(
+              authUserTable,
+              submission.username
+            );
+          }
+        })
+      );
     }
 
     results.byReportType[reportType.type] = {
@@ -243,36 +294,67 @@ function printResults(result) {
       if (data.count > 0) {
         console.log(`\n${reportType} (${data.count} submission(s)):`);
         console.log(rowDivider);
-        console.log(`${"State".padEnd(8)} ${"Report Type".padEnd(15)} ${"Report Name".padEnd(35)} ${"Date".padEnd(12)} ${"Submitter".padEnd(25)} ${"Email".padEnd(20)}`);
+        console.log(
+          `${"State".padEnd(8)} ${"Report Type".padEnd(
+            15
+          )} ${"Report Name".padEnd(35)} ${"Date".padEnd(
+            12
+          )} ${"Submitter".padEnd(25)} ${"Email".padEnd(20)}`
+        );
         console.log(rowDivider);
 
         for (const submission of data.submissions) {
-          const reportName = submission.reportName.length > 34 ? submission.reportName.substring(0, 31) + "..." : submission.reportName;
-          const submitter = submission.submittedBy.length > 24 ? submission.submittedBy.substring(0, 21) + "..." : submission.submittedBy;
-          const email = submission.submitterEmail.length > 19 ? submission.submitterEmail.substring(0, 16) + "..." : submission.submitterEmail;
+          const reportName =
+            submission.reportName.length > 34
+              ? submission.reportName.substring(0, 31) + "..."
+              : submission.reportName;
+          const submitter =
+            submission.submittedBy.length > 24
+              ? submission.submittedBy.substring(0, 21) + "..."
+              : submission.submittedBy;
+          const email =
+            submission.submitterEmail.length > 19
+              ? submission.submitterEmail.substring(0, 16) + "..."
+              : submission.submitterEmail;
 
-          console.log(`${submission.state.padEnd(8)} ${submission.reportType.padEnd(15)} ${reportName.padEnd(35)} ${submission.submissionDate.padEnd(12)} ${submitter.padEnd(25)} ${email.padEnd(20)}`);
+          console.log(
+            `${submission.state.padEnd(8)} ${submission.reportType.padEnd(
+              15
+            )} ${reportName.padEnd(35)} ${submission.submissionDate.padEnd(
+              12
+            )} ${submitter.padEnd(25)} ${email.padEnd(20)}`
+          );
         }
       }
     }
   }
 
   console.log(divider);
-  console.log(`Total: ${result.totalSubmissions} submission(s)/certification(s) since ${sinceDate.toISOString().split("T")[0]}`);
+  console.log(
+    `Total: ${result.totalSubmissions} submission(s)/certification(s) since ${
+      sinceDate.toISOString().split("T")[0]
+    }`
+  );
 
   const notes = {
-    MCR: ["• MCR/MFP: Submission dates and emails are stored; emails retrieved from S3"],
-    MFP: ["• MCR/MFP: Submission dates and emails are stored; emails retrieved from S3"],
+    MCR: [
+      "• MCR/MFP: Submission dates and emails are stored; emails retrieved from S3",
+    ],
+    MFP: [
+      "• MCR/MFP: Submission dates and emails are stored; emails retrieved from S3",
+    ],
     HCBS: ["• HCBS: Submission dates and emails are stored in DynamoDB"],
-    SEDS: ["• SEDS: Date shows when certification status changed - Email retrieved from auth-user table"],
+    SEDS: [
+      "• SEDS: Date shows when certification status changed - Email retrieved from auth-user table",
+    ],
     CARTS: [
       "• CARTS: Date shows when status last changed (includes uncertify/recertify)",
-      "  Email not available - stored only in Cognito, not linked to certification records"
+      "  Email not available - stored only in Cognito, not linked to certification records",
     ],
     QMR: [
       "• QMR: Date shows when core set was last altered (includes any update)",
-      "  Email not available - stored only in Cognito, not linked to submission records"
-    ]
+      "  Email not available - stored only in Cognito, not linked to submission records",
+    ],
   };
 
   const appNotes = notes[result.name];
