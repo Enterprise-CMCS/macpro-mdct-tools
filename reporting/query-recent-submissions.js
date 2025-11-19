@@ -1,27 +1,27 @@
 /**
- * Query recent submissions/certifications for MDCT applications.
+ * Query recent submissions for MDCT applications.
  *
- * Usage: node query-recent-submissions.js <application> <environment>
- * Example: node query-recent-submissions.js mcr production
+ * Usage: node query-recent-submissions.js <application> <environment> <output-file>
+ * Example: node query-recent-submissions.js mcr production output.csv
  */
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, paginateScan } from "@aws-sdk/lib-dynamodb";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { writeFile } from "fs/promises";
 import { getApplicationsConfig } from "./applicationsConfig.js";
 
 const VALID_APPS = ["mcr", "mfp", "hcbs", "carts", "seds", "qmr"];
 const DAYS_TO_QUERY = 30;
 const AWS_REGION = "us-east-1";
-const TABLE_WIDTH = 120;
 
 const authTableCache = new Map();
 
-const [application, environment] = process.argv.slice(2);
+const [application, environment, outputFile] = process.argv.slice(2);
 
 function validateArgs() {
   const usage =
-    "Usage: node query-recent-submissions.js <application> <environment>";
+    "Usage: node query-recent-submissions.js <application> <environment> <output-file>";
 
   if (!application) {
     console.error(
@@ -45,6 +45,11 @@ function validateArgs() {
     console.error(`\nError: Environment parameter is required\n${usage}\n`);
     process.exit(1);
   }
+
+  if (!outputFile) {
+    console.error(`\nError: Output file parameter is required\n${usage}\n`);
+    process.exit(1);
+  }
 }
 
 validateArgs();
@@ -55,7 +60,7 @@ const sinceTimestamp = sinceDate.getTime();
 console.log(
   `\nQuerying ${application} ${environment} for submissions since ${
     sinceDate.toISOString().split("T")[0]
-  } (${DAYS_TO_QUERY} days)`
+  } (last ${DAYS_TO_QUERY} days)`
 );
 
 const appConfig = getApplicationsConfig(environment)[application];
@@ -109,7 +114,7 @@ async function loadAuthTableCache(tableName) {
 
 async function getUserEmailFromAuthTable(tableName, username) {
   if (!username || username === "N/A") return "N/A";
-  if (username.includes("@")) return username;
+  if (username.includes("@")) return username; // Already an email
 
   await loadAuthTableCache(tableName);
   return authTableCache.get(tableName)?.get(username) || "N/A (user not found)";
@@ -272,104 +277,59 @@ async function queryApplication(app) {
     };
     results.totalSubmissions += formattedSubmissions.length;
 
-    console.log(`Found ${formattedSubmissions.length} submission(s)`);
+    console.log(
+      `Found ${formattedSubmissions.length} ${reportType.type} submission(s)`
+    );
   }
 
   return results;
 }
 
-function printResults(result) {
-  const divider = "=".repeat(TABLE_WIDTH);
-  const rowDivider = "─".repeat(TABLE_WIDTH - 4);
+function escapeCSV(value) {
+  if (value == null) return "";
+  const str = String(value);
+  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
+    return `"${str.replace(/"/g, '""')}"`;
+  }
+  return str;
+}
 
-  console.log(`\n${divider}`);
-  console.log("SUBMISSION/CERTIFICATION SUMMARY");
-  console.log(`${divider}\n`);
+async function writeCSV(result, filePath) {
+  const lines = [];
 
-  console.log(`${result.name} Application:`);
-  console.log(`Total: ${result.totalSubmissions}`);
+  lines.push(
+    "Application,Report Type,State,Report Name,Submission Date,Submitted By,Submitter Email,Notes"
+  );
 
-  if (result.totalSubmissions > 0) {
-    for (const [reportType, data] of Object.entries(result.byReportType)) {
-      if (data.count > 0) {
-        console.log(`\n${reportType} (${data.count} submission(s)):`);
-        console.log(rowDivider);
-        console.log(
-          `${"State".padEnd(8)} ${"Report Type".padEnd(
-            15
-          )} ${"Report Name".padEnd(35)} ${"Date".padEnd(
-            12
-          )} ${"Submitter".padEnd(25)} ${"Email".padEnd(20)}`
-        );
-        console.log(rowDivider);
-
-        for (const submission of data.submissions) {
-          const reportName =
-            submission.reportName.length > 34
-              ? submission.reportName.substring(0, 31) + "..."
-              : submission.reportName;
-          const submitter =
-            submission.submittedBy.length > 24
-              ? submission.submittedBy.substring(0, 21) + "..."
-              : submission.submittedBy;
-          const email =
-            submission.submitterEmail.length > 19
-              ? submission.submitterEmail.substring(0, 16) + "..."
-              : submission.submitterEmail;
-
-          console.log(
-            `${submission.state.padEnd(8)} ${submission.reportType.padEnd(
-              15
-            )} ${reportName.padEnd(35)} ${submission.submissionDate.padEnd(
-              12
-            )} ${submitter.padEnd(25)} ${email.padEnd(20)}`
-          );
-        }
-      }
+  for (const [reportType, data] of Object.entries(result.byReportType)) {
+    for (const submission of data.submissions) {
+      const row = [
+        submission.application,
+        submission.reportType,
+        submission.state,
+        submission.reportName,
+        submission.submissionDate,
+        submission.submittedBy,
+        submission.submitterEmail || "",
+        submission.notes || "",
+      ]
+        .map(escapeCSV)
+        .join(",");
+      lines.push(row);
     }
   }
 
-  console.log(divider);
-  console.log(
-    `Total: ${result.totalSubmissions} submission(s)/certification(s) since ${
-      sinceDate.toISOString().split("T")[0]
-    }`
-  );
-
-  const notes = {
-    MCR: [
-      "• MCR/MFP: Submission dates and emails are stored; emails retrieved from S3",
-    ],
-    MFP: [
-      "• MCR/MFP: Submission dates and emails are stored; emails retrieved from S3",
-    ],
-    HCBS: ["• HCBS: Submission dates and emails are stored in DynamoDB"],
-    SEDS: [
-      "• SEDS: Date shows when certification status changed - Email retrieved from auth-user table",
-    ],
-    CARTS: [
-      "• CARTS: Date shows when status last changed (includes uncertify/recertify)",
-      "  Email not available - stored only in Cognito, not linked to certification records",
-    ],
-    QMR: [
-      "• QMR: Date shows when core set was last altered (includes any update)",
-      "  Email not available - stored only in Cognito, not linked to submission records",
-    ],
-  };
-
-  const appNotes = notes[result.name];
-  if (appNotes) {
-    console.log("\nNOTES:\n" + appNotes.join("\n"));
-  }
-
-  console.log(`${divider}\n`);
+  await writeFile(filePath, lines.join("\n") + "\n", "utf8");
 }
 
 async function main() {
-  console.log(`\nQuerying ${appConfig.name} application`);
+  console.log(`Querying ${appConfig.name} application...`);
   const result = await queryApplication(appConfig);
-  printResults(result);
-  console.log("Query completed\n");
+
+  console.log(`\nWriting CSV to ${outputFile}...`);
+  await writeCSV(result, outputFile);
+
+  console.log(`\nDone! Found ${result.totalSubmissions} total submissions.\n`);
 }
 
 main();
