@@ -61,12 +61,8 @@ while IFS='|' read -r friendly account_id role || [[ -n "$friendly" ]]; do
 
   [[ "$env" == "unknown" ]] && { echo "  Skipping (couldn't determine environment)"; continue; }
 
-  if kion run --account "$account_id" --car "$role" -- \
-     node "$QUERY_SCRIPT" "$app" "$env" "$output_file"; then
-    echo "  -> $output_file"
-  else
-    echo "  Failed" >&2
-  fi
+  kion run --account "$account_id" --car "$role" -- \
+     node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
 done < "$ACCOUNTS_FILE"
 
 echo

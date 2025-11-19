@@ -323,10 +323,15 @@ async function writeCSV(result, filePath) {
 }
 
 async function main() {
-  console.log(`Querying ${appConfig.name} application...`);
+  console.log(`Querying ${appConfig.name} application`);
   const result = await queryApplication(appConfig);
 
-  console.log(`\nWriting CSV to ${outputFile}...`);
+  if (result.totalSubmissions === 0) {
+    console.log(`\nNo submissions found. Skipping file creation.\n`);
+    process.exit(0);
+  }
+
+  console.log(`\nWriting CSV to ${outputFile}`);
   await writeCSV(result, outputFile);
 
   console.log(`\nDone! Found ${result.totalSubmissions} total submissions.\n`);
