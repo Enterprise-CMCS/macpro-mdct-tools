@@ -2,3 +2,4 @@
 scripts/accounts.list
 scripts/unmanaged-resources*.txt
 node_modules
+/reporting/output
