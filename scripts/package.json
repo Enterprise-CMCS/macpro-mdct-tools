@@ -1,6 +1,7 @@
 {
   "name": "scan-resources",
   "version": "1.0.0",
+  "license": "CC0-1.0",
   "type": "module",
   "devDependencies": {
     "@aws-sdk/client-api-gateway": "^3.864.0",
@@ -21,6 +22,6 @@
     "adm-zip": "^0.5.16",
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.3"
   }
 }
