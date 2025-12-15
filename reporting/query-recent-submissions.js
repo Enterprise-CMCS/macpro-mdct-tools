@@ -8,8 +8,13 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, paginateScan } from "@aws-sdk/lib-dynamodb";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { writeFile } from "fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
+import { dirname, basename, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { getApplicationsConfig } from "./applicationsConfig.js";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const OUTPUT_DIR = join(__dirname, "output");
 
 const VALID_APPS = ["mcr", "mfp", "hcbs", "carts", "seds", "qmr"];
 const DAYS_TO_QUERY = 30;
@@ -17,7 +22,9 @@ const AWS_REGION = "us-east-1";
 
 const authTableCache = new Map();
 
-const [application, environment, outputFile] = process.argv.slice(2);
+const [application, environment, outputFileArg] = process.argv.slice(2);
+
+const outputFile = outputFileArg ? join(OUTPUT_DIR, basename(outputFileArg)) : null;
 
 function validateArgs() {
   const usage =
@@ -46,7 +53,7 @@ function validateArgs() {
     process.exit(1);
   }
 
-  if (!outputFile) {
+  if (!outputFileArg) {
     console.error(`\nError: Output file parameter is required\n${usage}\n`);
     process.exit(1);
   }
@@ -330,6 +337,8 @@ async function main() {
     console.log(`\nNo submissions found. Skipping file creation.\n`);
     process.exit(0);
   }
+
+  await mkdir(OUTPUT_DIR, { recursive: true });
 
   console.log(`\nWriting CSV to ${outputFile}`);
   await writeCSV(result, outputFile);
