@@ -20,12 +20,45 @@ import {
   APIGatewayClient,
   GetStagesCommand,
 } from "@aws-sdk/client-api-gateway";
+import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
+import { IAMClient, ListAccountAliasesCommand } from "@aws-sdk/client-iam";
 
 const apigw = new APIGatewayClient({ region: "us-east-1" });
 
+let outputFile = "unmanaged-resources.txt";
+
 function log(line: string = "") {
   console.log(line);
-  fs.appendFileSync("unmanaged-resources.txt", line + "\n");
+  fs.appendFileSync(outputFile, line + "\n");
+}
+
+async function getAccountIdentifier(): Promise<string> {
+  const iam = new IAMClient({});
+  let alias: string | undefined;
+  const accountId = await getAccountId();
+  try {
+    const aliasResp = await iam.send(new ListAccountAliasesCommand({}));
+    if (aliasResp.AccountAliases && aliasResp.AccountAliases.length > 0) {
+      alias = aliasResp.AccountAliases[0];
+    }
+  } catch {
+    // ignore
+  }
+
+  return (alias || accountId || "unknown-account").replace(
+    /[^a-zA-Z0-9-_]/g,
+    "_"
+  );
+}
+
+async function getAccountId(): Promise<string | undefined> {
+  try {
+    const sts = new STSClient({});
+    const idResp = await sts.send(new GetCallerIdentityCommand({}));
+    return idResp.Account;
+  } catch {
+    return undefined;
+  }
 }
 
 function header(
@@ -58,10 +91,14 @@ async function checkGeneric(
   all: string[],
   cfManaged: string[],
   additionalExcludes?: { [key: string]: number },
-  additionalExactExcludes?: { [key: string]: number }
+  additionalExactExcludes?: { [key: string]: number },
+  additionalContainsExcludes?: { [key: string]: number }
 ) {
   const excludePrefixes: string[] = Object.keys(additionalExcludes ?? {});
   const excludeExact: string[] = Object.keys(additionalExactExcludes ?? {});
+  const excludeContains: string[] = Object.keys(
+    additionalContainsExcludes ?? {}
+  );
 
   let managedCount = 0;
   const unmanaged: string[] = [];
@@ -79,7 +116,11 @@ async function checkGeneric(
     const excludedByExact =
       excludeExact.length > 0 && excludeExact.includes(id);
 
-    if (!(excludedByPrefix || excludedByExact)) {
+    const excludedByContains =
+      excludeContains.length > 0 &&
+      excludeContains.some((s) => (s ? id.includes(s) : false));
+
+    if (!(excludedByPrefix || excludedByExact || excludedByContains)) {
       unmanaged.push(id);
     }
   }
@@ -87,6 +128,7 @@ async function checkGeneric(
   const combinedCounts = {
     ...(additionalExcludes ?? {}),
     ...(additionalExactExcludes ?? {}),
+    ...(additionalContainsExcludes ?? {}),
   };
 
   header(label, all.length, managedCount, combinedCounts);
@@ -111,7 +153,11 @@ async function apiGatewayLogGroups(getArray: (k: string) => string[]) {
 }
 
 async function main() {
-  fs.writeFileSync("unmanaged-resources.txt", "");
+  const accountIdent = await getAccountIdentifier();
+  const accountId = await getAccountId();
+  outputFile = `unmanaged-resources-${accountIdent}.txt`;
+  fs.writeFileSync(outputFile, "");
+  console.log(`Writing scan results to ${outputFile}`);
 
   const cf = await getSelectedCfResourceIds();
   const getArray = (k: string) => cf[k] || [];
@@ -146,10 +192,23 @@ async function main() {
     getArray("AWS::CloudFront::OriginAccessControl")
   );
 
+  const allS3Buckets = await getAllS3Buckets();
+  const s3SubstringExcludes: string[] = [
+    "prod",
+    "us-west-2",
+    ...(accountId ? [accountId] : []),
+  ];
+  const s3ContainsCounts: { [k: string]: number } = {};
+  for (const sub of s3SubstringExcludes) {
+    s3ContainsCounts[sub] = allS3Buckets.filter((b) => b.includes(sub)).length;
+  }
   await checkGeneric(
     "S3 Buckets",
-    await getAllS3Buckets(),
-    getArray("AWS::S3::Bucket")
+    allS3Buckets,
+    getArray("AWS::S3::Bucket"),
+    undefined,
+    undefined,
+    s3ContainsCounts
   );
 
   const allLogGroups = await getAllLogGroups();
@@ -164,11 +223,16 @@ async function main() {
     "/aws/rds",
     "/aws/lambda/CMS-Cloud",
     "/aws/lambda/cms-cloud",
+    "/aws/lambda/NewRelicInfrastructure-Integrations-LambdaFunction",
   ];
   const logGroupExactExcludes = [
     "/aws/ssm/CMS-Cloud-Security-RunInspec",
     "amazon-ssm-agent.log",
     "cms-cloud-vpc-querylogs",
+    "/aws/apigateway/welcome",
+    "/aws/lambda/CF-Custom-Resource-SSM-Association",
+    "/aws/lambda/CMS-Custom-Resource-Placeholder-Document",
+    "/aws/lambda/ITOPS-Security-Attach-Inspector-to-SNS",
   ];
 
   const cwAdditionalExcludePrefixes: { [k: string]: number } = {};
@@ -274,7 +338,7 @@ async function main() {
     eventRulesAdditionalExcludes
   );
 
-  console.log("Scan complete. See unmanaged-resources.txt");
+  console.log(`Scan complete. See ${outputFile}`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
