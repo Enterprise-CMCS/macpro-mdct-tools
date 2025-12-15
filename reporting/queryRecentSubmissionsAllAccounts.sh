@@ -35,7 +35,7 @@ get_app_and_env() {
 mkdir -p "$OUTPUT_DIR"
 
 echo "Querying submissions across MDCT accounts"
-echo "Output: $OUTPUT_DIR"
+echo "Results will be saved to: $OUTPUT_DIR"
 echo
 
 while IFS='|' read -r friendly account_id role || [[ -n "$friendly" ]]; do
@@ -50,23 +50,19 @@ while IFS='|' read -r friendly account_id role || [[ -n "$friendly" ]]; do
   safe_name="${safe_name:gs/mdcthcbs/mdct-hcbs}"
   
   if [[ "$safe_name" == *"$app"* ]]; then
-    output_file="${OUTPUT_DIR}/${safe_name}.txt"
+    output_file="${OUTPUT_DIR}/${safe_name}.csv"
   else
     env_suffix="${env//production/prod}"
     env_suffix="${env_suffix//main/dev}"
-    output_file="${OUTPUT_DIR}/mdct-${app}-${env_suffix}.txt"
+    output_file="${OUTPUT_DIR}/mdct-${app}-${env_suffix}.csv"
   fi
 
   echo "Processing: $friendly ($app/$env)"
 
-  [[ "$env" == "unknown" ]] && { echo "  Skipping - unknown environment"; continue; }
+  [[ "$env" == "unknown" ]] && { echo "  Skipping (couldn't determine environment)"; continue; }
 
-  if kion run --account "$account_id" --car "$role" -- \
-     node "$QUERY_SCRIPT" "$app" "$env" > "$output_file" 2>&1; then
-    echo "  -> $output_file"
-  else
-    echo "  Failed (see $output_file for errors)" >&2
-  fi
+  kion run --account "$account_id" --car "$role" -- \
+     node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
 done < "$ACCOUNTS_FILE"
 
 echo
