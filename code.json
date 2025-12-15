@@ -23,7 +23,7 @@
   "disclaimerURL": "",
   "disclaimerText": "",
   "vcs": "git",
-  "laborHours": 3206,
+  "laborHours": 3551,
   "reuseFrequency": {
     "forks": 0,
     "clones": 0
@@ -39,18 +39,21 @@
   "softwareType": "addon",
   "languages": [
     "TypeScript",
-    "Shell"
+    "Shell",
+    "JavaScript"
   ],
   "maintenance": "contract",
-  "contractNumber": "75FCMC24F0027",
+  "contractNumber": [
+    "75FCMC24F0027"
+  ],
   "SBOM": "https://github.com/Enterprise-CMCS/macpro-mdct-tools/network/dependencies",
   "relatedCode": [],
   "reusedCode": [],
   "partners": [],
   "date": {
     "created": "2024-02-28T18:33:14Z",
-    "lastModified": "2025-09-15T15:45:06Z",
-    "metaDataLastUpdated": "2025-10-01T00:24:40.010Z"
+    "lastModified": "2025-11-19T16:24:58Z",
+    "metadataLastUpdated": "2025-12-01T00:28:20.603Z"
   },
   "tags": [
     "mdct"
@@ -76,10 +79,5 @@
   "userType": [
     "Government"
   ],
-  "maturityModelTier": 3,
-  "projectURL": "",
-  "feedbackMechanisms": [
-    "https://github.com/Enterprise-CMCS/macpro-mdct-tools/issues"
-  ],
-  "upstream": "https://github.com/Enterprise-CMCS/macpro-mdct-tools/network/dependencies"
+  "maturityModelTier": 3
 }
