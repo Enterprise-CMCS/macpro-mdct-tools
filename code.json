@@ -1,5 +1,6 @@
 {
   "name": "macpro-mdct-tools",
+  "version": "",
   "description": "mdct-tools is a CMCS MDCT repo for code-based tooling and scripts used by the MDCT application development team.",
   "longDescription": "Tools for MDCT developers",
   "status": "Development",
@@ -15,13 +16,17 @@
   },
   "organization": "Centers for Medicare & Medicaid Services",
   "repositoryURL": "https://github.com/Enterprise-CMCS/macpro-mdct-tools",
-  "projectURL": "",
   "repositoryHost": "github.com/Enterprise-CMCS",
   "repositoryVisibility": "public",
+  "homepageURL": "",
+  "downloadURL": "",
+  "disclaimerURL": "",
+  "disclaimerText": "",
   "vcs": "git",
-  "laborHours": 2432,
+  "laborHours": 3551,
   "reuseFrequency": {
-    "forks": 0
+    "forks": 0,
+    "clones": 0
   },
   "platforms": [
     "other"
@@ -33,14 +38,22 @@
   ],
   "softwareType": "addon",
   "languages": [
-    "Shell"
+    "TypeScript",
+    "Shell",
+    "JavaScript"
   ],
   "maintenance": "contract",
-  "contractNumber": "75FCMC24F0027",
+  "contractNumber": [
+    "75FCMC24F0027"
+  ],
+  "SBOM": "https://github.com/Enterprise-CMCS/macpro-mdct-tools/network/dependencies",
+  "relatedCode": [],
+  "reusedCode": [],
+  "partners": [],
   "date": {
     "created": "2024-02-28T18:33:14Z",
-    "lastModified": "2025-07-29T14:13:35Z",
-    "metaDataLastUpdated": "2025-08-01T00:27:25.131Z"
+    "lastModified": "2025-11-19T16:24:58Z",
+    "metadataLastUpdated": "2025-12-01T00:28:20.603Z"
   },
   "tags": [
     "mdct"
@@ -49,9 +62,8 @@
     "email": "brendan.myers@coforma.com",
     "name": "Brendan Myers"
   },
-  "feedbackMechanisms": [
-    "https://github.com/Enterprise-CMCS/macpro-mdct-tools/issues"
-  ],
+  "feedbackMechanism": "https://github.com/Enterprise-CMCS/macpro-mdct-tools/issues",
+  "AIUseCaseID": "0",
   "localisation": false,
   "repositoryType": "tools",
   "userInput": false,
@@ -61,7 +73,6 @@
     "MDCT"
   ],
   "systems": [],
-  "upstream": "https://github.com/Enterprise-CMCS/macpro-mdct-tools/network/dependencies",
   "subsetInHealthcare": [
     "Medicaid"
   ],

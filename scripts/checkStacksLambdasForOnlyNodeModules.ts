@@ -5,7 +5,7 @@ import {
 } from "@aws-sdk/client-cloudformation";
 import { LambdaClient, GetFunctionCommand } from "@aws-sdk/client-lambda";
 import AdmZip from "adm-zip";
-import { prompt } from "./utils.ts";
+import { prompt } from "./utils.js";
 
 const REGION = "us-east-1";
 const STACK_NAME = await prompt("Enter STACK NAME: ");
@@ -43,12 +43,14 @@ function isOnlyNodeModules(zipBuf: Buffer): boolean {
   return topLevel.size === 1 && topLevel.has("node_modules");
 }
 
-async function checkLambdaFunction(functionId: string): Promise<{
+interface CheckResult {
   id: string;
   onlyNodeModules: boolean;
   ignored?: string;
   error?: string;
-}> {
+}
+
+async function checkLambdaFunction(functionId: string): Promise<CheckResult> {
   try {
     const r = await lambda.send(
       new GetFunctionCommand({ FunctionName: functionId })
@@ -73,11 +75,12 @@ async function checkLambdaFunction(functionId: string): Promise<{
     const buf = Buffer.from(await resp.arrayBuffer());
     const bad = isOnlyNodeModules(buf);
     return { id: functionId, onlyNodeModules: bad };
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
     return {
       id: functionId,
       onlyNodeModules: false,
-      error: e.message || String(e),
+      error: message,
     };
   }
 }

@@ -5,13 +5,13 @@ on:
   schedule:
     - cron: "0 10 * * SUN"
   push:
-      branches:
-        - "main"
-        - "!skipci*"
+    branches:
+      - "main"
+      - "!skipci*"
 
 jobs:
   test:
-    runs-on: macos-12
+    runs-on: macos-26
     timeout-minutes: 120
     environment:
       name: test-ws-setup
@@ -38,7 +38,7 @@ jobs:
   notify_on_failure:
     runs-on: ubuntu-latest
     if: failure()
-    needs: 
+    needs:
       - test
     steps:
       - name: Slack Notification
