@@ -401,8 +401,8 @@ for url in "${repo_urls[@]}"; do
         rm -rf services/ui-src/node_modules
     fi
 
-    # Run yarn in /services/ui-src/ directory
-    if [ -d "services/ui-src/node_modules" ]; then
+    # Run yarn in /services/ui-src/ directory if package.json exists
+    if [ -f "services/ui-src/package.json" ]; then
       echo "Running yarn in /services/ui-src/ directory..."
       (cd services/ui-src/ && yarn)
     fi
@@ -413,8 +413,8 @@ for url in "${repo_urls[@]}"; do
         rm -rf services/app-api/node_modules
     fi
 
-    # Run yarn in /services/app-api/ directory
-    if [ -d "services/app-api/node_modules" ]; then
+    # Run yarn in /services/app-api/ directory if package.json exists
+    if [ -f "services/app-api/package.json" ]; then
       echo "Running yarn in /services/app-api/ directory..."
       (cd services/app-api/ && yarn)
     fi
@@ -425,8 +425,8 @@ for url in "${repo_urls[@]}"; do
         rm -rf services/database/node_modules
     fi
 
-    # Run yarn in /services/app-api/ directory
-    if [ -d "services/database/node_modules" ]; then
+    # Run yarn in /services/database/ directory if package.json exists
+    if [ -f "services/database/package.json" ]; then
       echo "Running yarn in /services/database/ directory..."
       (cd services/database/ && yarn)
     fi
@@ -437,8 +437,8 @@ for url in "${repo_urls[@]}"; do
         rm -rf services/ui/node_modules
     fi
 
-    # Run yarn in /services/app-api/ directory
-    if [ -d "services/ui/node_modules" ]; then
+    # Run yarn in /services/ui/ directory if package.json exists
+    if [ -f "services/ui/package.json" ]; then
       echo "Running yarn in /services/ui/ directory..."
       (cd services/ui/ && yarn)
     fi
@@ -449,8 +449,8 @@ for url in "${repo_urls[@]}"; do
         rm -rf services/ui-auth/node_modules
     fi
 
-    # Run yarn in /services/app-api/ directory
-    if [ -d "services/ui-auth/node_modules" ]; then
+    # Run yarn in /services/ui-auth/ directory if package.json exists
+    if [ -f "services/ui-auth/package.json" ]; then
       echo "Running yarn in /services/ui-auth/ directory..."
       (cd services/ui-auth/ && yarn)
     fi
@@ -461,8 +461,8 @@ for url in "${repo_urls[@]}"; do
         rm -rf services/uploads/node_modules
     fi
 
-    # Run yarn in /services/app-api/ directory
-    if [ -d "services/uploads/node_modules" ]; then
+    # Run yarn in /services/uploads/ directory if package.json exists
+    if [ -f "services/uploads/package.json" ]; then
       echo "Running yarn in /services/uploads/ directory..."
       (cd services/uploads/ && yarn)
     fi
