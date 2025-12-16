@@ -35,3 +35,36 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: "main"
+
+      - name: Get GitHub App token
+        id: app-token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.GH_APP_ID }}
+          private_key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+
+      - name: Find and auto-merge code.json PR
+        run: |
+          # Find the most recent open PR from github-actions[bot] with codejson label
+          PR_NUMBER=$(gh pr list --author "github-actions[bot]" --label "codejson-initialized" --state open --json number --jq '.[0].number')
+
+          if [ -z "$PR_NUMBER" ]; then
+            echo "No matching PR found, skipping auto-merge"
+            exit 0
+          fi
+
+          echo "Found PR #$PR_NUMBER"
+
+          # Verify only code.json is changed
+          FILES=$(gh pr view "$PR_NUMBER" --json files --jq '.files[].path')
+          if [ "$FILES" != "code.json" ]; then
+            echo "PR modifies files other than code.json:"
+            echo "$FILES"
+            exit 1
+          fi
+
+          # Approve and enable auto-merge
+          gh pr review "$PR_NUMBER" --approve
+          gh pr merge "$PR_NUMBER" --auto --squash
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
