@@ -225,6 +225,7 @@ async function main() {
     "/aws/lambda/cms-cloud",
     "/aws/lambda/NewRelicInfrastructure-Integrations-LambdaFunction",
   ];
+
   const logGroupExactExcludes = [
     "/aws/ssm/CMS-Cloud-Security-RunInspec",
     "amazon-ssm-agent.log",
@@ -322,6 +323,10 @@ async function main() {
     "billing-alerts",
     "health-events",
     "custodian",
+    "DO-NOT-DELETE",
+    "CMS-Cloud",
+    "cms-cloud",
+    "Tenable",
   ];
 
   const eventRulesAdditionalExcludes: { [k: string]: number } = {};
