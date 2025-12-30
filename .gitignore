@@ -3,12 +3,4 @@ scripts/accounts.list
 scripts/unmanaged-resources*.txt
 node_modules
 /reporting/output
-
-# Yarn 4
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-.pnp.*
+**/.yarn/*
