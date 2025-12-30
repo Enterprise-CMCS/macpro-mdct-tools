@@ -24,7 +24,9 @@ const authTableCache = new Map();
 
 const [application, environment, outputFileArg] = process.argv.slice(2);
 
-const outputFile = outputFileArg ? join(OUTPUT_DIR, basename(outputFileArg)) : null;
+const outputFile = outputFileArg
+  ? join(OUTPUT_DIR, basename(outputFileArg))
+  : null;
 
 function validateArgs() {
   const usage =
@@ -308,7 +310,7 @@ async function writeCSV(result, filePath) {
     "Application,Report Type,State,Report Name,Submission Date,Submitted By,Submitter Email,Notes"
   );
 
-  for (const [reportType, data] of Object.entries(result.byReportType)) {
+  for (const [, data] of Object.entries(result.byReportType)) {
     for (const submission of data.submissions) {
       const row = [
         submission.application,
