@@ -1,6 +1,7 @@
 {
   "name": "scan-resources",
   "version": "1.0.0",
+  "packageManager": "yarn@4.12.0",
   "license": "CC0-1.0",
   "type": "module",
   "devDependencies": {

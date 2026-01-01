@@ -147,7 +147,7 @@ async function apiGatewayLogGroups(getArray: (k: string) => string[]) {
           `API-Gateway-Execution-Logs_${restApiId}/${s.stageName}`
         );
       }
-    } catch {}
+    } catch {} // eslint-disable-line no-empty
   }
   return apiGatewayLogGroups;
 }
