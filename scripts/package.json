@@ -18,6 +18,7 @@
     "@aws-sdk/client-s3": "^3.864.0",
     "@aws-sdk/client-sts": "^3.864.0",
     "@aws-sdk/client-wafv2": "^3.864.0",
+    "@octokit/rest": "^22.0.1",
     "@types/adm-zip": "^0.5.7",
     "@types/node": "^24.0.12",
     "adm-zip": "^0.5.16",

@@ -9,16 +9,16 @@ import {
 
 const client = new CloudFormationClient({ region: "us-east-1" });
 
-async function getAllStacks(): Promise<StackSummary[]> {
+export async function getAllStacks(): Promise<StackSummary[]> {
   const stacks: StackSummary[] = [];
 
   for await (const page of paginateListStacks(
     { client },
     {
       StackStatusFilter: Object.values(StackStatus).filter(
-        (s) => s !== StackStatus.DELETE_COMPLETE
+        (s) => s !== StackStatus.DELETE_COMPLETE,
       ),
-    }
+    },
   )) {
     stacks.push(...page.StackSummaries!);
   }
@@ -57,7 +57,7 @@ export async function getSelectedCfResourceIds(): Promise<
 
     for await (const page of paginateListStackResources(
       { client },
-      { StackName: stackName }
+      { StackName: stackName },
     )) {
       for (const r of page.StackResourceSummaries!) {
         const type = r.ResourceType;

@@ -1,7 +1,10 @@
 #!/usr/bin/env -S tsx
-import fs from "fs";
+import fs from "node:fs";
 import { getAllRestApis } from "./scanResourcesComponents/apiGateway";
-import { getSelectedCfResourceIds } from "./scanResourcesComponents/cloudFormation";
+import {
+  getSelectedCfResourceIds,
+  getDeleteFailedStacks,
+} from "./scanResourcesComponents/cloudFormation";
 import { getAllDistributions } from "./scanResourcesComponents/cloudFrontDistribution";
 import { getAllS3Buckets } from "./scanResourcesComponents/s3Buckets";
 import { getAllCustomResponseHeadersPolicies } from "./scanResourcesComponents/cloudFrontResponseHeadersPolicy";
@@ -16,12 +19,13 @@ import { getAllUserPools } from "./scanResourcesComponents/cognitoUserPool";
 import { getAllIdentityPools } from "./scanResourcesComponents/cognitoIdentityPool";
 import { getAllWafv2WebACLsCfnIds } from "./scanResourcesComponents/wafWebACL";
 import { getAllEventRules } from "./scanResourcesComponents/eventsRule";
+import { getAllKmsKeys } from "./scanResourcesComponents/kmsKey";
+import { getAllSecurityGroups } from "./scanResourcesComponents/securityGroup";
 import {
   APIGatewayClient,
   GetStagesCommand,
 } from "@aws-sdk/client-api-gateway";
-import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
-import { IAMClient, ListAccountAliasesCommand } from "@aws-sdk/client-iam";
+import { getAccountIdentifier, getAccountId } from "./utils";
 
 const apigw = new APIGatewayClient({ region: "us-east-1" });
 
@@ -32,32 +36,6 @@ function log(line: string = "") {
   fs.appendFileSync(outputFile, line + "\n");
 }
 
-async function getAccountIdentifier(): Promise<string> {
-  const iam = new IAMClient({});
-  let alias: string | undefined;
-  const accountId = await getAccountId();
-  try {
-    const aliasResp = await iam.send(new ListAccountAliasesCommand({}));
-    if (aliasResp.AccountAliases && aliasResp.AccountAliases.length > 0) {
-      alias = aliasResp.AccountAliases[0];
-    }
-  } catch {
-    // ignore
-  }
-
-  return (alias || accountId || "unknown-account").replace(
-    /[^a-zA-Z0-9-_]/g,
-    "_"
-  );
-}
-
-async function getAccountId(): Promise<string | undefined> {
-  try {
-    const sts = new STSClient({});
-    const idResp = await sts.send(new GetCallerIdentityCommand({}));
-    return idResp.Account;
-  } catch {
-    return undefined;
   }
 }
 
@@ -65,7 +43,7 @@ function header(
   label: string,
   total: number,
   managed: number,
-  additionalExcludes?: { [key: string]: number }
+  additionalExcludes?: { [key: string]: number },
 ) {
   log(`${label} (total: ${total})`);
   log(`Managed by CloudFormation: ${managed}`);
@@ -92,12 +70,12 @@ async function checkGeneric(
   cfManaged: string[],
   additionalExcludes?: { [key: string]: number },
   additionalExactExcludes?: { [key: string]: number },
-  additionalContainsExcludes?: { [key: string]: number }
+  additionalContainsExcludes?: { [key: string]: number },
 ) {
   const excludePrefixes: string[] = Object.keys(additionalExcludes ?? {});
   const excludeExact: string[] = Object.keys(additionalExactExcludes ?? {});
   const excludeContains: string[] = Object.keys(
-    additionalContainsExcludes ?? {}
+    additionalContainsExcludes ?? {},
   );
 
   let managedCount = 0;
@@ -144,7 +122,7 @@ async function apiGatewayLogGroups(getArray: (k: string) => string[]) {
       for (const s of stages.item!) {
         if (!s.stageName) continue;
         apiGatewayLogGroups.push(
-          `API-Gateway-Execution-Logs_${restApiId}/${s.stageName}`
+          `API-Gateway-Execution-Logs_${restApiId}/${s.stageName}`,
         );
       }
     } catch {} // eslint-disable-line no-empty
@@ -159,37 +137,50 @@ async function main() {
   fs.writeFileSync(outputFile, "");
   console.log(`Writing scan results to ${outputFile}`);
 
+  const deleteFailedStacks = await getDeleteFailedStacks();
+  if (deleteFailedStacks.length > 0) {
+    log("CloudFormation Stacks in DELETE_FAILED State");
+    log(`Found ${deleteFailedStacks.length} stack(s) in DELETE_FAILED state:`);
+    for (const stackName of deleteFailedStacks) {
+      log(`❌ ${stackName}`);
+    }
+    log();
+  } else {
+    log("CloudFormation Stacks in DELETE_FAILED State");
+    log("✅ No stacks in DELETE_FAILED state.\n");
+  }
+
   const cf = await getSelectedCfResourceIds();
   const getArray = (k: string) => cf[k] || [];
 
   await checkGeneric(
     "API Gateway REST APIs",
     await getAllRestApis(),
-    getArray("AWS::ApiGateway::RestApi")
+    getArray("AWS::ApiGateway::RestApi"),
   );
 
   await checkGeneric(
     "CloudFront Distributions",
     await getAllDistributions(),
-    getArray("AWS::CloudFront::Distribution")
+    getArray("AWS::CloudFront::Distribution"),
   );
 
   await checkGeneric(
     "CloudFront Custom Response Headers Policies",
     await getAllCustomResponseHeadersPolicies(),
-    getArray("AWS::CloudFront::ResponseHeadersPolicy")
+    getArray("AWS::CloudFront::ResponseHeadersPolicy"),
   );
 
   await checkGeneric(
     "CloudFront Custom Cache Policies",
     await getAllCustomCachePolicies(),
-    getArray("AWS::CloudFront::CachePolicy")
+    getArray("AWS::CloudFront::CachePolicy"),
   );
 
   await checkGeneric(
     "CloudFront Origin Access Controls",
     await getAllOriginAccessControls(),
-    getArray("AWS::CloudFront::OriginAccessControl")
+    getArray("AWS::CloudFront::OriginAccessControl"),
   );
 
   const allS3Buckets = await getAllS3Buckets();
@@ -208,7 +199,7 @@ async function main() {
     getArray("AWS::S3::Bucket"),
     undefined,
     undefined,
-    s3ContainsCounts
+    s3ContainsCounts,
   );
 
   const allLogGroups = await getAllLogGroups();
@@ -239,14 +230,14 @@ async function main() {
   const cwAdditionalExcludePrefixes: { [k: string]: number } = {};
   for (const prefix of logGroupExcludedPrefixes) {
     cwAdditionalExcludePrefixes[prefix] = allLogGroups.filter((n) =>
-      n.startsWith(prefix)
+      n.startsWith(prefix),
     ).length;
   }
 
   const cwAdditionalExactExcludes: { [k: string]: number } = {};
   for (const exact of logGroupExactExcludes) {
     cwAdditionalExactExcludes[exact] = allLogGroups.filter(
-      (n) => n === exact
+      (n) => n === exact,
     ).length;
   }
 
@@ -255,49 +246,49 @@ async function main() {
     allLogGroups,
     treatedAsManagedLogGroups,
     cwAdditionalExcludePrefixes,
-    cwAdditionalExactExcludes
+    cwAdditionalExactExcludes,
   );
 
   await checkGeneric(
     "Lambda Functions",
     await getAllLambdaFunctions(),
-    getArray("AWS::Lambda::Function")
+    getArray("AWS::Lambda::Function"),
   );
 
   await checkGeneric(
     "Lambda LayerVersions",
     await getAllLayerVersionArns(),
-    getArray("AWS::Lambda::LayerVersion")
+    getArray("AWS::Lambda::LayerVersion"),
   );
 
   await checkGeneric(
     "DynamoDB Tables",
     await getAllTableNames(),
-    getArray("AWS::DynamoDB::Table")
+    getArray("AWS::DynamoDB::Table"),
   );
 
   const allIamRoles = await getAllIamRoles();
   log("All IAM Roles: " + allIamRoles.length);
   const projectRolePattern = /^(seds|qmr|mcr|mfp|hcbs|carts)/i;
   const projectIamRoles = allIamRoles.filter((name) =>
-    projectRolePattern.test(name)
+    projectRolePattern.test(name),
   );
   await checkGeneric(
     "IAM Roles (project-scoped, excluding service-linked)",
     projectIamRoles,
-    getArray("AWS::IAM::Role")
+    getArray("AWS::IAM::Role"),
   );
 
   await checkGeneric(
     "Cognito User Pools",
     await getAllUserPools(),
-    getArray("AWS::Cognito::UserPool")
+    getArray("AWS::Cognito::UserPool"),
   );
 
   await checkGeneric(
     "Cognito Identity Pools",
     await getAllIdentityPools(),
-    getArray("AWS::Cognito::IdentityPool")
+    getArray("AWS::Cognito::IdentityPool"),
   );
 
   const allWebAcls = await getAllWafv2WebACLsCfnIds();
@@ -306,7 +297,7 @@ async function main() {
   const wafAdditionalExcludes: { [k: string]: number } = {};
   for (const prefix of webAclExcludedPrefixes) {
     wafAdditionalExcludes[prefix] = allWebAcls.filter((a) =>
-      a.startsWith(prefix)
+      a.startsWith(prefix),
     ).length;
   }
 
@@ -314,7 +305,7 @@ async function main() {
     "WAFv2 WebACLs (REGIONAL & CLOUDFRONT)",
     allWebAcls,
     getArray("AWS::WAFv2::WebACL"),
-    wafAdditionalExcludes
+    wafAdditionalExcludes,
   );
 
   const allEventRules = await getAllEventRules();
@@ -332,7 +323,7 @@ async function main() {
   const eventRulesAdditionalExcludes: { [k: string]: number } = {};
   for (const prefix of eventRulesExcludedPrefixes) {
     eventRulesAdditionalExcludes[prefix] = allEventRules.filter((a) =>
-      a.startsWith(prefix)
+      a.startsWith(prefix),
     ).length;
   }
 
@@ -340,7 +331,19 @@ async function main() {
     "Event Rules",
     allEventRules,
     getArray("AWS::Events::Rule"),
-    eventRulesAdditionalExcludes
+    eventRulesAdditionalExcludes,
+  );
+
+  await checkGeneric(
+    "KMS Keys",
+    await getAllKmsKeys(),
+    getArray("AWS::KMS::Key"),
+  );
+
+  await checkGeneric(
+    "Security Groups",
+    await getAllSecurityGroups(),
+    getArray("AWS::EC2::SecurityGroup"),
   );
 
   console.log(`Scan complete. See ${outputFile}`);
