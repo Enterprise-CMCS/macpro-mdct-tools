@@ -11,7 +11,7 @@ interface StackInfo {
   status: string;
 }
 
-async function getRepoBranches(repoName: string): Promise<string[]> {
+export async function getRepoBranches(repoName: string): Promise<string[]> {
   const token = process.env.GITHUB_TOKEN;
   if (!token) throw new Error("GITHUB_TOKEN not set");
   const octokit = new Octokit({ auth: token });
@@ -34,6 +34,34 @@ async function getRepoBranches(repoName: string): Promise<string[]> {
   }
 
   return branches;
+}
+
+export async function getOrphanedStacks(repoName: string): Promise<StackInfo[]> {
+  const stackSummaries = await getAllStacks();
+  const stacks: StackInfo[] = stackSummaries
+    .filter(
+      (s) =>
+        s.StackName &&
+        s.CreationTime &&
+        s.StackStatus !== StackStatus.DELETE_COMPLETE,
+    )
+    .map((s) => ({
+      name: s.StackName!,
+      creationTime: s.CreationTime!,
+      status: s.StackStatus!,
+    }));
+
+  const branches = await getRepoBranches(repoName);
+  const orphanedStacks = stacks
+    .filter(
+      (stack) =>
+        !branches.some((branch) => stack.name.includes(branch)) &&
+        !/^cms/i.test(stack.name) &&
+        stack.name !== "cbj-delete-snapshot",
+    )
+    .sort((a, b) => a.creationTime.getTime() - b.creationTime.getTime());
+
+  return orphanedStacks;
 }
 
 async function main() {
@@ -64,57 +92,27 @@ async function main() {
   log(`Generated: ${new Date().toISOString()}`);
   log();
 
-  console.log("Fetching CloudFormation stacks...");
-  const stackSummaries = await getAllStacks();
-  const stacks: StackInfo[] = stackSummaries
-    .filter(
-      (s) =>
-        s.StackName &&
-        s.CreationTime &&
-        s.StackStatus !== StackStatus.DELETE_COMPLETE
-    )
-    .map((s) => ({
-      name: s.StackName!,
-      creationTime: s.CreationTime!,
-      status: s.StackStatus!,
-    }));
-  log(`Total stacks found: ${stacks.length}`);
-
-  console.log("Fetching branches from GitHub...");
-  let branches: string[] = [];
+  console.log("Fetching CloudFormation stacks and branches...");
+  let orphanedStacks: StackInfo[] = [];
   try {
-    branches = await getRepoBranches(repoName);
-    log(`Total branches found: ${branches.length}`);
+    orphanedStacks = await getOrphanedStacks(repoName);
   } catch (e: any) {
-    log(`Failed to fetch branches: ${e?.message || e}`);
-    console.error("Failed to fetch branches:", e?.message || e);
+    log(`Failed to fetch orphaned stacks: ${e?.message || e}`);
+    console.error("Failed to fetch orphaned stacks:", e?.message || e);
     process.exit(1);
   }
 
-  log();
-  log("Filtering stacks...");
-  const filteredStacks = stacks
-    .filter(
-      (stack) =>
-        !branches.some((branch) => stack.name.includes(branch)) &&
-        !/^cms/i.test(stack.name) &&
-        stack.name !== "cbj-delete-snapshot"
-    )
-    .sort((a, b) => a.creationTime.getTime() - b.creationTime.getTime());
-
-  log(`Orphaned stacks (no matching branch): ${filteredStacks.length}`);
+  log(`Orphaned stacks (no matching branch): ${orphanedStacks.length}`);
   log();
 
-  if (!filteredStacks.length) {
+  if (!orphanedStacks.length) {
     log("✅ No orphaned stacks found.");
   } else {
     log("❌ Orphaned stacks:");
-    for (const stack of filteredStacks) {
+    for (const stack of orphanedStacks) {
       log(
-        `- ${
-          stack.name
-        } (Created: ${stack.creationTime.toISOString()}, Status: ${
-          stack.status
+        `- ${stack.name
+        } (Created: ${stack.creationTime.toISOString()}, Status: ${stack.status
         })`
       );
     }

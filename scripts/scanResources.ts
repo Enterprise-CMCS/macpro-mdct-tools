@@ -4,6 +4,7 @@ import { getAllRestApis } from "./scanResourcesComponents/apiGateway";
 import {
   getSelectedCfResourceIds,
   getDeleteFailedStacks,
+  getAllStacks,
 } from "./scanResourcesComponents/cloudFormation";
 import { getAllDistributions } from "./scanResourcesComponents/cloudFrontDistribution";
 import { getAllS3Buckets } from "./scanResourcesComponents/s3Buckets";
@@ -26,6 +27,7 @@ import {
   GetStagesCommand,
 } from "@aws-sdk/client-api-gateway";
 import { getAccountIdentifier, getAccountId } from "./utils";
+import { getOrphanedStacks } from "./auditCloudFormationStacksAgainstGitBranches";
 
 const apigw = new APIGatewayClient({ region: "us-east-1" });
 
@@ -34,9 +36,6 @@ let outputFile = "unmanaged-resources.txt";
 function log(line: string = "") {
   console.log(line);
   fs.appendFileSync(outputFile, line + "\n");
-}
-
-  }
 }
 
 function header(
@@ -148,6 +147,57 @@ async function main() {
   } else {
     log("CloudFormation Stacks in DELETE_FAILED State");
     log("✅ No stacks in DELETE_FAILED state.\n");
+  }
+
+  // Check for orphaned stacks (auto-detects in GitHub Actions or uses CLI arg)
+  let repoName = process.argv[2];
+  if (!repoName && process.env.GITHUB_REPOSITORY) {
+    // Extract repo name from GITHUB_REPOSITORY (format: "owner/repo")
+    repoName = process.env.GITHUB_REPOSITORY.split("/")[1];
+  }
+  if (repoName) {
+    log("CloudFormation Orphaned Stacks (No Matching Git Branch)");
+    try {
+      const stackSummaries = await getAllStacks();
+      const stacks = stackSummaries
+        .filter(
+          (s) =>
+            s.StackName &&
+            s.CreationTime &&
+            s.StackStatus !== StackStatus.DELETE_COMPLETE,
+        )
+        .map((s) => ({
+          name: s.StackName!,
+          creationTime: s.CreationTime!,
+          status: s.StackStatus!,
+        }));
+
+      const branches = await getRepoBranches(repoName);
+      const orphanedStacks = stacks
+        .filter(
+          (stack) =>
+            !branches.some((branch) => stack.name.includes(branch)) &&
+            !/^cms/i.test(stack.name) &&
+            stack.name !== "cbj-delete-snapshot",
+        )
+        .sort((a, b) => a.creationTime.getTime() - b.creationTime.getTime());
+
+      if (orphanedStacks.length === 0) {
+        log("✅ No orphaned stacks found.\n");
+      } else {
+        log(
+          `Found ${orphanedStacks.length} orphaned stack(s) (repository: ${repoName}):`,
+        );
+        for (const stack of orphanedStacks) {
+          log(
+            `❌ ${stack.name} (Created: ${stack.creationTime.toISOString()}, Status: ${stack.status})`,
+          );
+        }
+        log();
+      }
+    } catch (e: any) {
+      log(`⚠️  Failed to check orphaned stacks: ${e?.message || e}\n`);
+    }
   }
 
   const cf = await getSelectedCfResourceIds();
