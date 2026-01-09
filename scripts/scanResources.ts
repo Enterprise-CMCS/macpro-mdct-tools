@@ -24,11 +24,7 @@ import {
   GetStagesCommand,
 } from "@aws-sdk/client-api-gateway";
 import { getAccountIdentifier, getAccountId } from "./utils";
-import {
-  getOrphanedStacks,
-  getRepoBranches
-} from "./auditCloudFormationStacksAgainstGitBranches";
-import { StackStatus } from "@aws-sdk/client-cloudformation";
+import { getOrphanedStacks } from "./auditCloudFormationStacksAgainstGitBranches";
 
 const apigw = new APIGatewayClient({ region: "us-east-1" });
 
@@ -225,29 +221,7 @@ async function main() {
   if (repoName) {
     log("CloudFormation Orphaned Stacks (No Matching Git Branch)");
     try {
-      const stackSummaries = await cloudFormation.getAllStacks();
-      const stacks = stackSummaries
-        .filter(
-          (s) =>
-            s.StackName &&
-            s.CreationTime &&
-            s.StackStatus !== StackStatus.DELETE_COMPLETE,
-        )
-        .map((s) => ({
-          name: s.StackName!,
-          creationTime: s.CreationTime!,
-          status: s.StackStatus!,
-        }));
-
-      const branches = await getRepoBranches(repoName);
-      const orphanedStacks = stacks
-        .filter(
-          (stack) =>
-            !branches.some((branch) => stack.name.includes(branch)) &&
-            !/^cms/i.test(stack.name) &&
-            stack.name !== "cbj-delete-snapshot",
-        )
-        .sort((a, b) => a.creationTime.getTime() - b.creationTime.getTime());
+      const orphanedStacks = await getOrphanedStacks(repoName);
 
       if (orphanedStacks.length === 0) {
         log("✅ No orphaned stacks found.\n");
