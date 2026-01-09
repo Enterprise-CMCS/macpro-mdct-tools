@@ -98,7 +98,6 @@ async function main() {
     orphanedStacks = await getOrphanedStacks(repoName);
   } catch (e: any) {
     log(`Failed to fetch orphaned stacks: ${e?.message || e}`);
-    console.error("Failed to fetch orphaned stacks:", e?.message || e);
     process.exit(1);
   }
 
@@ -120,7 +119,6 @@ async function main() {
 
   log();
   log(`Report saved to: ${outputFile}`);
-  console.log(`Report saved to: ${outputFile}`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
