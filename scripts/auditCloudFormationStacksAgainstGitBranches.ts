@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { StackStatus } from "@aws-sdk/client-cloudformation";
 import { Octokit } from "@octokit/rest";
 import { getAccountIdentifier } from "./utils";
-import { getAllStacks } from "./scanResourcesComponents/cloudFormation";
+import cloudFormation from "./scanResourcesComponents/cloudFormation";
 
 interface StackInfo {
   name: string;
@@ -37,7 +37,7 @@ export async function getRepoBranches(repoName: string): Promise<string[]> {
 }
 
 export async function getOrphanedStacks(repoName: string): Promise<StackInfo[]> {
-  const stackSummaries = await getAllStacks();
+  const stackSummaries = await cloudFormation.getAllStacks();
   const stacks: StackInfo[] = stackSummaries
     .filter(
       (s) =>
@@ -123,7 +123,9 @@ async function main() {
   console.log(`Report saved to: ${outputFile}`);
 }
 
-main().catch((e) => {
-  console.error("Unhandled error:", e);
-  process.exit(1);
-});
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((e) => {
+    console.error("Unhandled error:", e);
+    process.exit(1);
+  });
+}

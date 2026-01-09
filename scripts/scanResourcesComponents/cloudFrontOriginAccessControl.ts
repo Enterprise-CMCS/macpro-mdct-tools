@@ -6,7 +6,7 @@ import {
 
 const client = new CloudFrontClient({ region: "us-east-1" });
 
-export async function getAllOriginAccessControls(): Promise<string[]> {
+async function getAllOriginAccessControls(): Promise<string[]> {
   const ids: string[] = [];
 
   for await (const page of paginateListOriginAccessControls({ client }, {})) {
@@ -17,6 +17,14 @@ export async function getAllOriginAccessControls(): Promise<string[]> {
 
   return ids;
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (id) => `aws cloudfront delete-origin-access-control --id ${id}`,
+  );
+}
+
+export default { getAllOriginAccessControls, generateDeleteCommands };
 
 async function main() {
   const ids = await getAllOriginAccessControls();

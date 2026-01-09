@@ -6,7 +6,7 @@ import {
 
 const client = new CloudFrontClient({ region: "us-east-1" });
 
-export async function getAllCustomResponseHeadersPolicies(): Promise<string[]> {
+async function getAllCustomResponseHeadersPolicies(): Promise<string[]> {
   const ids: string[] = [];
   let marker: string | undefined;
 
@@ -24,6 +24,17 @@ export async function getAllCustomResponseHeadersPolicies(): Promise<string[]> {
 
   return ids;
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (id) => `aws cloudfront delete-response-headers-policy --id ${id}`,
+  );
+}
+
+export default {
+  getAllCustomResponseHeadersPolicies,
+  generateDeleteCommands,
+};
 
 async function main() {
   const ids = await getAllCustomResponseHeadersPolicies();

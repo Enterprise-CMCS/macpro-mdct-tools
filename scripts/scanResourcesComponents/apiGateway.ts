@@ -6,7 +6,7 @@ import {
 
 const client = new APIGatewayClient({ region: "us-east-1" });
 
-export async function getAllRestApis(): Promise<string[]> {
+async function getAllRestApis(): Promise<string[]> {
   const ids: string[] = [];
 
   for await (const page of paginateGetRestApis({ client }, { limit: 500 })) {
@@ -15,6 +15,14 @@ export async function getAllRestApis(): Promise<string[]> {
 
   return ids;
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (id) => `aws apigateway delete-rest-api --rest-api-id ${id}`,
+  );
+}
+
+export default { getAllRestApis, generateDeleteCommands };
 
 async function main() {
   const ids = await getAllRestApis();

@@ -6,7 +6,7 @@ import {
 
 const client = new CognitoIdentityProviderClient({ region: "us-east-1" });
 
-export async function getAllUserPools(): Promise<string[]> {
+async function getAllUserPools(): Promise<string[]> {
   const ids: string[] = [];
 
   for await (const page of paginateListUserPools(
@@ -20,6 +20,14 @@ export async function getAllUserPools(): Promise<string[]> {
 
   return ids;
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (id) => `aws cognito-idp delete-user-pool --user-pool-id ${id}`,
+  );
+}
+
+export default { getAllUserPools, generateDeleteCommands };
 
 async function main() {
   const ids = await getAllUserPools();

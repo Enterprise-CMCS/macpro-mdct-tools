@@ -6,7 +6,7 @@ import {
 
 const client = new EventBridgeClient({ region: "us-east-1" });
 
-export async function getAllEventRules(): Promise<string[]> {
+async function getAllEventRules(): Promise<string[]> {
   const names: string[] = [];
   let nextToken: string | undefined;
 
@@ -24,6 +24,19 @@ export async function getAllEventRules(): Promise<string[]> {
 
   return names;
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  const commands: string[] = [];
+  resources.forEach((name) => {
+    commands.push(
+      `aws events remove-targets --rule ${name} --ids $(aws events list-targets-by-rule --rule ${name} --query 'Targets[].Id' --output text)`,
+    );
+    commands.push(`aws events delete-rule --name ${name}`);
+  });
+  return commands;
+}
+
+export default { getAllEventRules, generateDeleteCommands };
 
 async function main() {
   const rules = await getAllEventRules();
