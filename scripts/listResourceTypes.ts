@@ -81,7 +81,4 @@ async function main() {
   console.log(`✅ Done. Wrote ${stacks.length} files to ./${OUT_DIR}/`);
 }
 
-main().catch((err) => {
-  console.error("Error:", err);
-  process.exit(1);
-});
+main();

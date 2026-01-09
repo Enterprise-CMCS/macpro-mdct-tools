@@ -124,8 +124,5 @@ async function main() {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((e) => {
-    console.error("Unhandled error:", e);
-    process.exit(1);
-  });
+  main();
 }
