@@ -29,10 +29,10 @@ function generateDeleteCommands(resources: string[]): string[] {
       `# Manually edit /tmp/dist-config-${id}.json to set Enabled to false, then:`,
     );
     commands.push(
-      `# aws cloudfront update-distribution --id ${id} --distribution-config file:///tmp/dist-config-${id}.json --if-match <ETag>`,
+      `aws cloudfront update-distribution --id ${id} --distribution-config file:///tmp/dist-config-${id}.json --if-match <ETag>`,
     );
     commands.push(
-      `# aws cloudfront delete-distribution --id ${id} --if-match <ETag>`,
+      `aws cloudfront delete-distribution --id ${id} --if-match <ETag>`,
     );
   });
   return commands;

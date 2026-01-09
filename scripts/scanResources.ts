@@ -151,15 +151,17 @@ async function apiGatewayLogGroups(getArray: (k: string) => string[]) {
 }
 
 function generateDeleteCommands() {
-  const deleteScriptFile = outputFile.replace(".txt", "-delete-commands.sh");
+  const deleteScriptFile = outputFile.replace(".txt", "-delete-commands.txt");
   const commands: string[] = [];
 
-  commands.push("#!/bin/bash");
   commands.push("# AWS CLI commands to delete unmanaged resources");
-  commands.push("# WARNING: Review carefully before executing!");
   commands.push("# Generated: " + new Date().toISOString());
   commands.push("");
-  commands.push("set -e  # Exit on error");
+  commands.push("⚠️  IMPORTANT SAFETY WARNINGS:");
+  commands.push("1. MANUALLY VERIFY each resource before running its delete command");
+  commands.push("2. Run commands INDIVIDUALLY, one at a time - DO NOT run all at once");
+  commands.push("3. Confirm each resource is truly unmanaged and safe to delete");
+  commands.push("4. Remove the '#' prefix from each command before executing");
   commands.push("");
 
   for (const [resourceType, { resources, generator }] of Object.entries(
@@ -168,7 +170,8 @@ function generateDeleteCommands() {
     if (resources.length === 0) continue;
 
     commands.push(`# Delete ${resourceType} (${resources.length} resources)`);
-    commands.push(...generator(resources));
+    // Prefix each AWS command with # to prevent bulk execution
+    commands.push(...generator(resources).map(cmd => `# ${cmd}`));
     commands.push("");
   }
 
@@ -176,9 +179,8 @@ function generateDeleteCommands() {
   const hasAwsCommands = commands.some(cmd => cmd.trim().startsWith("aws"));
   if (hasAwsCommands) {
     fs.writeFileSync(deleteScriptFile, commands.join("\n"));
-    fs.chmodSync(deleteScriptFile, 0o755);
     log(`\nAWS CLI delete commands written to: ${deleteScriptFile}`);
-    log("⚠️ WARNING: Review the script carefully before executing!");
+    log("⚠️ WARNING: Manually verify each resource and run commands individually!");
   }
 }
 
