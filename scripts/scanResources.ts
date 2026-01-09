@@ -172,8 +172,9 @@ function generateDeleteCommands() {
     commands.push("");
   }
 
-  // Only create file if there are actual delete commands (more than just the header)
-  if (commands.length > 7) {
+  // Only create file if there are actual delete commands
+  const hasAwsCommands = commands.some(cmd => cmd.trim().startsWith("aws"));
+  if (hasAwsCommands) {
     fs.writeFileSync(deleteScriptFile, commands.join("\n"));
     fs.chmodSync(deleteScriptFile, 0o755);
     log(`\nAWS CLI delete commands written to: ${deleteScriptFile}`);
