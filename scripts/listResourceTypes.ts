@@ -6,8 +6,8 @@ import {
   StackSummary,
 } from "@aws-sdk/client-cloudformation";
 import { STSClient, GetCallerIdentityCommand } from "@aws-sdk/client-sts";
-import { mkdirSync, writeFileSync } from "fs";
-import { join } from "path";
+import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
 const region = "us-east-1";
 const cf = new CloudFormationClient({ region });
@@ -81,7 +81,4 @@ async function main() {
   console.log(`✅ Done. Wrote ${stacks.length} files to ./${OUT_DIR}/`);
 }
 
-main().catch((err) => {
-  console.error("Error:", err);
-  process.exit(1);
-});
+main();

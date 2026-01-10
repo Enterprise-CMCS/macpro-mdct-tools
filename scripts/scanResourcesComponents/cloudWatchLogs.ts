@@ -6,7 +6,7 @@ import {
 
 const client = new CloudWatchLogsClient({ region: "us-east-1" });
 
-export async function getAllLogGroups(): Promise<string[]> {
+async function getAllLogGroups(): Promise<string[]> {
   const names: string[] = [];
 
   for await (const page of paginateDescribeLogGroups({ client }, {})) {
@@ -17,6 +17,14 @@ export async function getAllLogGroups(): Promise<string[]> {
 
   return names;
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (name) => `aws logs delete-log-group --log-group-name ${name}`,
+  );
+}
+
+export default { getAllLogGroups, generateDeleteCommands };
 
 async function main() {
   const names = await getAllLogGroups();

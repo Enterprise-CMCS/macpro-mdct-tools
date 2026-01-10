@@ -7,7 +7,7 @@ import {
 
 const client = new LambdaClient({ region: "us-east-1" });
 
-export async function getAllLayerVersionArns(): Promise<string[]> {
+async function getAllLayerVersionArns(): Promise<string[]> {
   const arns: string[] = [];
 
   for await (const layersPage of paginateListLayers({ client }, {})) {
@@ -25,6 +25,14 @@ export async function getAllLayerVersionArns(): Promise<string[]> {
 
   return arns;
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (arn) => `aws lambda delete-layer-version --version-arn ${arn}`,
+  );
+}
+
+export default { getAllLayerVersionArns, generateDeleteCommands };
 
 async function main() {
   const arns = await getAllLayerVersionArns();
