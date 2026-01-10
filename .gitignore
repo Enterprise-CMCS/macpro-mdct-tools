@@ -1,6 +1,7 @@
 /scripts/node_modules
 scripts/accounts.list
 scripts/unmanaged-resources*.txt
+scripts/unmanaged-resources*-delete-commands.txt
 node_modules
 /reporting/output
 **/.yarn/*

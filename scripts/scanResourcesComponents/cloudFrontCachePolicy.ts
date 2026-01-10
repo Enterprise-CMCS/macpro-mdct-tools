@@ -6,7 +6,7 @@ import {
 
 const client = new CloudFrontClient({ region: "us-east-1" });
 
-export async function getAllCustomCachePolicies(): Promise<string[]> {
+async function getAllCustomCachePolicies(): Promise<string[]> {
   const ids: string[] = [];
   let marker: string | undefined;
 
@@ -24,6 +24,14 @@ export async function getAllCustomCachePolicies(): Promise<string[]> {
 
   return ids;
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (id) => `aws cloudfront delete-cache-policy --id ${id}`,
+  );
+}
+
+export default { getAllCustomCachePolicies, generateDeleteCommands };
 
 async function main() {
   const ids = await getAllCustomCachePolicies();

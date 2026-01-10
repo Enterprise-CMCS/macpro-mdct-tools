@@ -28,7 +28,7 @@ async function listWebAclsByScope(scope: Scope): Promise<WebACLSummary[]> {
   return out;
 }
 
-export async function getAllWafv2WebACLsCfnIds(): Promise<string[]> {
+async function getAllWafv2WebACLsCfnIds(): Promise<string[]> {
   const [regional, cloudfront] = await Promise.all([
     listWebAclsByScope("REGIONAL"),
     listWebAclsByScope("CLOUDFRONT"),
@@ -42,6 +42,15 @@ export async function getAllWafv2WebACLsCfnIds(): Promise<string[]> {
     ...cloudfront.map(toId("CLOUDFRONT")),
   ];
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (id) =>
+      `aws wafv2 delete-web-acl --id ${id} --scope <REGIONAL|CLOUDFRONT> --lock-token <token>`,
+  );
+}
+
+export default { getAllWafv2WebACLsCfnIds, generateDeleteCommands };
 
 async function main() {
   const ids = await getAllWafv2WebACLsCfnIds();

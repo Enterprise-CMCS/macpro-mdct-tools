@@ -16,9 +16,9 @@ async function getAllStacks(): Promise<StackSummary[]> {
     { client },
     {
       StackStatusFilter: Object.values(StackStatus).filter(
-        (s) => s !== StackStatus.DELETE_COMPLETE
+        (s) => s !== StackStatus.DELETE_COMPLETE,
       ),
-    }
+    },
   )) {
     stacks.push(...page.StackSummaries!);
   }
@@ -26,9 +26,7 @@ async function getAllStacks(): Promise<StackSummary[]> {
   return stacks;
 }
 
-export async function getSelectedCfResourceIds(): Promise<
-  Record<string, string[]>
-> {
+async function getSelectedCfResourceIds(): Promise<Record<string, string[]>> {
   const interestedTypes = [
     "AWS::ApiGateway::RestApi",
     "AWS::CloudFront::CachePolicy",
@@ -38,10 +36,14 @@ export async function getSelectedCfResourceIds(): Promise<
     "AWS::Cognito::IdentityPool",
     "AWS::Cognito::UserPool",
     "AWS::DynamoDB::Table",
+    "AWS::EC2::NetworkInterface",
+    "AWS::EC2::SecurityGroup",
     "AWS::Events::Rule",
     "AWS::IAM::ManagedPolicy",
     "AWS::IAM::Policy",
     "AWS::IAM::Role",
+    "AWS::KMS::Alias",
+    "AWS::KMS::Key",
     "AWS::Lambda::Function",
     "AWS::Lambda::LayerVersion",
     "AWS::Logs::LogGroup",
@@ -57,7 +59,7 @@ export async function getSelectedCfResourceIds(): Promise<
 
     for await (const page of paginateListStackResources(
       { client },
-      { StackName: stackName }
+      { StackName: stackName },
     )) {
       for (const r of page.StackResourceSummaries!) {
         const type = r.ResourceType;
@@ -70,6 +72,25 @@ export async function getSelectedCfResourceIds(): Promise<
 
   return result;
 }
+
+async function getDeleteFailedStacks(): Promise<string[]> {
+  const stacks: string[] = [];
+
+  for await (const page of paginateListStacks(
+    { client },
+    {
+      StackStatusFilter: [StackStatus.DELETE_FAILED],
+    },
+  )) {
+    if (page.StackSummaries) {
+      stacks.push(...page.StackSummaries.map((s) => s.StackName!));
+    }
+  }
+
+  return stacks;
+}
+
+export default { getAllStacks, getSelectedCfResourceIds, getDeleteFailedStacks };
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   getSelectedCfResourceIds().then((x) => console.log(x));

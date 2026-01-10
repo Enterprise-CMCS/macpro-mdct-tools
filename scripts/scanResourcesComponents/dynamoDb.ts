@@ -3,7 +3,7 @@ import { DynamoDBClient, paginateListTables } from "@aws-sdk/client-dynamodb";
 
 const client = new DynamoDBClient({ region: "us-east-1" });
 
-export async function getAllTableNames(): Promise<string[]> {
+async function getAllTableNames(): Promise<string[]> {
   const names: string[] = [];
 
   for await (const page of paginateListTables({ client }, { Limit: 100 })) {
@@ -12,6 +12,14 @@ export async function getAllTableNames(): Promise<string[]> {
 
   return names;
 }
+
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (name) => `aws dynamodb delete-table --table-name ${name}`,
+  );
+}
+
+export default { getAllTableNames, generateDeleteCommands };
 
 async function main() {
   const tables = await getAllTableNames();
