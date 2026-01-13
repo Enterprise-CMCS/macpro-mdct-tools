@@ -176,7 +176,7 @@ function generateDeleteCommands() {
   }
 
   // Only create file if there are actual delete commands
-  const hasAwsCommands = commands.some(cmd => cmd.trim().startsWith("aws"));
+  const hasAwsCommands = commands.some(cmd => cmd.trim().startsWith("# aws"));
   if (hasAwsCommands) {
     fs.writeFileSync(deleteScriptFile, commands.join("\n"));
     log(`\nAWS CLI delete commands written to: ${deleteScriptFile}`);
@@ -203,12 +203,7 @@ async function main() {
     // Store DELETE_FAILED stacks for delete command generation
     unmanagedResources["CloudFormation Stacks (DELETE_FAILED)"] = {
       resources: deleteFailedStacks,
-      generator: (stacks: string[]) => {
-        return stacks.map(
-          (stackName) =>
-            `aws cloudformation delete-stack --stack-name "${stackName}" --region us-east-1`,
-        );
-      },
+      generator: cloudFormation.generateDeleteCommands,
     };
   } else {
     log("CloudFormation Stacks in DELETE_FAILED State");
@@ -222,23 +217,43 @@ async function main() {
     repoName = process.env.GITHUB_REPOSITORY.split("/")[1];
   }
   if (repoName) {
-    log("CloudFormation Orphaned Stacks (No Matching Git Branch)");
     try {
+      console.log(`Checking for orphaned stacks in repo: ${repoName}`);
       const orphanedStacks = await getOrphanedStacks(repoName);
 
-      if (orphanedStacks.length === 0) {
-        log("✅ No orphaned stacks found.\n");
-      } else {
-        log(
-          `Found ${orphanedStacks.length} orphaned stack(s) (repository: ${repoName}):`,
-        );
-        for (const stack of orphanedStacks) {
-          log(
-            `❌ ${stack.name} (Created: ${stack.creationTime.toISOString()}, Status: ${stack.status})`,
-          );
-        }
-        log();
+      const orphanedStackPrefixes = ["CMS-Cloud", "cloudtamer", "ct", "Trend-Micro", "CPM", "cms"];
+      const orphanedStackExact = [
+        "ConsolidatedPermissionBoundaryCFT",
+        "CDKToolkit",
+        "cbj-delete-snapshot",
+        "smtp-ado-postfix-relay",
+        "Wiz-Integration-Role",
+      ];
+
+      const projects = ["seds", "qmr", "mcr", "mfp", "hcbs", "carts"];
+      for (const project of projects) {
+        orphanedStackExact.push(`${project}-prerequisites`);
       }
+
+      const orphanedStackNames = orphanedStacks.map(s => s.name);
+      const orphanedStackPrefixCounts: { [k: string]: number } = {};
+      for (const prefix of orphanedStackPrefixes) {
+        orphanedStackPrefixCounts[prefix] = orphanedStackNames.filter((n) => n.startsWith(prefix)).length;
+      }
+
+      const orphanedStackExactCounts: { [k: string]: number } = {};
+      for (const exact of orphanedStackExact) {
+        orphanedStackExactCounts[exact] = orphanedStackNames.filter((n) => n === exact).length;
+      }
+
+      await checkGeneric({
+        label: `CloudFormation Orphaned Stacks (No Matching Git Branch in ${repoName})`,
+        all: orphanedStackNames,
+        cfManaged: [],
+        excludePrefixes: orphanedStackPrefixCounts,
+        excludeExact: orphanedStackExactCounts,
+        deleteGenerator: cloudFormation.generateDeleteCommands,
+      });
     } catch (e: any) {
       log(`⚠️ Failed to check orphaned stacks: ${e?.message || e}\n`);
     }
