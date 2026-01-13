@@ -52,13 +52,9 @@ export async function getOrphanedStacks(repoName: string): Promise<StackInfo[]> 
     }));
 
   const branches = await getRepoBranches(repoName);
+
   const orphanedStacks = stacks
-    .filter(
-      (stack) =>
-        !branches.some((branch) => stack.name.includes(branch)) &&
-        !/^cms/i.test(stack.name) &&
-        stack.name !== "cbj-delete-snapshot",
-    )
+    .filter((stack) => !branches.some((branch) => stack.name.includes(branch)))
     .sort((a, b) => a.creationTime.getTime() - b.creationTime.getTime());
 
   return orphanedStacks;
