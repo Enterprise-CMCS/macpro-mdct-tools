@@ -90,7 +90,14 @@ async function getDeleteFailedStacks(): Promise<string[]> {
   return stacks;
 }
 
-export default { getAllStacks, getSelectedCfResourceIds, getDeleteFailedStacks };
+function generateDeleteCommands(resources: string[]): string[] {
+  return resources.map(
+    (stackName) =>
+      `aws cloudformation delete-stack --stack-name "${stackName}" --region us-east-1`,
+  );
+}
+
+export default { getAllStacks, getSelectedCfResourceIds, getDeleteFailedStacks, generateDeleteCommands };
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   getSelectedCfResourceIds().then((x) => console.log(x));
