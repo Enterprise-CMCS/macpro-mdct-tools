@@ -36,14 +36,16 @@ export async function getRepoBranches(repoName: string): Promise<string[]> {
   return branches;
 }
 
-export async function getOrphanedStacks(repoName: string): Promise<StackInfo[]> {
+export async function getOrphanedStacks(
+  repoName: string
+): Promise<StackInfo[]> {
   const stackSummaries = await cloudFormation.getAllStacks();
   const stacks: StackInfo[] = stackSummaries
     .filter(
       (s) =>
         s.StackName &&
         s.CreationTime &&
-        s.StackStatus !== StackStatus.DELETE_COMPLETE,
+        s.StackStatus !== StackStatus.DELETE_COMPLETE
     )
     .map((s) => ({
       name: s.StackName!,
@@ -106,8 +108,10 @@ async function main() {
     log("❌ Orphaned stacks:");
     for (const stack of orphanedStacks) {
       log(
-        `- ${stack.name
-        } (Created: ${stack.creationTime.toISOString()}, Status: ${stack.status
+        `- ${
+          stack.name
+        } (Created: ${stack.creationTime.toISOString()}, Status: ${
+          stack.status
         })`
       );
     }

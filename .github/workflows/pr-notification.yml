@@ -13,7 +13,7 @@ permissions:
 jobs:
   notify_integrations_channel:
     runs-on: ubuntu-latest
-    # avoiding notifications for automated Snyk Pull Requests and draft pull requests 
+    # avoiding notifications for automated Snyk Pull Requests and draft pull requests
     if: github.actor != 'mdct-github-service-account' && !github.event.pull_request.draft
     steps:
       - name: Slack Notification

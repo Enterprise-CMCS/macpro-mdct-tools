@@ -28,7 +28,7 @@ async function getAllLayerVersionArns(): Promise<string[]> {
 
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
-    (arn) => `aws lambda delete-layer-version --version-arn ${arn}`,
+    (arn) => `aws lambda delete-layer-version --version-arn ${arn}`
   );
 }
 

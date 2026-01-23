@@ -16,9 +16,9 @@ async function getAllStacks(): Promise<StackSummary[]> {
     { client },
     {
       StackStatusFilter: Object.values(StackStatus).filter(
-        (s) => s !== StackStatus.DELETE_COMPLETE,
+        (s) => s !== StackStatus.DELETE_COMPLETE
       ),
-    },
+    }
   )) {
     stacks.push(...page.StackSummaries!);
   }
@@ -59,7 +59,7 @@ async function getSelectedCfResourceIds(): Promise<Record<string, string[]>> {
 
     for await (const page of paginateListStackResources(
       { client },
-      { StackName: stackName },
+      { StackName: stackName }
     )) {
       for (const r of page.StackResourceSummaries!) {
         const type = r.ResourceType;
@@ -80,7 +80,7 @@ async function getDeleteFailedStacks(): Promise<string[]> {
     { client },
     {
       StackStatusFilter: [StackStatus.DELETE_FAILED],
-    },
+    }
   )) {
     if (page.StackSummaries) {
       stacks.push(...page.StackSummaries.map((s) => s.StackName!));
@@ -93,11 +93,16 @@ async function getDeleteFailedStacks(): Promise<string[]> {
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
     (stackName) =>
-      `aws cloudformation delete-stack --stack-name "${stackName}" --region us-east-1`,
+      `aws cloudformation delete-stack --stack-name "${stackName}" --region us-east-1`
   );
 }
 
-export default { getAllStacks, getSelectedCfResourceIds, getDeleteFailedStacks, generateDeleteCommands };
+export default {
+  getAllStacks,
+  getSelectedCfResourceIds,
+  getDeleteFailedStacks,
+  generateDeleteCommands,
+};
 
 if (import.meta.url === `file://${process.argv[1]}`) {
   getSelectedCfResourceIds().then((x) => console.log(x));

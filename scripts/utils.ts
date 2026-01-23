@@ -8,7 +8,7 @@ export function prompt(question: string): Promise<string> {
     rl.question(question, (answer) => {
       rl.close();
       resolve(answer.trim());
-    }),
+    })
   );
 }
 
@@ -37,6 +37,6 @@ export async function getAccountIdentifier(): Promise<string> {
 
   return (alias || accountId || "unknown-account").replace(
     /[^a-zA-Z0-9-_]/g,
-    "_",
+    "_"
   );
 }

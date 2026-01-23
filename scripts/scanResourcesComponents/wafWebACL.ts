@@ -46,7 +46,7 @@ async function getAllWafv2WebACLsCfnIds(): Promise<string[]> {
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
     (id) =>
-      `aws wafv2 delete-web-acl --id ${id} --scope <REGIONAL|CLOUDFRONT> --lock-token <token>`,
+      `aws wafv2 delete-web-acl --id ${id} --scope <REGIONAL|CLOUDFRONT> --lock-token <token>`
   );
 }
 

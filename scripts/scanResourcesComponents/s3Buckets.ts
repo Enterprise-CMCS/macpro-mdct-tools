@@ -10,7 +10,7 @@ async function getAllS3Buckets(): Promise<string[]> {
 
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
-    (name) => `aws s3 rb s3://${name} --force  # WARNING: Deletes all objects!`,
+    (name) => `aws s3 rb s3://${name} --force  # WARNING: Deletes all objects!`
   );
 }
 

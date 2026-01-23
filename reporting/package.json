@@ -1,13 +1,13 @@
 {
   "name": "mdct-tools-reporting",
   "version": "1.0.0",
-  "packageManager": "yarn@4.12.0",
-  "license": "CC0-1.0",
   "description": "Reporting script for MDCT applications",
+  "license": "CC0-1.0",
   "type": "module",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.931.0",
     "@aws-sdk/client-s3": "^3.931.0",
     "@aws-sdk/lib-dynamodb": "^3.931.0"
-  }
+  },
+  "packageManager": "yarn@4.12.0"
 }

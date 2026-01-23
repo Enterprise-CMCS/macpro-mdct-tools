@@ -18,7 +18,7 @@ async function getAllRestApis(): Promise<string[]> {
 
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
-    (id) => `aws apigateway delete-rest-api --rest-api-id ${id}`,
+    (id) => `aws apigateway delete-rest-api --rest-api-id ${id}`
   );
 }
 

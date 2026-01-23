@@ -23,8 +23,7 @@ async function getAllIdentityPools(): Promise<string[]> {
 
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
-    (id) =>
-      `aws cognito-identity delete-identity-pool --identity-pool-id ${id}`,
+    (id) => `aws cognito-identity delete-identity-pool --identity-pool-id ${id}`
   );
 }
 

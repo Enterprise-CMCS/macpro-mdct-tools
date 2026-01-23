@@ -29,7 +29,7 @@ function generateDeleteCommands(resources: string[]): string[] {
   const commands: string[] = [];
   resources.forEach((name) => {
     commands.push(
-      `aws events remove-targets --rule ${name} --ids $(aws events list-targets-by-rule --rule ${name} --query 'Targets[].Id' --output text)`,
+      `aws events remove-targets --rule ${name} --ids $(aws events list-targets-by-rule --rule ${name} --query 'Targets[].Id' --output text)`
     );
     commands.push(`aws events delete-rule --name ${name}`);
   });

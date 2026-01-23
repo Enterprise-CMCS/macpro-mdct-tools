@@ -32,7 +32,10 @@ let outputFile = "unmanaged-resources.txt";
 
 type ResourceDeleteGenerator = (resources: string[]) => string[];
 const unmanagedResources: {
-  [resourceType: string]: { resources: string[]; generator: ResourceDeleteGenerator };
+  [resourceType: string]: {
+    resources: string[];
+    generator: ResourceDeleteGenerator;
+  };
 } = {};
 
 function log(line: string = "") {
@@ -44,7 +47,7 @@ function header(
   label: string,
   total: number,
   managed: number,
-  additionalExcludes?: { [key: string]: number },
+  additionalExcludes?: { [key: string]: number }
 ) {
   log(`${label} (total: ${total})`);
   log(`Managed by CloudFormation: ${managed}`);
@@ -142,10 +145,10 @@ async function apiGatewayLogGroups(getArray: (k: string) => string[]) {
       for (const s of stages.item!) {
         if (!s.stageName) continue;
         apiGatewayLogGroups.push(
-          `API-Gateway-Execution-Logs_${restApiId}/${s.stageName}`,
+          `API-Gateway-Execution-Logs_${restApiId}/${s.stageName}`
         );
       }
-    } catch { } // eslint-disable-line no-empty
+    } catch {} // eslint-disable-line no-empty
   }
   return apiGatewayLogGroups;
 }
@@ -158,29 +161,37 @@ function generateDeleteCommands() {
   commands.push("# Generated: " + new Date().toISOString());
   commands.push("");
   commands.push("⚠️  IMPORTANT SAFETY WARNINGS:");
-  commands.push("1. MANUALLY VERIFY each resource before running its delete command");
-  commands.push("2. Run commands INDIVIDUALLY, one at a time - DO NOT run all at once");
-  commands.push("3. Confirm each resource is truly unmanaged and safe to delete");
+  commands.push(
+    "1. MANUALLY VERIFY each resource before running its delete command"
+  );
+  commands.push(
+    "2. Run commands INDIVIDUALLY, one at a time - DO NOT run all at once"
+  );
+  commands.push(
+    "3. Confirm each resource is truly unmanaged and safe to delete"
+  );
   commands.push("4. Remove the '#' prefix from each command before executing");
   commands.push("");
 
   for (const [resourceType, { resources, generator }] of Object.entries(
-    unmanagedResources,
+    unmanagedResources
   )) {
     if (resources.length === 0) continue;
 
     commands.push(`# Delete ${resourceType} (${resources.length} resources)`);
     // Prefix each AWS command with # to prevent bulk execution
-    commands.push(...generator(resources).map(cmd => `# ${cmd}`));
+    commands.push(...generator(resources).map((cmd) => `# ${cmd}`));
     commands.push("");
   }
 
   // Only create file if there are actual delete commands
-  const hasAwsCommands = commands.some(cmd => cmd.trim().startsWith("# aws"));
+  const hasAwsCommands = commands.some((cmd) => cmd.trim().startsWith("# aws"));
   if (hasAwsCommands) {
     fs.writeFileSync(deleteScriptFile, commands.join("\n"));
     log(`\nAWS CLI delete commands written to: ${deleteScriptFile}`);
-    log("⚠️ WARNING: Manually verify each resource and run commands individually!");
+    log(
+      "⚠️ WARNING: Manually verify each resource and run commands individually!"
+    );
   }
 }
 
@@ -221,7 +232,14 @@ async function main() {
       console.log(`Checking for orphaned stacks in repo: ${repoName}`);
       const orphanedStacks = await getOrphanedStacks(repoName);
 
-      const orphanedStackPrefixes = ["CMS-Cloud", "cloudtamer", "ct", "Trend-Micro", "CPM", "cms"];
+      const orphanedStackPrefixes = [
+        "CMS-Cloud",
+        "cloudtamer",
+        "ct",
+        "Trend-Micro",
+        "CPM",
+        "cms",
+      ];
       const orphanedStackExact = [
         "ConsolidatedPermissionBoundaryCFT",
         "CDKToolkit",
@@ -235,15 +253,19 @@ async function main() {
         orphanedStackExact.push(`${project}-prerequisites`);
       }
 
-      const orphanedStackNames = orphanedStacks.map(s => s.name);
+      const orphanedStackNames = orphanedStacks.map((s) => s.name);
       const orphanedStackPrefixCounts: { [k: string]: number } = {};
       for (const prefix of orphanedStackPrefixes) {
-        orphanedStackPrefixCounts[prefix] = orphanedStackNames.filter((n) => n.startsWith(prefix)).length;
+        orphanedStackPrefixCounts[prefix] = orphanedStackNames.filter((n) =>
+          n.startsWith(prefix)
+        ).length;
       }
 
       const orphanedStackExactCounts: { [k: string]: number } = {};
       for (const exact of orphanedStackExact) {
-        orphanedStackExactCounts[exact] = orphanedStackNames.filter((n) => n === exact).length;
+        orphanedStackExactCounts[exact] = orphanedStackNames.filter(
+          (n) => n === exact
+        ).length;
       }
 
       await checkGeneric({
@@ -320,7 +342,9 @@ async function main() {
   const allLogGroups = await cloudWatchLogs.getAllLogGroups();
   const treatedAsManagedLogGroups: string[] = [
     ...getArray("AWS::Logs::LogGroup"),
-    ...getArray("AWS::Lambda::Function").map((functionName) => `/aws/lambda/${functionName}`),
+    ...getArray("AWS::Lambda::Function").map(
+      (functionName) => `/aws/lambda/${functionName}`
+    ),
     ...(await apiGatewayLogGroups(getArray)),
   ];
 
@@ -348,21 +372,21 @@ async function main() {
   const cwAdditionalExcludePrefixes: { [k: string]: number } = {};
   for (const prefix of logGroupExcludedPrefixes) {
     cwAdditionalExcludePrefixes[prefix] = allLogGroups.filter((n) =>
-      n.startsWith(prefix),
+      n.startsWith(prefix)
     ).length;
   }
 
   const cwAdditionalExactExcludes: { [k: string]: number } = {};
   for (const exact of logGroupExactExcludes) {
     cwAdditionalExactExcludes[exact] = allLogGroups.filter(
-      (n) => n === exact,
+      (n) => n === exact
     ).length;
   }
 
   const cwAdditionalContainsExcludes: { [k: string]: number } = {};
   for (const substring of logGroupContainsExcludes) {
     cwAdditionalContainsExcludes[substring] = allLogGroups.filter((n) =>
-      n.includes(substring),
+      n.includes(substring)
     ).length;
   }
 
@@ -394,8 +418,8 @@ async function main() {
   const dynamoDbContainsExcludes = ["main"];
   const dynamoDbAdditionalContainsExcludes: { [k: string]: number } = {};
   for (const substring of dynamoDbContainsExcludes) {
-    dynamoDbAdditionalContainsExcludes[substring] = allDynamoDbTables.filter((n) =>
-      n.includes(substring),
+    dynamoDbAdditionalContainsExcludes[substring] = allDynamoDbTables.filter(
+      (n) => n.includes(substring)
     ).length;
   }
 
@@ -411,7 +435,7 @@ async function main() {
   log("All IAM Roles: " + allIamRoles.length);
   const projectRolePattern = /^(seds|qmr|mcr|mfp|hcbs|carts)/i;
   const projectIamRoles = allIamRoles.filter((name) =>
-    projectRolePattern.test(name),
+    projectRolePattern.test(name)
   );
   await checkGeneric({
     label: "IAM Roles (project-scoped, excluding service-linked)",
@@ -434,14 +458,13 @@ async function main() {
     deleteGenerator: cognitoIdentityPool.generateDeleteCommands,
   });
 
-
   const allWebAcls = await wafWebACL.getAllWafv2WebACLsCfnIds();
   const webAclExcludedPrefixes = ["FMManagedWebACLV2-cms-cloud"];
 
   const wafAdditionalExcludes: { [k: string]: number } = {};
   for (const prefix of webAclExcludedPrefixes) {
     wafAdditionalExcludes[prefix] = allWebAcls.filter((a) =>
-      a.startsWith(prefix),
+      a.startsWith(prefix)
     ).length;
   }
 
@@ -468,7 +491,7 @@ async function main() {
   const eventRulesAdditionalExcludes: { [k: string]: number } = {};
   for (const prefix of eventRulesExcludedPrefixes) {
     eventRulesAdditionalExcludes[prefix] = allEventRules.filter((a) =>
-      a.startsWith(prefix),
+      a.startsWith(prefix)
     ).length;
   }
 
@@ -481,7 +504,12 @@ async function main() {
   });
 
   const allKmsKeys = await kmsKey.getAllKmsKeys();
-  const kmsContainsExcludes = ["Tenable", "AWS Backups", "CloudTrail", "KMS key for encrypting logs"];
+  const kmsContainsExcludes = [
+    "Tenable",
+    "AWS Backups",
+    "CloudTrail",
+    "KMS key for encrypting logs",
+  ];
 
   const kmsAdditionalContainsExcludes: { [k: string]: number } = {};
   for (const substring of kmsContainsExcludes) {
@@ -497,13 +525,10 @@ async function main() {
   const keysFromAliases = await kmsKey.getKeysFromAliases(cfManagedAliases);
 
   // Combine both types - these are just key IDs
-  const managedKeyIds = new Set([
-    ...directlyManagedKeys,
-    ...keysFromAliases
-  ]);
+  const managedKeyIds = new Set([...directlyManagedKeys, ...keysFromAliases]);
 
   // For matching, we need to check if the key ID (before " - ") is in the managed set
-  const treatedAsManagedKeys = allKmsKeys.filter(keyDetail => {
+  const treatedAsManagedKeys = allKmsKeys.filter((keyDetail) => {
     const keyId = keyDetail.split(" - ")[0];
     return managedKeyIds.has(keyId);
   });
@@ -522,7 +547,12 @@ async function main() {
   const projectPrefixes = /^(seds|qmr|mcr|mfp|hcbs|carts)-/i; // |app-api
 
   const allSecurityGroups = await securityGroup.getAllSecurityGroups();
-  const sgContainsExcludes = ["cmscloud", "main", "master", "default VPC security group"]; // "default"
+  const sgContainsExcludes = [
+    "cmscloud",
+    "main",
+    "master",
+    "default VPC security group",
+  ]; // "default"
 
   const sgAdditionalContainsExcludes: { [k: string]: number } = {};
   for (const substring of sgContainsExcludes) {
@@ -543,10 +573,12 @@ async function main() {
     treatedAsManagedSecurityGroups.push(...exactMatches);
 
     // Try matching without the project prefix
-    const stackWithoutPrefix = stackName.replace(projectPrefixes, '');
+    const stackWithoutPrefix = stackName.replace(projectPrefixes, "");
     if (stackWithoutPrefix !== stackName && stackWithoutPrefix.length > 5) {
-      const prefixMatches = allSecurityGroups.filter((sg) =>
-        sg.includes(stackWithoutPrefix) && !treatedAsManagedSecurityGroups.includes(sg)
+      const prefixMatches = allSecurityGroups.filter(
+        (sg) =>
+          sg.includes(stackWithoutPrefix) &&
+          !treatedAsManagedSecurityGroups.includes(sg)
       );
       treatedAsManagedSecurityGroups.push(...prefixMatches);
     }
@@ -562,17 +594,22 @@ async function main() {
 
   const allNetworkInterfaces = await eni.getAllNetworkInterfaces();
 
-  const eniContainsExcludes = ["main", "master", "Transit Gateway", "VPC Endpoint Interface"];
+  const eniContainsExcludes = [
+    "main",
+    "master",
+    "Transit Gateway",
+    "VPC Endpoint Interface",
+  ];
 
   const eniAdditionalContainsExcludes: { [k: string]: number } = {};
   for (const substring of eniContainsExcludes) {
-    eniAdditionalContainsExcludes[substring] = allNetworkInterfaces.filter((e) =>
-      e.toLowerCase().includes(substring.toLowerCase())
+    eniAdditionalContainsExcludes[substring] = allNetworkInterfaces.filter(
+      (e) => e.toLowerCase().includes(substring.toLowerCase())
     ).length;
   }
 
   // Exclude ENIs that contain a CloudFormation stack name (treated as managed)
-  // Stack names often have project prefixes (e.g., "seds-x8e03cb1432") but ENI descriptions 
+  // Stack names often have project prefixes (e.g., "seds-x8e03cb1432") but ENI descriptions
   // just have the suffix (e.g., "x8e03cb1432")
   const managedEnis = getArray("AWS::EC2::NetworkInterface");
   const treatedAsManagedEnis = [...managedEnis];
@@ -585,10 +622,12 @@ async function main() {
     treatedAsManagedEnis.push(...exactMatches);
 
     // Try matching without the project prefix (e.g., "x8e03cb1432" from "seds-x8e03cb1432")
-    const stackWithoutPrefix = stackName.replace(projectPrefixes, '');
+    const stackWithoutPrefix = stackName.replace(projectPrefixes, "");
     if (stackWithoutPrefix !== stackName && stackWithoutPrefix.length > 5) {
-      const prefixMatches = allNetworkInterfaces.filter((eni) =>
-        eni.includes(stackWithoutPrefix) && !treatedAsManagedEnis.includes(eni)
+      const prefixMatches = allNetworkInterfaces.filter(
+        (eni) =>
+          eni.includes(stackWithoutPrefix) &&
+          !treatedAsManagedEnis.includes(eni)
       );
       treatedAsManagedEnis.push(...prefixMatches);
     }

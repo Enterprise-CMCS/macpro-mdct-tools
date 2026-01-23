@@ -17,7 +17,7 @@ async function getAllLambdaFunctions(): Promise<string[]> {
 
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
-    (name) => `aws lambda delete-function --function-name ${name}`,
+    (name) => `aws lambda delete-function --function-name ${name}`
   );
 }
 

@@ -173,8 +173,8 @@ function formatReportSummary(report, dateField, appName, reportType = null) {
       report.status_id === 2
         ? "Provisional"
         : report.status_id === 3
-        ? "Final"
-        : "Unknown";
+          ? "Final"
+          : "Unknown";
     return {
       application: "SEDS",
       reportType: "SEDS",

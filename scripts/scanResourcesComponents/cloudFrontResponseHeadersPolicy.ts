@@ -27,7 +27,7 @@ async function getAllCustomResponseHeadersPolicies(): Promise<string[]> {
 
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
-    (id) => `aws cloudfront delete-response-headers-policy --id ${id}`,
+    (id) => `aws cloudfront delete-response-headers-policy --id ${id}`
   );
 }
 
