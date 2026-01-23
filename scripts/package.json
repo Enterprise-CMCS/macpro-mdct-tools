@@ -1,7 +1,6 @@
 {
   "name": "scan-resources",
   "version": "1.0.0",
-  "packageManager": "yarn@4.12.0",
   "license": "CC0-1.0",
   "type": "module",
   "devDependencies": {
@@ -27,5 +26,6 @@
     "ts-node": "^10.9.2",
     "tsx": "^4.20.3",
     "typescript": "^5.9.3"
-  }
+  },
+  "packageManager": "yarn@4.12.0"
 }
