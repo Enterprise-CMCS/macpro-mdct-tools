@@ -20,7 +20,7 @@ async function getAllOriginAccessControls(): Promise<string[]> {
 
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
-    (id) => `aws cloudfront delete-origin-access-control --id ${id}`,
+    (id) => `aws cloudfront delete-origin-access-control --id ${id}`
   );
 }
 

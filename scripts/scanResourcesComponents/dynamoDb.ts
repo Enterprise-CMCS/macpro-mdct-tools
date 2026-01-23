@@ -15,7 +15,7 @@ async function getAllTableNames(): Promise<string[]> {
 
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
-    (name) => `aws dynamodb delete-table --table-name ${name}`,
+    (name) => `aws dynamodb delete-table --table-name ${name}`
   );
 }
 

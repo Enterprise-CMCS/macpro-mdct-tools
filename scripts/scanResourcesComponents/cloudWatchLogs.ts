@@ -20,7 +20,7 @@ async function getAllLogGroups(): Promise<string[]> {
 
 function generateDeleteCommands(resources: string[]): string[] {
   return resources.map(
-    (name) => `aws logs delete-log-group --log-group-name ${name}`,
+    (name) => `aws logs delete-log-group --log-group-name ${name}`
   );
 }
 

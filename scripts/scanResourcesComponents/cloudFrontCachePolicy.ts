@@ -26,9 +26,7 @@ async function getAllCustomCachePolicies(): Promise<string[]> {
 }
 
 function generateDeleteCommands(resources: string[]): string[] {
-  return resources.map(
-    (id) => `aws cloudfront delete-cache-policy --id ${id}`,
-  );
+  return resources.map((id) => `aws cloudfront delete-cache-policy --id ${id}`);
 }
 
 export default { getAllCustomCachePolicies, generateDeleteCommands };
