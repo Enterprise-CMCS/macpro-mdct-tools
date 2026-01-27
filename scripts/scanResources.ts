@@ -235,10 +235,11 @@ async function main() {
       const orphanedStackPrefixes = [
         "CMS-Cloud",
         "cloudtamer",
-        "ct",
+        "ct-",
         "Trend-Micro",
         "CPM",
         "cms",
+        "security-hub-collector",
       ];
       const orphanedStackExact = [
         "ConsolidatedPermissionBoundaryCFT",

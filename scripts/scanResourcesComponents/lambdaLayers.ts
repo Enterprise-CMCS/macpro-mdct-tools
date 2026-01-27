@@ -27,9 +27,13 @@ async function getAllLayerVersionArns(): Promise<string[]> {
 }
 
 function generateDeleteCommands(resources: string[]): string[] {
-  return resources.map(
-    (arn) => `aws lambda delete-layer-version --version-arn ${arn}`
-  );
+  return resources.map((arn) => {
+    const parts = arn.split(":");
+    const layerName = parts[6];
+    const layerVersion = parts[7];
+
+    return `aws lambda delete-layer-version --layer-name ${layerName} --version-number ${layerVersion}`;
+  });
 }
 
 export default { getAllLayerVersionArns, generateDeleteCommands };
