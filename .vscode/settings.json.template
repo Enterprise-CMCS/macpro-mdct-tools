@@ -1,0 +1,23 @@
+{
+  "oxc.path.oxfmt": "node_modules/oxfmt/bin/oxfmt",
+  "workbench.colorCustomizations": {
+    "commandCenter.border": "#15202b99",
+    "sash.hoverBorder": "#d1f9d0",
+    "titleBar.activeBackground": "#a4f4a2",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#a4f4a299",
+    "titleBar.inactiveForeground": "#15202b99",
+    "activityBar.activeBackground": "#d1f9d0",
+    "activityBar.background": "#d1f9d0",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#8e90f1",
+    "activityBarBadge.foreground": "#15202b",
+    "statusBar.background": "#a4f4a2",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#77ef74",
+    "statusBarItem.remoteBackground": "#a4f4a2",
+    "statusBarItem.remoteForeground": "#15202b"
+  },
+  "peacock.color": "#a4f4a2"
+}
