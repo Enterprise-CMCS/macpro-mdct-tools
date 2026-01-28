@@ -172,7 +172,7 @@ if [ ! -f "$version_file" ]; then
     echo "It looks like you've never run the workspace setup script before. The MDCT team uses the workspace setup script to maintain a consistent development environment and brew to install as many packages as possible. The script will remove your ~/.nvm, ~/.npm, ~/go, and ~/.kion.yml folders/files if they already exist to ensure a consistent installation process."
     if confirm "Would you like to proceed with deleting these folders and continuing the setup? [Y/n]"; then
         echo "Proceeding with the setup..."
-        
+
         # Remove ~/.nvm ~/.npm and ~/go folders
         echo "Removing ~/.nvm, ~/.npm, ~/.sesrverless, ~/go, and ~/.kion.yml folders and files if they exist..."
         rm -rf "$HOME/.nvm"
@@ -181,7 +181,7 @@ if [ ! -f "$version_file" ]; then
         rm -rf "$HOME/.kion.yml"
         rm -rf "$HOME/.serverlessrc"
         rm -rf "$HOME/.serverless"
-        
+
         # Create the version file
         echo "Creating version file at $version_file"
         echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
@@ -242,13 +242,13 @@ if ! which pre-commit > /dev/null ; then
   brew install pre-commit
 fi
 
-# Install java with brew 
+# Install java with brew
 if [[ ! $(which java) =~ "$(brew --prefix)/opt/openjdk" ]] ; then
   echo "brew installing java"
 	brew install java
   # Get the directory where java is installed
   java_home=$(brew --prefix)/opt/openjdk
-  
+
   # Add java to PATH
   echo "adding java to PATH"
   echo "export PATH=\"$java_home/bin:\$PATH\"" >> "$shellprofile"
@@ -266,19 +266,13 @@ if ! which awslogs > /dev/null ; then
   brew install awslogs
 fi
 
-# Install yarn, a node package manager similiar to npm
-if ! which yarn > /dev/null ; then
-  echo "brew installing yarn"
-  brew install yarn
-fi
-
-# Install git, our version control system 
+# Install git, our version control system
 if ! which git > /dev/null ; then
   echo "brew installing git"
   brew install git
 fi
 
-# Install GitHub CLI, our version control system 
+# Install GitHub CLI, our version control system
 if ! which gh > /dev/null ; then
   echo "brew installing GitHub cli"
   brew install gh
@@ -296,7 +290,7 @@ if ! which snyk > /dev/null ; then
   brew install snyk-cli
 fi
 
-# Install Kion except on CI. 
+# Install Kion except on CI.
 if [ "$CI" != "true" ]; then
   # Install Kion
   if ! which kion > /dev/null ; then
@@ -330,12 +324,12 @@ echo "Begin cloing/looping through repos"
 for url in "${repo_urls[@]}"; do
     # Extract the repository name from the URL
     repo_name=$(basename "$url" .git)
-    
+
     # Clone the repository if it doesn't exist
     if [ ! -d "$clone_dir/$repo_name" ]; then
         echo "Cloning $repo_name..."
         git clone "$url" "$clone_dir/$repo_name"
-        
+
         # Check if clone was successful
         if [ $? -eq 0 ]; then
             echo "Cloned $repo_name successfully."
@@ -346,14 +340,14 @@ for url in "${repo_urls[@]}"; do
     else
         echo "$repo_name already exists. Skipping cloning."
     fi
-    
+
     # Navigate into the cloned repository directory
     cd "$clone_dir/$repo_name"
-    
+
     # Run the "pre-commit install" command
     echo "Running pre-commit install in $repo_name..."
     pre-commit install
-    
+
     # Check if pre-commit install was successful
     if [ $? -eq 0 ]; then
         echo "pre-commit installed successfully in $repo_name."
@@ -371,7 +365,7 @@ for url in "${repo_urls[@]}"; do
     # Pull latest changes from main or master branch
     echo "Pulling latest changes in $repo_name..."
     git pull origin "$current_branch"
-    
+
     # Check if pull was successful
     if [ $? -eq 0 ]; then
         echo "Pulled latest changes successfully in $repo_name."
@@ -379,12 +373,15 @@ for url in "${repo_urls[@]}"; do
         echo "Failed to pull latest changes in $repo_name."
         continue
     fi
-        
+
     [ ! -f ".nvmrc" ] && continue
 
     # install correct version of node using the .nvmrc
     echo "Installing the correct node version"
     nvm install
+
+    # check yarn exists with corepack
+    corepack enable 2>/dev/null || true
 
     # Check if node_modules directory exists
     if [ -d "node_modules" ]; then
@@ -490,14 +487,14 @@ for url in "${repo_urls[@]}"; do
         echo "running yarn in the tests folder...."
         (cd tests && yarn)
     fi
-    
+
     # Check if yarn was successful
     if [ $? -eq 0 ]; then
         echo "yarn completed successfully in $repo_name."
     else
         echo "Failed to run yarn in $repo_name."
     fi
-    
+
     # Navigate back to the original directory
     cd -
 done
