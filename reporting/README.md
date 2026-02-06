@@ -30,17 +30,6 @@ kion run --account XXXXXXXXXXXX --car XXXXXXX-application-admin -- \
   node query-recent-submissions.js mcr production output/mcr-prod.csv
 ```
 
-## Production Accounts
-
-| App   | Account ID   | IAM Role                    |
-| ----- | ------------ | --------------------------- |
-| SEDS  | 459236791836 | MDCT Application Admin      |
-| CARTS | 175972079437 | mdctcarts-application-admin |
-| MCR   | 044969939588 | mdctmcr-application-admin   |
-| MFP   | 006660783728 | mdctmfp-application-admin   |
-| QMR   | 204375272847 | mdctqmr-application-admin   |
-| HCBS  | 339713052013 | mdcthcbs-application-admin  |
-
 ## Configuration
 
 - **Date range**: Edit `DAYS_TO_QUERY` in `query-recent-submissions.js` (default: 30 days)
