@@ -6,6 +6,11 @@ ACCOUNTS_FILE="${SCRIPT_DIR}/../scripts/accounts.list"
 QUERY_SCRIPT="${SCRIPT_DIR}/query-recent-submissions.js"
 OUTPUT_DIR="${SCRIPT_DIR}/output"
 
+PROD_ONLY=false
+if [[ "$1" == "--prod-only" ]]; then
+  PROD_ONLY=true
+fi
+
 [[ -f "$ACCOUNTS_FILE" ]] || { echo "Error: accounts.list not found" >&2; exit 1; }
 [[ -f "$QUERY_SCRIPT" ]] || { echo "Error: query-recent-submissions.js not found" >&2; exit 1; }
 
@@ -60,6 +65,11 @@ while IFS='|' read -r friendly account_id role || [[ -n "$friendly" ]]; do
   echo "Processing: $friendly ($app/$env)"
 
   [[ "$env" == "unknown" ]] && { echo "  Skipping (couldn't determine environment)"; continue; }
+
+  if [[ "$PROD_ONLY" == true && "$env" != "production" ]]; then
+    echo "  Skipping (not production)"
+    continue
+  fi
 
   kion run --account "$account_id" --car "$role" -- \
      node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
