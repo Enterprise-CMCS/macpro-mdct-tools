@@ -16,6 +16,7 @@ repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-hcbs.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-rhtp.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-core.git"
 )
@@ -45,9 +46,9 @@ for repo_url in "${repo_urls[@]}"; do
             # Get the current branch name
             current_branch=$(git rev-parse --abbrev-ref HEAD)
 
-            # Check if the current branch is 'main' or 'master'
-            if [[ "$current_branch" != "main" && "$current_branch" != "master" ]]; then
-                echo "Repository $repo_name is not on the 'main' or 'master' branch. Please commit any changes you may have and checkout main or master to re-run the MDCT workspace setup script."
+            # Check if the current branch is 'main'
+            if [[ "$current_branch" != "main" ]]; then
+                echo "Repository $repo_name is not on the 'main'. Please commit any changes you may have and checkout main to re-run the MDCT workspace setup script."
                 exit 1
             fi
         else
@@ -320,7 +321,7 @@ EOL
 fi
 
 # Loop through each repository URL
-echo "Begin cloing/looping through repos"
+echo "Begin cloning/looping through repos"
 for url in "${repo_urls[@]}"; do
     # Extract the repository name from the URL
     repo_name=$(basename "$url" .git)
@@ -355,14 +356,14 @@ for url in "${repo_urls[@]}"; do
         echo "Failed to install pre-commit in $repo_name."
     fi
 
-    # Ensure repository is on main or master branch
+    # Ensure repository is on main branch
     current_branch=$(git rev-parse --abbrev-ref HEAD)
-    if [ "$current_branch" != "main" ] && [ "$current_branch" != "master" ]; then
-        echo "Error: $repo_name is not on the main or master branch. Please commit any outstanding changes and switch to the main/master branch before running this script."
+    if [ "$current_branch" != "main" ]; then
+        echo "Error: $repo_name is not on the main branch. Please commit any outstanding changes and switch to the main branch before running this script."
         exit 1
     fi
 
-    # Pull latest changes from main or master branch
+    # Pull latest changes from main branch
     echo "Pulling latest changes in $repo_name..."
     git pull origin "$current_branch"
 
@@ -373,6 +374,8 @@ for url in "${repo_urls[@]}"; do
         echo "Failed to pull latest changes in $repo_name."
         continue
     fi
+
+    cp .vscode/settings.json.template .vscode/settings.json
 
     [ ! -f ".nvmrc" ] && continue
 
