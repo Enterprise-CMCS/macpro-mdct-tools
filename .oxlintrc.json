@@ -1,0 +1,11 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["unicorn", "typescript", "oxc"],
+  "rules": {
+    // ESLint
+    "no-duplicate-imports": "error",
+    "no-empty": "error",
+    "no-restricted-globals": "error",
+    "no-unreachable": "error"
+  }
+}
