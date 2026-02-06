@@ -26,7 +26,7 @@ kion run --account <account_id> --car <role> -- \
 Example:
 
 ```bash
-kion run --account 044969939588 --car mdctmcr-application-admin -- \
+kion run --account XXXXXXXXXXXX --car XXXXXXX-application-admin -- \
   node query-recent-submissions.js mcr production output/mcr-prod.csv
 ```
 
