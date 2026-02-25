@@ -175,13 +175,11 @@ if [ ! -f "$version_file" ]; then
         echo "Proceeding with the setup..."
 
         # Remove ~/.nvm ~/.npm and ~/go folders
-        echo "Removing ~/.nvm, ~/.npm, ~/.sesrverless, ~/go, and ~/.kion.yml folders and files if they exist..."
+        echo "Removing ~/.nvm, ~/.npm, ~/go, and ~/.kion.yml folders and files if they exist..."
         rm -rf "$HOME/.nvm"
         rm -rf "$HOME/.npm"
         sudo rm -rf "$HOME/go"
         rm -rf "$HOME/.kion.yml"
-        rm -rf "$HOME/.serverlessrc"
-        rm -rf "$HOME/.serverless"
 
         # Create the version file
         echo "Creating version file at $version_file"
