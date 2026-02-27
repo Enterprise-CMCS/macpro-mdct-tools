@@ -2,6 +2,7 @@
   "recommendations": [
     "oxc.oxc-vscode",
     "vitest.explorer",
-    "firsttris.vscode-jest-runner"
+    "firsttris.vscode-jest-runner",
+    "streetsidesoftware.code-spell-checker"
   ]
 }
