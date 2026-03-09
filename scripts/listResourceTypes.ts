@@ -49,16 +49,16 @@ async function getResourceTypes(stackName: string): Promise<string[]> {
   );
   const types: string[] = resp
     .StackResources!.map((r) => r.ResourceType)
-    .filter((type): type is string => Boolean(type));
-  return Array.from(new Set(types)).sort();
+    .filter(Boolean);
+  return [...new Set(types)].toSorted();
 }
 
 function sanitize(name: string): string {
   // Preserve alphanumerics and '-', '_', '.', replace others with '-'
   return name
-    .replace(/[^A-Za-z0-9._-]+/g, "-")
-    .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
+    .replaceAll(/[^A-Za-z0-9._-]+/g, "-")
+    .replaceAll(/-+/g, "-")
+    .replaceAll(/^-|-$/g, "");
 }
 
 async function main() {

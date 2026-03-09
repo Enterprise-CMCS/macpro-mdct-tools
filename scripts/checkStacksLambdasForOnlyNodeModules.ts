@@ -75,8 +75,8 @@ async function checkLambdaFunction(functionId: string): Promise<CheckResult> {
     const buf = Buffer.from(await resp.arrayBuffer());
     const bad = isOnlyNodeModules(buf);
     return { id: functionId, onlyNodeModules: bad };
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : String(e);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       id: functionId,
       onlyNodeModules: false,
@@ -111,7 +111,7 @@ async function main() {
   console.log("\nSummary");
   console.log(`  Total functions:   ${results.length}`);
   console.log(`  Problem functions: ${offenders.length}`);
-  if (offenders.length) {
+  if (offenders.length > 0) {
     console.log("\nFunctions with only node_modules:");
     for (const o of offenders) console.log(`  - ${o.id}`);
     process.exitCode = 1;
