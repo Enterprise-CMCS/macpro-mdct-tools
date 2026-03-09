@@ -33,31 +33,27 @@ function validateArgs() {
     "Usage: node query-recent-submissions.js <application> <environment> <output-file>";
 
   if (!application) {
-    console.error(
+    throw new Error(
       `\nError: Application parameter is required\n${usage}\nValid applications: ${VALID_APPS.join(
         ", "
       )}\n`
     );
-    process.exit(1);
   }
 
   if (!VALID_APPS.includes(application)) {
-    console.error(
+    throw new Error(
       `\nError: Invalid application "${application}"\nValid applications: ${VALID_APPS.join(
         ", "
       )}\n`
     );
-    process.exit(1);
   }
 
   if (!environment) {
-    console.error(`\nError: Environment parameter is required\n${usage}\n`);
-    process.exit(1);
+    throw new Error(`\nError: Environment parameter is required\n${usage}\n`);
   }
 
   if (!outputFileArg) {
-    console.error(`\nError: Output file parameter is required\n${usage}\n`);
-    process.exit(1);
+    throw new Error(`\nError: Output file parameter is required\n${usage}\n`);
   }
 }
 
@@ -74,10 +70,9 @@ console.log(
 
 const appConfig = getApplicationsConfig(environment)[application];
 if (!appConfig) {
-  console.error(
+  throw new Error(
     `\nError: Application configuration not found for "${application}"\n`
   );
-  process.exit(1);
 }
 
 async function scanTable(tableName) {
@@ -172,7 +167,8 @@ function formatReportSummary(report, dateField, appName, reportType = null) {
     const statusName =
       report.status_id === 2
         ? "Provisional"
-        : report.status_id === 3
+        : // oxlint-disable-next-line no-nested-ternary
+          report.status_id === 3
           ? "Final"
           : "Unknown";
     return {
@@ -298,17 +294,15 @@ function escapeCSV(value) {
   if (value == null) return "";
   const str = String(value);
   if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-    return `"${str.replace(/"/g, '""')}"`;
+    return `"${str.replaceAll('"', '""')}"`;
   }
   return str;
 }
 
 async function writeCSV(result, filePath) {
-  const lines = [];
-
-  lines.push(
-    "Application,Report Type,State,Report Name,Submission Date,Submitted By,Submitter Email,Notes"
-  );
+  const lines = [
+    "Application,Report Type,State,Report Name,Submission Date,Submitted By,Submitter Email,Notes",
+  ];
 
   for (const [, data] of Object.entries(result.byReportType)) {
     for (const submission of data.submissions) {
@@ -336,8 +330,7 @@ async function main() {
   const result = await queryApplication(appConfig);
 
   if (result.totalSubmissions === 0) {
-    console.log(`\nNo submissions found. Skipping file creation.\n`);
-    process.exit(0);
+    throw new Error("\nNo submissions found. Skipping file creation.\n");
   }
 
   await mkdir(OUTPUT_DIR, { recursive: true });
