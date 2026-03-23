@@ -8,6 +8,5 @@
     "@aws-sdk/client-dynamodb": "~3.1012.0",
     "@aws-sdk/client-s3": "~3.1012.0",
     "@aws-sdk/lib-dynamodb": "~3.1012.0"
-  },
-  "packageManager": "yarn@4.12.0"
+  }
 }
