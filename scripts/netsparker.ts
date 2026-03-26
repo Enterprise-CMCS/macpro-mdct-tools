@@ -150,6 +150,8 @@ h3. ${domain}
 }
 
 async function main() {
+  // example of a file name:
+  // Medicaid_and_CHIP_Program_System_2026.02.23.7z <- the suffix is a specific encrypted 7z extension
   const downloadsDir = path.join(os.homedir(), "Downloads");
   const filePrefix = "Medicaid_and_CHIP_Program_System";
   const fileSuffix = ".7z";
