@@ -1,13 +1,8 @@
 set -e
 
-# Script version
-SCRIPT_VERSION="1.0.4"
-
-# Define the clone directory and version file
+# Define the clone directory
 clone_dir="$HOME/Projects"
-version_file="$clone_dir/.mdct_workspace_setup_version"
 
-#
 # Define the URLs of the MDCT repositories
 repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
@@ -168,32 +163,6 @@ confirm() {
     esac
 }
 
-# Check if the version file exists
-if [ ! -f "$version_file" ]; then
-    echo "It looks like you've never run the workspace setup script before. The MDCT team uses the workspace setup script to maintain a consistent development environment and brew to install as many packages as possible. The script will remove your ~/.nvm, ~/.npm, ~/go, and ~/.kion.yml folders/files if they already exist to ensure a consistent installation process."
-    if confirm "Would you like to proceed with deleting these folders and continuing the setup? [Y/n]"; then
-        echo "Proceeding with the setup..."
-
-        # Remove ~/.nvm ~/.npm and ~/go folders
-        echo "Removing ~/.nvm, ~/.npm, ~/go, and ~/.kion.yml folders and files if they exist..."
-        rm -rf "$HOME/.nvm"
-        rm -rf "$HOME/.npm"
-        sudo rm -rf "$HOME/go"
-        rm -rf "$HOME/.kion.yml"
-
-        # Create the version file
-        echo "Creating version file at $version_file"
-        echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
-    else
-        echo "Exiting script."
-        exit 0
-    fi
-else
-    # Update the version file on subsequent runs
-    echo "Updating version file at $version_file"
-    echo "Setup script version: $SCRIPT_VERSION" > "$version_file"
-fi
-
 # Install the AWS CLI, used to interact with any/all AWS services
 if ! which aws > /dev/null ; then
   echo "brew installing aws cli session-manager-plugin"
@@ -207,15 +176,8 @@ if ! which jq > /dev/null ; then
 fi
 
 # Install nvm, a version manager for Node, allowing multiple versions of Node to be installed and used
-if [ "$CI" != "true" ]; then
-  if [ ! -f ~/.nvm/nvm.sh ]; then
-    echo "brew installing nvm"
-    brew install nvm
-  fi
-else
-  echo "brew is installing nvm"
-  brew install nvm
-fi
+echo "brew installing nvm"
+brew install nvm
 echo "creating ~/.nvm if it does no exist"
 mkdir -p ~/.nvm
 
@@ -225,21 +187,14 @@ echo "sourcing nvm.sh"
 source $(brew --prefix nvm)/nvm.sh
 
 # Optional: Add NVM initialization to shell profile for future sessions
-if [ "$shell" = "bash" ] && ! grep -q 'source $(brew --prefix nvm)/nvm.sh' $shellprofile; then
+if ! grep -q 'source $(brew --prefix nvm)/nvm.sh' $shellprofile; then
   echo 'export NVM_DIR="$HOME/.nvm"' >> $shellprofile
   echo 'source $(brew --prefix nvm)/nvm.sh' >> $shellprofile
 fi
 
-if [ "$shell" = "zsh" ] && ! grep -q 'source $(brew --prefix nvm)/nvm.sh' $shellprofile; then
-  echo 'export NVM_DIR="$HOME/.nvm"' >> $shellprofile
-  echo 'source $(brew --prefix nvm)/nvm.sh' >> $shellprofile
-fi
-
-# Install pre-commit
-if ! which pre-commit > /dev/null ; then
-  echo "brew installing pre-commit"
-  brew install pre-commit
-fi
+# Install/Update pre-commit
+echo "brew installing/updating pre-commit"
+brew install pre-commit
 
 # Install java with brew
 if [[ ! $(which java) =~ "$(brew --prefix)/opt/openjdk" ]] ; then
@@ -345,7 +300,7 @@ for url in "${repo_urls[@]}"; do
 
     # Run the "pre-commit install" command
     echo "Running pre-commit install in $repo_name..."
-    pre-commit install
+    pre-commit install --hook-type pre-commit --hook-type commit-msg
 
     # Check if pre-commit install was successful
     if [ $? -eq 0 ]; then
@@ -393,102 +348,6 @@ for url in "${repo_urls[@]}"; do
     echo "Running yarn"
     yarn
 
-    # Check if ui-src node_modules directory exists
-    if [ -d "services/ui-src/node_modules" ]; then
-        echo "services/ui-src/node_modules directory found. Removing its contents..."
-        rm -rf services/ui-src/node_modules
-    fi
-
-    # Run yarn in /services/ui-src/ directory if package.json exists
-    if [ -f "services/ui-src/package.json" ]; then
-      echo "Running yarn in /services/ui-src/ directory..."
-      (cd services/ui-src/ && yarn)
-    fi
-
-    # Check if app-api node_modules directory exists
-    if [ -d "services/app-api/node_modules" ]; then
-        echo "services/app-api/node_modules directory found. Removing its contents..."
-        rm -rf services/app-api/node_modules
-    fi
-
-    # Run yarn in /services/app-api/ directory if package.json exists
-    if [ -f "services/app-api/package.json" ]; then
-      echo "Running yarn in /services/app-api/ directory..."
-      (cd services/app-api/ && yarn)
-    fi
-
-    # Check if database node_modules directory exists
-    if [ -d "services/database/node_modules" ]; then
-        echo "services/database/node_modules directory found. Removing its contents..."
-        rm -rf services/database/node_modules
-    fi
-
-    # Run yarn in /services/database/ directory if package.json exists
-    if [ -f "services/database/package.json" ]; then
-      echo "Running yarn in /services/database/ directory..."
-      (cd services/database/ && yarn)
-    fi
-
-    # Check if ui node_modules directory exists
-    if [ -d "services/ui/node_modules" ]; then
-        echo "services/ui/node_modules directory found. Removing its contents..."
-        rm -rf services/ui/node_modules
-    fi
-
-    # Run yarn in /services/ui/ directory if package.json exists
-    if [ -f "services/ui/package.json" ]; then
-      echo "Running yarn in /services/ui/ directory..."
-      (cd services/ui/ && yarn)
-    fi
-
-    # Check if ui-auth node_modules directory exists
-    if [ -d "services/ui-auth/node_modules" ]; then
-        echo "services/ui-auth/node_modules directory found. Removing its contents..."
-        rm -rf services/ui-auth/node_modules
-    fi
-
-    # Run yarn in /services/ui-auth/ directory if package.json exists
-    if [ -f "services/ui-auth/package.json" ]; then
-      echo "Running yarn in /services/ui-auth/ directory..."
-      (cd services/ui-auth/ && yarn)
-    fi
-
-    # Check if uploads node_modules directory exists
-    if [ -d "services/uploads/node_modules" ]; then
-        echo "services/uploads/node_modules directory found. Removing its contents..."
-        rm -rf services/uploads/node_modules
-    fi
-
-    # Run yarn in /services/uploads/ directory if package.json exists
-    if [ -f "services/uploads/package.json" ]; then
-      echo "Running yarn in /services/uploads/ directory..."
-      (cd services/uploads/ && yarn)
-    fi
-
-    # Check if tests/cypress node_modules directory exists
-    if [ -d "tests/cypress/node_modules" ]; then
-        echo "tests/cypress/node_modules directory found. Removing its contents..."
-        rm -rf tests/cypress/node_modules
-    fi
-
-    # If the tets live in tests/cypress ... run yarn there
-    if [ -d "tests/cypress" ]; then
-        echo "running yarn in the tests/cypress folder...."
-        (cd tests/cypress && yarn)
-    fi
-
-    # Check if tests node_modules directory exists
-    if [ -d "tests/node_modules" ]; then
-        echo "tests/node_modules directory found. Removing its contents..."
-        rm -rf tests/node_modules
-    fi
-
-    # If the tets live in tests ... run yarn there
-    if [ -f "tests/package.json" ]; then
-        echo "running yarn in the tests folder...."
-        (cd tests && yarn)
-    fi
-
     # Check if yarn was successful
     if [ $? -eq 0 ]; then
         echo "yarn completed successfully in $repo_name."
@@ -516,12 +375,6 @@ fi
 if ! which localstack > /dev/null ; then
   echo "brew installing localstack/tap/localstack-cli"
   brew install localstack/tap/localstack-cli
-fi
-
-# Install dynamodb-admin
-if ! which dynamodb-admin > /dev/null ; then
-  echo "npm installing dynamodb-admin"
-  npm install -g dynamodb-admin
 fi
 
 echo " Congratulations! The script ran successfully. Here is a free taco for your time.
