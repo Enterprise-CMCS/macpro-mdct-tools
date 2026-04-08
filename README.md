@@ -90,12 +90,6 @@ colima
 localstack
 ```
 
-Tools installed via npm:
-
-```
-dynamodb-admin
-```
-
 ### Developing/Adding Changes to Workspace setup:
 
 The team is encouraged to add changes to the workspace setup that will be beneficial to the entire team. To make changes the current process is as following:

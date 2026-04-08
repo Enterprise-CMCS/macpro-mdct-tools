@@ -2,21 +2,18 @@ name: Workspace Setup
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "0 10 * * SUN"
-  push:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
     branches:
       - "main"
-      - "!skipci*"
+    paths:
+      - "mdct-setup.sh"
+      - ".github/workflows/workspace-setup.yml"
 
 jobs:
   test:
     runs-on: macos-26
-    timeout-minutes: 120
-    environment:
-      name: test-ws-setup
-    env:
-      STAGE_NAME: test-ws-setup
+    timeout-minutes: 30
     permissions:
       id-token: write
     steps:
