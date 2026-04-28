@@ -13,7 +13,16 @@ const region = "us-east-1";
 const cf = new CloudFormationClient({ region });
 const sts = new STSClient({ region });
 
-const PROJECTS = ["mcr", "mfp", "carts", "qmr", "seds", "hcbs"];
+const PROJECTS = [
+  "carts",
+  "hcbs",
+  "mcr",
+  "mfp",
+  "pasrr",
+  "qmr",
+  "rhtp",
+  "seds",
+];
 const ENVS = ["main", "val", "prod", "production"];
 const OUT_DIR = "resource-types";
 
