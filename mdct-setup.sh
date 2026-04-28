@@ -6,14 +6,15 @@ clone_dir="$HOME/Projects"
 # Define the URLs of the MDCT repositories
 repo_urls=(
     "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-seds.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-hcbs.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-hcbs.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-pasrr.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-rhtp.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-seds.git"
     "https://github.com/Enterprise-CMCS/macpro-mdct-core.git"
+    "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
 )
 
 # Check that user is using MacOS

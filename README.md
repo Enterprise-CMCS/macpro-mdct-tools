@@ -52,15 +52,18 @@ If you're a developer on the MDCT program and need to re-run the workspace setup
 - The script will error out early if you are not on the correct integration branch for **any** repository. You must check out main in all of the repositories to run the script
 - The script clones all of the repos using HTTPS and not SSH. If you prefer to use ssh for github authentication you can run the following after you've run the workspace setup script. Also, this is a one time command and will not need to be run after future runs of the workspace setup script.
 
-`cd ~/Projects/macpro-mdct-carts && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-carts.git &&
-cd ~/Projects/macpro-mdct-core && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-core.git &&
+```
+cd ~/Projects/macpro-mdct-carts && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-carts.git &&
 cd ~/Projects/macpro-mdct-hcbs && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-hcbs.git &&
 cd ~/Projects/macpro-mdct-mcr && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-mcr.git &&
 cd ~/Projects/macpro-mdct-mfp && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-mfp.git &&
+cd ~/Projects/macpro-mdct-pasrr && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-pasrr.git &&
 cd ~/Projects/macpro-mdct-qmr && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-qmr.git &&
 cd ~/Projects/macpro-mdct-rhtp && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-rhtp.git &&
 cd ~/Projects/macpro-mdct-seds && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-seds.git &&
-cd ~/Projects/macpro-mdct-tools && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-tools.git`
+cd ~/Projects/macpro-mdct-core && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-core.git &&
+cd ~/Projects/macpro-mdct-tools && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-tools.git
+```
 
 ### Tools Installed:
 
