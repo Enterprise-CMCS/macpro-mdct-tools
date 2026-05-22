@@ -1,20 +1,21 @@
+#!/usr/bin/env bash
 set -e
 
 # Define the clone directory
 clone_dir="$HOME/Projects"
 
-# Define the URLs of the MDCT repositories
-repo_urls=(
-    "https://github.com/Enterprise-CMCS/macpro-mdct-carts.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-hcbs.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-mcr.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-mfp.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-pasrr.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-qmr.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-rhtp.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-seds.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-core.git"
-    "https://github.com/Enterprise-CMCS/macpro-mdct-tools.git"
+# Define the MDCT repositories
+repo_names=(
+    "macpro-mdct-carts"
+    "macpro-mdct-hcbs"
+    "macpro-mdct-mcr"
+    "macpro-mdct-mfp"
+    "macpro-mdct-pasrr"
+    "macpro-mdct-qmr"
+    "macpro-mdct-rhtp"
+    "macpro-mdct-seds"
+    "macpro-mdct-core"
+    "macpro-mdct-tools"
 )
 
 # Check that user is using MacOS
@@ -23,12 +24,49 @@ if [[ ! "$OSTYPE" =~ ^darwin ]]; then
   echo "ERROR:  This script is intended only for MacOS." && exit 1
 fi
 
+clone_method=""
+
+if [ "$CI" = "true" ]; then
+  clone_method="https"
+else
+  echo "Which clone method do you want to use?  Please input a number and hit Enter:"
+  select selected_method in HTTPS SSH
+  do
+    case $selected_method in
+      "HTTPS")
+        clone_method="https"
+        ;;
+      "SSH")
+        clone_method="ssh"
+        ;;
+      *)
+        echo "ERROR:  Invalid input.  Exiting."
+        exit 1
+        ;;
+    esac
+    break
+  done
+fi
+
+case "$clone_method" in
+  https)
+    repo_base_url="https://github.com/Enterprise-CMCS"
+    ;;
+  ssh)
+    repo_base_url="git@github.com:Enterprise-CMCS"
+    ;;
+esac
+
+echo "Using $clone_method for cloning and repo remotes."
+
+repo_url_for() {
+  echo "$repo_base_url/$1.git"
+}
+
 # Loop through each repository URL
 echo "Checking to see if the MDCT repos already exist and ensure they are on the correct branch to continue running the MDCT workspace setup script...."
-for repo_url in "${repo_urls[@]}"; do
-    # Extract the repository name from the URL
-    repo_name=$(basename -s .git "$repo_url")
-
+for repo_name in "${repo_names[@]}"; do
+    repo_url="$(repo_url_for "$repo_name")"
     # Construct the repository directory path
     repo_dir="$clone_dir/$repo_name"
 
@@ -166,8 +204,8 @@ confirm() {
 
 # Install the AWS CLI, used to interact with any/all AWS services
 if ! which aws > /dev/null ; then
-  echo "brew installing aws cli session-manager-plugin"
-	brew install awscli session-manager-plugin
+  echo "brew installing aws cli"
+	brew install awscli
 fi
 
 # Install jq, a command line utility for parsing JSON.
@@ -196,24 +234,6 @@ fi
 # Install/Update pre-commit
 echo "brew installing/updating pre-commit"
 brew install pre-commit
-
-# Install java with brew
-if [[ ! $(which java) =~ "$(brew --prefix)/opt/openjdk" ]] ; then
-  echo "brew installing java"
-	brew install java
-  # Get the directory where java is installed
-  java_home=$(brew --prefix)/opt/openjdk
-
-  # Add java to PATH
-  echo "adding java to PATH"
-  echo "export PATH=\"$java_home/bin:\$PATH\"" >> "$shellprofile"
-  # echo "Java installed successfully and added to PATH."
-  source $shellprofile
-  # Check if java is installed and add it to PATH if necessary
-  if [[ ! $(which java) =~ "$(brew --prefix)/opt/openjdk" ]] ; then
-      echo "Java installation failed." && exit 1
-  fi
-fi
 
 # Install awslogs, a utility for streaming CloudWatch logs
 if ! which awslogs > /dev/null ; then
@@ -276,9 +296,8 @@ fi
 
 # Loop through each repository URL
 echo "Begin cloning/looping through repos"
-for url in "${repo_urls[@]}"; do
-    # Extract the repository name from the URL
-    repo_name=$(basename "$url" .git)
+for repo_name in "${repo_names[@]}"; do
+    url="$(repo_url_for "$repo_name")"
 
     # Clone the repository if it doesn't exist
     if [ ! -d "$clone_dir/$repo_name" ]; then
@@ -298,6 +317,11 @@ for url in "${repo_urls[@]}"; do
 
     # Navigate into the cloned repository directory
     cd "$clone_dir/$repo_name"
+
+    current_remote=$(git remote get-url origin 2>/dev/null || true)
+    if [ "$current_remote" != "$url" ]; then
+        git remote set-url origin "$url"
+    fi
 
     # Run the "pre-commit install" command
     echo "Running pre-commit install in $repo_name..."
