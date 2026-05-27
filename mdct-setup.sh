@@ -353,7 +353,7 @@ for repo_name in "${repo_names[@]}"; do
         continue
     fi
 
-    cp .vscode/settings.json.template .vscode/settings.json
+    cp .vscode/settings.json.template .vscode/settings.json 2>/dev/null || true
 
     [ ! -f ".nvmrc" ] && continue
 
