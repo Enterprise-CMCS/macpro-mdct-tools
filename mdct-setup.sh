@@ -329,7 +329,9 @@ for url in "${repo_urls[@]}"; do
         continue
     fi
 
-    cp .vscode/settings.json.template .vscode/settings.json
+    if [ -f ".vscode/settings.json.template" ]; then
+        cp .vscode/settings.json.template .vscode/settings.json
+    fi
 
     [ ! -f ".nvmrc" ] && continue
 
