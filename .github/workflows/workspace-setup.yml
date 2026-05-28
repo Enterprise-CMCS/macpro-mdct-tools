@@ -20,7 +20,9 @@ jobs:
       # rather than run from the repo this replicates the behavior of new devs onboarding
       - name: curl setup
         run: |
-          curl -o mdct-setup.sh https://raw.githubusercontent.com/Enterprise-CMCS/macpro-mdct-tools/main/mdct-setup.sh && chmod +x mdct-setup.sh && ./mdct-setup.sh
+          repo="${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name || github.repository }}"
+          ref="${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}"
+          curl -o mdct-setup.sh "https://raw.githubusercontent.com/$repo/$ref/mdct-setup.sh" && chmod +x mdct-setup.sh && ./mdct-setup.sh
 
       # This job flexes the 1Password capability for MFP after the projects have been setup by using a 1password service account
       - name: one password test

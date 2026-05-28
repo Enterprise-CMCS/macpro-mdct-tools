@@ -29,15 +29,16 @@ If you're a developer on the MDCT program and need to re-run the workspace setup
 1. `cd ~/Projects/macpro-mdct-tools`
 2. `git checkout main`
 3. `git pull`
-4. `sh mdct-setup.sh`
+4. `./mdct-setup.sh`
+5. When prompted, select HTTPS or SSH for cloning repositories
 
 ### What does workspace setup do?
 
-1. The MDCT workspace setup script starts by removing any existing applicable installations that may have been installed by hand or possibly through other projects on your workstation. These include installations of serverless, java, npm, and nvm.
+1. The MDCT workspace setup script starts by removing any existing applicable installations that may have been installed by hand or possibly through other projects on your workstation. These include installations of serverless, npm, and nvm.
 2. You then choose your preferred shell between ZSH or BASH. This will be used to write certain variables and PATHS throughout the script
 3. A `~/Projects` directory is created if it does not already exist. This will be the base directory where all MDCT repositories are cloned.
 4. Brew and XCode Command Line tools are installed if they have not already been installed.
-5. Standard tooling is installed using brew. Tools include pre-commit, nvm, kion, java, etc.
+5. Standard tooling is installed using brew. Tools include pre-commit, nvm, kion, etc.
 6. Repositories are cloned to the `~/Projects` folder
 7. The script then loops through each repository and does the following
    - Checks to see if the repository is on the main branch
@@ -50,20 +51,7 @@ If you're a developer on the MDCT program and need to re-run the workspace setup
 
 - **This script is meant solely to be run on Mac OS**. Currently Windows and Linux OS are not supported and have not been tested.
 - The script will error out early if you are not on the correct integration branch for **any** repository. You must check out main in all of the repositories to run the script
-- The script clones all of the repos using HTTPS and not SSH. If you prefer to use ssh for github authentication you can run the following after you've run the workspace setup script. Also, this is a one time command and will not need to be run after future runs of the workspace setup script.
-
-```
-cd ~/Projects/macpro-mdct-carts && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-carts.git &&
-cd ~/Projects/macpro-mdct-hcbs && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-hcbs.git &&
-cd ~/Projects/macpro-mdct-mcr && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-mcr.git &&
-cd ~/Projects/macpro-mdct-mfp && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-mfp.git &&
-cd ~/Projects/macpro-mdct-pasrr && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-pasrr.git &&
-cd ~/Projects/macpro-mdct-qmr && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-qmr.git &&
-cd ~/Projects/macpro-mdct-rhtp && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-rhtp.git &&
-cd ~/Projects/macpro-mdct-seds && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-seds.git &&
-cd ~/Projects/macpro-mdct-core && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-core.git &&
-cd ~/Projects/macpro-mdct-tools && git remote set-url origin git@github.com:Enterprise-CMCS/macpro-mdct-tools.git
-```
+- The script will prompt you to choose between HTTPS and SSH for cloning repositories.
 
 ### Tools Installed:
 
@@ -81,7 +69,6 @@ aws cli
 jq
 nvm
 pre-commit
-java
 aws logs
 git
 github cli
