@@ -4,7 +4,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 QUERY_SCRIPT="${SCRIPT_DIR}/query-recent-submissions.js"
 OUTPUT_DIR="${SCRIPT_DIR}/output"
-ACCOUNTS_FILE="${REPORTING_ACCOUNTS_FILE:-${HOME}/data/mdct-reporting/accounts.list}"
+ACCOUNTS_FILE="${REPORTING_ACCOUNTS_FILE:-${SCRIPT_DIR}/accounts.list}"
 
 [[ -f "$QUERY_SCRIPT" ]] || { echo "Error: query-recent-submissions.js not found" >&2; exit 1; }
 [[ -f "$ACCOUNTS_FILE" ]] || { echo "Error: account config not found at $ACCOUNTS_FILE" >&2; exit 1; }

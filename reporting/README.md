@@ -13,7 +13,7 @@ Use this when you need reports for the full previous calendar month across the c
 npm install
 ```
 
-3. Place the separately distributed account config at `~/data/mdct-reporting/accounts.list`.
+3. Place the separately distributed account config at `accounts.list`.
    Use `accounts.list.example` for the required row format.
 
 4. Run the monthly job:
@@ -28,7 +28,7 @@ Notes:
 
 - The script obtains short-lived credentials for each account by running `kion stak --credential-process` with account IDs and cloud access roles.
 - The script does not read or write `~/.aws/credentials`.
-- Account IDs are read from `~/data/mdct-reporting/accounts.list` or the `REPORTING_ACCOUNTS_FILE` path.
+- Account IDs are read from `accounts.list` or the `REPORTING_ACCOUNTS_FILE` path.
 - Unsupported app rows are skipped before credentials are requested.
 - If an app has zero submissions, the script writes a header-only CSV.
 
@@ -44,7 +44,7 @@ Notes:
 
 - **Date range**: Complete prior calendar month only (for example, on July 9 it runs June 1 through June 30)
 - **Credential source**: `kion stak --credential-process`
-- **Account config**: `~/data/mdct-reporting/accounts.list`
+- **Account config**: `./accounts.list`
 - **Output directory**: `./output/`
 
 Configured accounts:
