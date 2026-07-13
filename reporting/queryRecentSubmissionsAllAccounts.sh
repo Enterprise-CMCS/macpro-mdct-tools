@@ -4,18 +4,12 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 QUERY_SCRIPT="${SCRIPT_DIR}/query-recent-submissions.js"
 OUTPUT_DIR="${SCRIPT_DIR}/output"
+ACCOUNTS_FILE="${REPORTING_ACCOUNTS_FILE:-${HOME}/data/mdct-reporting/accounts.list}"
 
 [[ -f "$QUERY_SCRIPT" ]] || { echo "Error: query-recent-submissions.js not found" >&2; exit 1; }
+[[ -f "$ACCOUNTS_FILE" ]] || { echo "Error: account config not found at $ACCOUNTS_FILE" >&2; exit 1; }
 
-TARGET_ACCOUNTS=(
-  "aws-cms-oit-iusg-acct283|459236791836|MDCT Application Admin|seds|production|mdct-seds-prod.csv"
-  "aws-cms-cmcs-mdct-carts-prod|175972079437|mdctcarts-application-admin|carts|production|mdct-carts-prod.csv"
-  "aws-cms-cmcs-mdctmcr-prod|044969939588|mdctmcr-application-admin|mcr|production|mdct-mcr-prod.csv"
-  "aws-cms-cmcs-mdct-mfp-prod|006660783728|mdctmfp-application-admin|mfp|production|mdct-mfp-prod.csv"
-  "aws-cms-cmcs-mdct-qmr-prod|204375272847|mdctqmr-application-admin|qmr|production|mdct-qmr-prod.csv"
-  "aws-cms-cmcs-mdct-rhtp-prod|823615568263|mdct-rhtp-application-admin|seds|production|mdct-rhtp-prod.csv"
-  "aws-cms-cmcs-mdcthcbs-prod|339713052013|mdcthcbs-application-admin|hcbs|production|mdct-hcbs-prod.csv"
-)
+SUPPORTED_APPS=(carts hcbs mcr mfp qmr seds)
 
 get_credential_field() {
   KION_CREDENTIAL_JSON="$credential_json" node -e '
@@ -34,14 +28,26 @@ try {
 mkdir -p "$OUTPUT_DIR"
 
 echo "Querying submissions across MDCT accounts"
+echo "Using account config: $ACCOUNTS_FILE"
 echo "Results will be saved to: $OUTPUT_DIR"
 echo
 
-for account in "${TARGET_ACCOUNTS[@]}"; do
-  IFS='|' read -r account_alias account_id car app env output_name <<< "$account"
+while IFS='|' read -r account_alias account_id car app env output_name || [[ -n "$account_alias" ]]; do
+  [[ -z "${account_alias// }" || "$account_alias" == \#* ]] && continue
+
   output_file="${OUTPUT_DIR}/${output_name}"
 
   echo "Processing: $account_alias ($app/$env)"
+
+  if [[ -z "$account_id" || -z "$car" || -z "$app" || -z "$env" || -z "$output_name" ]]; then
+    echo "  Invalid account config row" >&2
+    continue
+  fi
+
+  if [[ " ${SUPPORTED_APPS[*]} " != *" $app "* ]]; then
+    echo "  Skipping unsupported app: $app" >&2
+    continue
+  fi
 
   if ! credential_json="$(kion stak --account "$account_id" --car "$car" --region us-east-1 --credential-process)"; then
     echo "  Failed to get Kion credentials" >&2
@@ -64,7 +70,7 @@ for account in "${TARGET_ACCOUNTS[@]}"; do
     node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
 
   unset credential_json AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
-done
+done < "$ACCOUNTS_FILE"
 
 echo
 echo "Done. Reports in: $OUTPUT_DIR"

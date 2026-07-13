@@ -4,5 +4,6 @@ scripts/unmanaged-resources*.txt
 scripts/unmanaged-resources*-delete-commands.txt
 node_modules
 /reporting/output
+/reporting/accounts.list
 **/.yarn/*
 .vscode/settings.json
