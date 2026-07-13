@@ -23,7 +23,8 @@ npm install
 
 Notes:
 
-- The script obtains credentials for each account through an AWS SDK `credential_process` that runs `kion stak` with account aliases and cloud access roles.
+- The script obtains short-lived credentials for each account by running `kion stak --credential-process` with account aliases and cloud access roles.
+- The script does not read or write `~/.aws/credentials`.
 
 ## Quick Start
 
@@ -36,7 +37,7 @@ Notes:
 ## Configuration
 
 - **Date range**: Complete prior calendar month only (for example, on July 9 it runs June 1 through June 30)
-- **Credential source**: `kion stak` through AWS SDK `credential_process`
+- **Credential source**: `kion stak --credential-process`
 - **Output directory**: `./output/`
 
 Configured accounts:
