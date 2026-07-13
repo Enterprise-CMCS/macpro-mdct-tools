@@ -22,7 +22,8 @@ npm install
 4. Collect CSV files from `reporting/output/`.
 
 Notes:
-- The script obtains credentials for each account with `kion run` using account aliases and cloud access roles, not Kion favorites.
+
+- The script obtains credentials for each account through an AWS SDK `credential_process` that runs `kion stak` with account aliases and cloud access roles.
 
 ## Quick Start
 
@@ -32,24 +33,10 @@ Notes:
 ./queryRecentSubmissionsAllAccounts.sh
 ```
 
-### Run a Single Application
-
-```bash
-kion run --alias <account_alias> --car <role> -- \
-  node query-recent-submissions.js <app> <environment> <output-file>
-```
-
-Example:
-
-```bash
-kion run --alias aws-cms-cmcs-mdctmcr-prod --car mdctmcr-application-admin -- \
-  node query-recent-submissions.js mcr production output/mcr-prod.csv
-```
-
 ## Configuration
 
 - **Date range**: Complete prior calendar month only (for example, on July 9 it runs June 1 through June 30)
-- **Credential source**: `kion run` assume-role flow
+- **Credential source**: `kion stak` through AWS SDK `credential_process`
 - **Output directory**: `./output/`
 
 Configured accounts:

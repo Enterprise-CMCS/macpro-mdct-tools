@@ -83,9 +83,9 @@ function getDateRange() {
   const endDateInclusive = new Date(range.endTimestamp - 1);
   return {
     ...range,
-    logMessage: `complete prior month (${range.startDate
-      .toISOString()
-      .split("T")[0]} to ${endDateInclusive.toISOString().split("T")[0]})`,
+    logMessage: `complete prior month (${
+      range.startDate.toISOString().split("T")[0]
+    } to ${endDateInclusive.toISOString().split("T")[0]})`,
   };
 }
 
