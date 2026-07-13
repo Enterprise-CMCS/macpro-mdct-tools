@@ -23,7 +23,7 @@ npm install
 
 Notes:
 
-- The script obtains short-lived credentials for each account by running `kion stak --credential-process` with account aliases and cloud access roles.
+- The script obtains short-lived credentials for each account by running `kion stak --credential-process` with account IDs and cloud access roles.
 - The script does not read or write `~/.aws/credentials`.
 
 ## Quick Start
@@ -42,13 +42,13 @@ Notes:
 
 Configured accounts:
 
-- aws-cms-oit-iusg-acct283
-- aws-cms-cmcs-mdct-carts-prod
-- aws-cms-cmcs-mdctmcr-prod
-- aws-cms-cmcs-mdct-mfp-prod
-- aws-cms-cmcs-mdct-qmr-prod
-- aws-cms-cmcs-mdct-rhtp-prod
-- aws-cms-cmcs-mdcthcbs-prod
+- aws-cms-oit-iusg-acct283 (459236791836)
+- aws-cms-cmcs-mdct-carts-prod (175972079437)
+- aws-cms-cmcs-mdctmcr-prod (044969939588)
+- aws-cms-cmcs-mdct-mfp-prod (006660783728)
+- aws-cms-cmcs-mdct-qmr-prod (204375272847)
+- aws-cms-cmcs-mdct-rhtp-prod (823615568263)
+- aws-cms-cmcs-mdcthcbs-prod (339713052013)
 
 The six `aws-cms-cmcs-*prod` aliases are directly identified as production by their Kion aliases. The `aws-cms-oit-iusg-acct283` alias does not include `prod`; it is configured as the SEDS production reporting account based on the Kion selection used for this report.
 
