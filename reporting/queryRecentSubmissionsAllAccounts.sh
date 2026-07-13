@@ -8,13 +8,13 @@ OUTPUT_DIR="${SCRIPT_DIR}/output"
 [[ -f "$QUERY_SCRIPT" ]] || { echo "Error: query-recent-submissions.js not found" >&2; exit 1; }
 
 TARGET_ACCOUNTS=(
-  "MDCT Dev|461|mdct-dev-application-admin|seds|main|mdct-seds-dev.csv"
-  "mdct-carts-prod|932|mdct-carts-prod-application-admin|carts|production|mdct-carts-prod.csv"
-  "mdct-mcr-prod|879|mdct-mcr-prod-application-admin|mcr|production|mdct-mcr-prod.csv"
-  "mdct-mfp-prod|1185|mdct-mfp-prod-application-admin|mfp|production|mdct-mfp-prod.csv"
-  "mdct-qmr-prod|654|mdct-qmr-prod-application-admin|qmr|production|mdct-qmr-prod.csv"
-  "mdct-rhtp-prod|1666|mdct-rhtp-prod-application-admin|seds|production|mdct-rhtp-prod.csv"
-  "mdcthcbs-prod|1387|mdcthcbs-prod-application-admin|hcbs|production|mdct-hcbs-prod.csv"
+  "aws-cms-oit-iusg-acct283|MDCT Application Admin|seds|production|mdct-seds-prod.csv"
+  "aws-cms-cmcs-mdct-carts-prod|mdctcarts-application-admin|carts|production|mdct-carts-prod.csv"
+  "aws-cms-cmcs-mdctmcr-prod|mdctmcr-application-admin|mcr|production|mdct-mcr-prod.csv"
+  "aws-cms-cmcs-mdct-mfp-prod|mdctmfp-application-admin|mfp|production|mdct-mfp-prod.csv"
+  "aws-cms-cmcs-mdct-qmr-prod|mdctqmr-application-admin|qmr|production|mdct-qmr-prod.csv"
+  "aws-cms-cmcs-mdct-rhtp-prod|mdct-rhtp-application-admin|seds|production|mdct-rhtp-prod.csv"
+  "aws-cms-cmcs-mdcthcbs-prod|mdcthcbs-application-admin|hcbs|production|mdct-hcbs-prod.csv"
 )
 
 mkdir -p "$OUTPUT_DIR"
@@ -24,12 +24,12 @@ echo "Results will be saved to: $OUTPUT_DIR"
 echo
 
 for account in "${TARGET_ACCOUNTS[@]}"; do
-  IFS='|' read -r friendly account_id car app env output_name <<< "$account"
+  IFS='|' read -r account_alias car app env output_name <<< "$account"
   output_file="${OUTPUT_DIR}/${output_name}"
 
-  echo "Processing: $friendly ($app/$env)"
+  echo "Processing: $account_alias ($app/$env)"
 
-  kion run --account "$account_id" --car "$car" --region us-east-1 -- \
+  kion run --alias "$account_alias" --car "$car" --region us-east-1 -- \
     node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
 done
 

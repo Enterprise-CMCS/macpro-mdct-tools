@@ -22,7 +22,7 @@ npm install
 4. Collect CSV files from `reporting/output/`.
 
 Notes:
-- The script obtains credentials for each account with `kion run`.
+- The script obtains credentials for each account with `kion run` using account aliases and cloud access roles, not Kion favorites.
 
 ## Quick Start
 
@@ -35,14 +35,14 @@ Notes:
 ### Run a Single Application
 
 ```bash
-kion run --account <account_id> --car <role> -- \
+kion run --alias <account_alias> --car <role> -- \
   node query-recent-submissions.js <app> <environment> <output-file>
 ```
 
 Example:
 
 ```bash
-kion run --account XXXXXXXXXXXX --car XXXXXXX-application-admin -- \
+kion run --alias aws-cms-cmcs-mdctmcr-prod --car mdctmcr-application-admin -- \
   node query-recent-submissions.js mcr production output/mcr-prod.csv
 ```
 
@@ -54,13 +54,15 @@ kion run --account XXXXXXXXXXXX --car XXXXXXX-application-admin -- \
 
 Configured accounts:
 
-- MDCT Dev (461)
-- mdct-carts-prod (932)
-- mdct-mcr-prod (879)
-- mdct-mfp-prod (1185)
-- mdct-qmr-prod (654)
-- mdct-rhtp-prod (1666)
-- mdcthcbs-prod (1387)
+- aws-cms-oit-iusg-acct283
+- aws-cms-cmcs-mdct-carts-prod
+- aws-cms-cmcs-mdctmcr-prod
+- aws-cms-cmcs-mdct-mfp-prod
+- aws-cms-cmcs-mdct-qmr-prod
+- aws-cms-cmcs-mdct-rhtp-prod
+- aws-cms-cmcs-mdcthcbs-prod
+
+The six `aws-cms-cmcs-*prod` aliases are directly identified as production by their Kion aliases. The `aws-cms-oit-iusg-acct283` alias does not include `prod`; it is configured as the SEDS production reporting account based on the Kion selection used for this report.
 
 ## Output
 
