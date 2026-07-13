@@ -361,6 +361,11 @@ async function main() {
 
   await mkdir(OUTPUT_DIR, { recursive: true });
 
+  if (result.totalSubmissions === 0) {
+    console.log("\nNo submissions found. Skipping CSV creation.\n");
+    return;
+  }
+
   console.log(`\nWriting CSV to ${outputFile}`);
   await writeCSV(result, outputFile);
 

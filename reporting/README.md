@@ -30,7 +30,7 @@ Notes:
 - The script does not read or write `~/.aws/credentials`.
 - Account IDs are read from `accounts.list` or the `REPORTING_ACCOUNTS_FILE` path.
 - Unsupported app rows are skipped before credentials are requested.
-- If an app has zero submissions, the script writes a header-only CSV.
+- If an app has zero submissions, the script skips CSV creation for that app.
 
 ## Quick Start
 
