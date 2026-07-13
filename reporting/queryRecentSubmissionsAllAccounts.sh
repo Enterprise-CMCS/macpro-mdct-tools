@@ -2,54 +2,20 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ACCOUNTS_FILE="${SCRIPT_DIR}/../scripts/accounts.list"
 QUERY_SCRIPT="${SCRIPT_DIR}/query-recent-submissions.js"
 OUTPUT_DIR="${SCRIPT_DIR}/output"
 
-PROD_ONLY=false
-USE_SHARED_CREDENTIALS=false
-
-for arg in "$@"; do
-  case "$arg" in
-    --prod-only)
-      PROD_ONLY=true
-      ;;
-    --use-shared-credentials)
-      USE_SHARED_CREDENTIALS=true
-      ;;
-    *)
-      echo "Error: Unknown argument '$arg'" >&2
-      echo "Usage: ./queryRecentSubmissionsAllAccounts.sh [--prod-only] [--use-shared-credentials]" >&2
-      exit 1
-      ;;
-  esac
-done
-
-[[ -f "$ACCOUNTS_FILE" ]] || { echo "Error: accounts.list not found" >&2; exit 1; }
 [[ -f "$QUERY_SCRIPT" ]] || { echo "Error: query-recent-submissions.js not found" >&2; exit 1; }
 
-get_app_and_env() {
-  local friendly="$1"
-  local app env
-
-  case "${friendly:l}" in
-    *carts*) app="carts" ;;
-    *mcr*)   app="mcr" ;;
-    *mfp*)   app="mfp" ;;
-    *qmr*)   app="qmr" ;;
-    *hcbs*)  app="hcbs" ;;
-    *)       app="seds" ;;
-  esac
-
-  case "${friendly:l}" in
-    *prod*) env="production" ;;
-    *impl*|*val*) env="val" ;;
-    *dev*)  env="main" ;;
-    *)      env="unknown" ;;
-  esac
-
-  echo "${app}|${env}"
-}
+TARGET_ACCOUNTS=(
+  "MDCT Dev|461|mdct-dev-application-admin|seds|main|mdct-seds-dev.csv"
+  "mdct-carts-prod|932|mdct-carts-prod-application-admin|carts|production|mdct-carts-prod.csv"
+  "mdct-mcr-prod|879|mdct-mcr-prod-application-admin|mcr|production|mdct-mcr-prod.csv"
+  "mdct-mfp-prod|1185|mdct-mfp-prod-application-admin|mfp|production|mdct-mfp-prod.csv"
+  "mdct-qmr-prod|654|mdct-qmr-prod-application-admin|qmr|production|mdct-qmr-prod.csv"
+  "mdct-rhtp-prod|1666|mdct-rhtp-prod-application-admin|seds|production|mdct-rhtp-prod.csv"
+  "mdcthcbs-prod|1387|mdcthcbs-prod-application-admin|hcbs|production|mdct-hcbs-prod.csv"
+)
 
 mkdir -p "$OUTPUT_DIR"
 
@@ -57,44 +23,15 @@ echo "Querying submissions across MDCT accounts"
 echo "Results will be saved to: $OUTPUT_DIR"
 echo
 
-while IFS='|' read -r friendly account_id role profile || [[ -n "$friendly" ]]; do
-  [[ -z "${friendly// }" || "$friendly" == \#* ]] && continue
-
-  result=$(get_app_and_env "$friendly")
-  app=${result%%|*}
-  env=${result##*|}
-  
-  safe_name="${friendly:l:gs/ /-}"
-  safe_name="${safe_name:gs/impl/val}"
-  safe_name="${safe_name:gs/mdcthcbs/mdct-hcbs}"
-  
-  if [[ "$safe_name" == *"$app"* ]]; then
-    output_file="${OUTPUT_DIR}/${safe_name}.csv"
-  else
-    env_suffix="${env//production/prod}"
-    env_suffix="${env_suffix//main/dev}"
-    output_file="${OUTPUT_DIR}/mdct-${app}-${env_suffix}.csv"
-  fi
+for account in "${TARGET_ACCOUNTS[@]}"; do
+  IFS='|' read -r friendly account_id car app env output_name <<< "$account"
+  output_file="${OUTPUT_DIR}/${output_name}"
 
   echo "Processing: $friendly ($app/$env)"
 
-  [[ "$env" == "unknown" ]] && { echo "  Skipping (couldn't determine environment)"; continue; }
-
-  if [[ "$PROD_ONLY" == true && "$env" != "production" ]]; then
-    echo "  Skipping (not production)"
-    continue
-  fi
-
-  if [[ "$USE_SHARED_CREDENTIALS" == true ]]; then
-    profile_name="${profile:-$account_id}"
-    echo "  Using AWS profile: $profile_name"
-    AWS_PROFILE="$profile_name" AWS_SDK_LOAD_CONFIG=1 \
-      node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
-  else
-    kion run --account "$account_id" --car "$role" -- \
-      node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
-  fi
-done < "$ACCOUNTS_FILE"
+  kion run --account "$account_id" --car "$car" --region us-east-1 -- \
+    node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
+done
 
 echo
 echo "Done. Reports in: $OUTPUT_DIR"

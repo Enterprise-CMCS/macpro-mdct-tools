@@ -4,7 +4,7 @@ Query recent submissions across MDCT applications.
 
 ## Simplest Monthly Process
 
-Use this when you need reports for the full previous calendar month across all production accounts.
+Use this when you need reports for the full previous calendar month across the configured MDCT reporting accounts.
 
 1. Open a terminal in `reporting/`.
 2. Install dependencies once:
@@ -13,43 +13,20 @@ Use this when you need reports for the full previous calendar month across all p
 npm install
 ```
 
-3. Ensure `../scripts/accounts.list` exists and has one row per account in this format:
-
-```text
-friendly_name|account_id|role|aws_profile
-```
-
-4. Run the monthly job:
+3. Run the monthly job:
 
 ```bash
-./queryRecentSubmissionsAllAccounts.sh --prod-only --use-shared-credentials
+./queryRecentSubmissionsAllAccounts.sh
 ```
 
-5. Collect CSV files from `reporting/output/`.
+4. Collect CSV files from `reporting/output/`.
 
 Notes:
-- `--use-shared-credentials` uses profiles in `~/.aws/credentials`.
-- If an app has zero submissions, the script still writes a header-only CSV.
+- The script obtains credentials for each account with `kion run`.
 
 ## Quick Start
 
-### Run All Production Accounts
-
-```bash
-./queryRecentSubmissionsAllAccounts.sh --prod-only
-```
-
-### Run Using ~/.aws/credentials Profiles
-
-```bash
-./queryRecentSubmissionsAllAccounts.sh --prod-only --use-shared-credentials
-```
-
-When using `--use-shared-credentials`, the script uses `AWS_PROFILE` per row from `scripts/accounts.list`:
-- If a 4th column exists, it is used as the profile name.
-- Otherwise, it uses the account ID as the profile name.
-
-### Run All Accounts (dev, impl, prod)
+### Run All Configured Accounts
 
 ```bash
 ./queryRecentSubmissionsAllAccounts.sh
@@ -72,9 +49,18 @@ kion run --account XXXXXXXXXXXX --car XXXXXXX-application-admin -- \
 ## Configuration
 
 - **Date range**: Complete prior calendar month only (for example, on July 9 it runs June 1 through June 30)
-- **Credential source (default)**: `kion run` assume-role flow
-- **Credential source (optional)**: Pass `--use-shared-credentials` to use profiles from `~/.aws/credentials`
+- **Credential source**: `kion run` assume-role flow
 - **Output directory**: `./output/`
+
+Configured accounts:
+
+- MDCT Dev (461)
+- mdct-carts-prod (932)
+- mdct-mcr-prod (879)
+- mdct-mfp-prod (1185)
+- mdct-qmr-prod (654)
+- mdct-rhtp-prod (1666)
+- mdcthcbs-prod (1387)
 
 ## Output
 
