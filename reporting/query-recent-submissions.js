@@ -17,7 +17,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = join(__dirname, "output");
 
 const VALID_APPS = ["mcr", "mfp", "hcbs", "carts", "seds", "qmr"];
-const DAYS_TO_QUERY = 30;
 const AWS_REGION = "us-east-1";
 
 const authTableCache = new Map();
@@ -59,13 +58,41 @@ function validateArgs() {
 
 validateArgs();
 
-const sinceDate = new Date(Date.now() - DAYS_TO_QUERY * 24 * 60 * 60 * 1000);
-const sinceTimestamp = sinceDate.getTime();
+function getCompletePriorMonthRange(now = new Date()) {
+  const currentMonthStart = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+  );
+  const priorMonthStart = new Date(
+    Date.UTC(
+      currentMonthStart.getUTCFullYear(),
+      currentMonthStart.getUTCMonth() - 1,
+      1
+    )
+  );
+
+  return {
+    startTimestamp: priorMonthStart.getTime(),
+    endTimestamp: currentMonthStart.getTime(),
+    startDate: priorMonthStart,
+    endDateExclusive: currentMonthStart,
+  };
+}
+
+function getDateRange() {
+  const range = getCompletePriorMonthRange();
+  const endDateInclusive = new Date(range.endTimestamp - 1);
+  return {
+    ...range,
+    logMessage: `complete prior month (${range.startDate
+      .toISOString()
+      .split("T")[0]} to ${endDateInclusive.toISOString().split("T")[0]})`,
+  };
+}
+
+const dateRange = getDateRange();
 
 console.log(
-  `\nQuerying ${application} ${environment} for submissions since ${
-    sinceDate.toISOString().split("T")[0]
-  } (last ${DAYS_TO_QUERY} days)`
+  `\nQuerying ${application} ${environment} for submissions in ${dateRange.logMessage}`
 );
 
 const appConfig = getApplicationsConfig(environment)[application];
@@ -130,14 +157,16 @@ function matchesStatus(item, config) {
   return v === config.statusValue;
 }
 
-function filterRecentSubmissions(items, config, sinceTimestamp) {
+function filterRecentSubmissions(items, config, startTimestamp, endTimestamp) {
   if (!items) return [];
 
   return items.filter((item) => {
     const dateValue = item[config.dateField];
     if (!dateValue || !matchesStatus(item, config)) return false;
 
-    return new Date(dateValue).getTime() >= sinceTimestamp;
+    const itemTimestamp = new Date(dateValue).getTime();
+
+    return itemTimestamp >= startTimestamp && itemTimestamp < endTimestamp;
   });
 }
 
@@ -237,7 +266,8 @@ async function queryApplication(app) {
     const recentSubmissions = filterRecentSubmissions(
       items,
       reportType,
-      sinceTimestamp
+      dateRange.startTimestamp,
+      dateRange.endTimestamp
     );
 
     const formattedSubmissions = recentSubmissions.map((r) =>
@@ -329,11 +359,11 @@ async function main() {
   console.log(`Querying ${appConfig.name} application`);
   const result = await queryApplication(appConfig);
 
+  await mkdir(OUTPUT_DIR, { recursive: true });
+
   if (result.totalSubmissions === 0) {
     throw new Error("\nNo submissions found. Skipping file creation.\n");
   }
-
-  await mkdir(OUTPUT_DIR, { recursive: true });
 
   console.log(`\nWriting CSV to ${outputFile}`);
   await writeCSV(result, outputFile);

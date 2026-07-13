@@ -7,9 +7,23 @@ QUERY_SCRIPT="${SCRIPT_DIR}/query-recent-submissions.js"
 OUTPUT_DIR="${SCRIPT_DIR}/output"
 
 PROD_ONLY=false
-if [[ "$1" == "--prod-only" ]]; then
-  PROD_ONLY=true
-fi
+USE_SHARED_CREDENTIALS=false
+
+for arg in "$@"; do
+  case "$arg" in
+    --prod-only)
+      PROD_ONLY=true
+      ;;
+    --use-shared-credentials)
+      USE_SHARED_CREDENTIALS=true
+      ;;
+    *)
+      echo "Error: Unknown argument '$arg'" >&2
+      echo "Usage: ./queryRecentSubmissionsAllAccounts.sh [--prod-only] [--use-shared-credentials]" >&2
+      exit 1
+      ;;
+  esac
+done
 
 [[ -f "$ACCOUNTS_FILE" ]] || { echo "Error: accounts.list not found" >&2; exit 1; }
 [[ -f "$QUERY_SCRIPT" ]] || { echo "Error: query-recent-submissions.js not found" >&2; exit 1; }
@@ -43,7 +57,7 @@ echo "Querying submissions across MDCT accounts"
 echo "Results will be saved to: $OUTPUT_DIR"
 echo
 
-while IFS='|' read -r friendly account_id role || [[ -n "$friendly" ]]; do
+while IFS='|' read -r friendly account_id role profile || [[ -n "$friendly" ]]; do
   [[ -z "${friendly// }" || "$friendly" == \#* ]] && continue
 
   result=$(get_app_and_env "$friendly")
@@ -71,8 +85,15 @@ while IFS='|' read -r friendly account_id role || [[ -n "$friendly" ]]; do
     continue
   fi
 
-  kion run --account "$account_id" --car "$role" -- \
-     node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
+  if [[ "$USE_SHARED_CREDENTIALS" == true ]]; then
+    profile_name="${profile:-$account_id}"
+    echo "  Using AWS profile: $profile_name"
+    AWS_PROFILE="$profile_name" AWS_SDK_LOAD_CONFIG=1 \
+      node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
+  else
+    kion run --account "$account_id" --car "$role" -- \
+      node "$QUERY_SCRIPT" "$app" "$env" "$output_file" || echo "  Failed" >&2
+  fi
 done < "$ACCOUNTS_FILE"
 
 echo
