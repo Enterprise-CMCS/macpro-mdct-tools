@@ -9,11 +9,9 @@ OUTPUT_DIR="${SCRIPT_DIR}/output"
 
 AWS_CONFIG_DIR="$(mktemp -d "${TMPDIR:-/tmp}/mdct-reporting-aws.XXXXXX")"
 AWS_CONFIG_FILE="${AWS_CONFIG_DIR}/config"
-AWS_SHARED_CREDENTIALS_FILE="${AWS_CONFIG_DIR}/credentials"
 AWS_PROFILE_NAME="mdct-reporting"
 
 trap 'rm -rf "$AWS_CONFIG_DIR"' EXIT
-: > "$AWS_SHARED_CREDENTIALS_FILE"
 
 TARGET_ACCOUNTS=(
   "aws-cms-oit-iusg-acct283|MDCT Application Admin|seds|production|mdct-seds-prod.csv"
@@ -42,14 +40,14 @@ for account in "${TARGET_ACCOUNTS[@]}"; do
   echo "Processing: $account_alias ($app/$env)"
 
   {
-    print -r -- "[profile ${AWS_PROFILE_NAME}]"
-    print -r -- "region = us-east-1"
-    print -r -- "credential_process = kion stak --alias $(quote_for_credential_process "$account_alias") --car $(quote_for_credential_process "$car") --region us-east-1 --credential-process"
+    printf "%s\n" "[profile ${AWS_PROFILE_NAME}]"
+    printf "%s\n" "region = us-east-1"
+    printf "%s\n" "credential_process = kion stak --alias $(quote_for_credential_process "$account_alias") --car $(quote_for_credential_process "$car") --region us-east-1 --credential-process"
   } > "$AWS_CONFIG_FILE"
 
   AWS_PROFILE="$AWS_PROFILE_NAME" \
     AWS_CONFIG_FILE="$AWS_CONFIG_FILE" \
-    AWS_SHARED_CREDENTIALS_FILE="$AWS_SHARED_CREDENTIALS_FILE" \
+    AWS_SHARED_CREDENTIALS_FILE=/dev/null \
     AWS_SDK_LOAD_CONFIG=1 \
     AWS_REGION=us-east-1 \
     AWS_DEFAULT_REGION=us-east-1 \
