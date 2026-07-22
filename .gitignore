@@ -6,3 +6,4 @@ node_modules
 /reporting/output
 **/.yarn/*
 .vscode/settings.json
+**/.DS_Store
