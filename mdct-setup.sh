@@ -282,11 +282,10 @@ if [ "$CI" != "true" ]; then
     cat <<EOL > $kion_config_file
 kion:
   url: https://cloudtamer.cms.gov
-  api_key: ""
-  username: $user_id
-  idms_id: "2"
-  saml_metadata_file: ""
-  saml_sp_issuer: ""
+  idms_id: 5
+  saml_metadata_file: https://idm.cms.gov/app/exk10wd8mvjHwLRKa298/sso/saml/metadata
+  saml_sp_issuer: https://cloudtamer.cms.gov/api/v1/saml/auth
+  disable_cache: true
 EOL
     echo "Kion configuration file created at $kion_config_file"
   else
