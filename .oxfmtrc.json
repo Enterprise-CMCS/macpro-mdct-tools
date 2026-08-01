@@ -1,6 +1,10 @@
 {
   "$schema": "./node_modules/oxfmt/configuration_schema.json",
-  "ignorePatterns": ["code.json", "**/.github/PULL_REQUEST_TEMPLATE.md"],
+  "ignorePatterns": [
+    "code.json",
+    "**/.github/PULL_REQUEST_TEMPLATE.md",
+    "apps/stackport/**"
+  ],
   "trailingComma": "es5",
   "printWidth": 80
 }

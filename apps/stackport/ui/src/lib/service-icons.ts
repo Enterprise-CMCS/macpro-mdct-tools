@@ -1,0 +1,89 @@
+import {
+  HardDrive,
+  Database,
+  Zap,
+  MessageSquare,
+  Bell,
+  Shield,
+  Server,
+  Container,
+  Mail,
+  Clock,
+  FileText,
+  Activity,
+  Globe,
+  Key,
+  Layers,
+  Workflow,
+  DatabaseZap,
+  MemoryStick,
+  Cloud,
+  Lock,
+  CloudCog,
+  Search,
+  Package,
+  Flame,
+  Cog,
+  Network,
+  FolderTree,
+  type LucideIcon,
+} from "lucide-react";
+
+import { AWS_ICON_MAP } from "./aws-icons";
+
+export type ServiceIcon = React.FC<{ className?: string }>;
+
+const LUCIDE_ICON_MAP: Record<string, LucideIcon> = {
+  s3: HardDrive,
+  dynamodb: Database,
+  lambda: Zap,
+  sqs: MessageSquare,
+  sns: Bell,
+  iam: Shield,
+  ec2: Server,
+  ecs: Container,
+  ses: Mail,
+  events: Clock,
+  "events-scheduler": Clock,
+  logs: FileText,
+  kinesis: Activity,
+  route53: Globe,
+  kms: Key,
+  cloudformation: Layers,
+  states: Workflow,
+  stepfunctions: Workflow,
+  rds: DatabaseZap,
+  elasticache: MemoryStick,
+  monitoring: Cloud,
+  cloudwatch: Cloud,
+  secretsmanager: Lock,
+  ssm: CloudCog,
+  sts: Shield,
+  acm: Lock,
+  wafv2: Shield,
+  ecr: Package,
+  firehose: Flame,
+  glue: Cog,
+  athena: Search,
+  apigateway: Globe,
+  "cognito-idp": Shield,
+  "cognito-identity": Shield,
+  cognito: Shield,
+  elasticmapreduce: Activity,
+  elasticloadbalancing: Network,
+  elbv2: Network,
+  elasticfilesystem: FolderTree,
+  cloudfront: Globe,
+  appsync: Search,
+};
+
+export const FALLBACK_ICON: ServiceIcon = Server;
+
+export function getServiceIcon(service: string): ServiceIcon {
+  const key = service.toLowerCase();
+  return (
+    (AWS_ICON_MAP[key] as ServiceIcon) ??
+    (LUCIDE_ICON_MAP[key] as ServiceIcon) ??
+    FALLBACK_ICON
+  );
+}

@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+node_modules/
+.env
+*.egg-info/
+/dist/
+ui/dist/
+.DS_Store
+*.egg
+.eggs/
+build/
+*.whl
+tsconfig.test.tsbuildinfo

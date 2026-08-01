@@ -1,0 +1,9 @@
+.git
+node_modules
+ui/node_modules
+__pycache__
+*.egg-info
+*.pyc
+.venv
+.env
+.claude
