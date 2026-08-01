@@ -380,9 +380,20 @@ for repo_name in "${repo_names[@]}"; do
         echo "Failed to run yarn in $repo_name."
     fi
 
+    if [ -f "scripts/build-stackport-ui.sh" ]; then
+        echo "Building StackPort UI..."
+        STACKPORT_FORCE_UI_BUILD=1 bash scripts/build-stackport-ui.sh
+    fi
+
     # Navigate back to the original directory
     cd -
 done
+
+# Install uv (Python tooling; used for StackPort)
+if ! which uv > /dev/null ; then
+  echo "brew installing uv"
+  brew install uv
+fi
 
 # Install Docker
 if ! which docker > /dev/null ; then
@@ -394,12 +405,6 @@ fi
 if ! which colima > /dev/null ; then
   echo "brew installing colima"
   brew install colima
-fi
-
-# Install LocalStack
-if ! which localstack > /dev/null ; then
-  echo "brew installing localstack/tap/localstack-cli"
-  brew install localstack/tap/localstack-cli
 fi
 
 echo " Congratulations! The script ran successfully. Here is a free taco for your time.

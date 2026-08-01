@@ -77,7 +77,6 @@ snyk cli
 kion
 docker
 colima
-localstack
 ```
 
 ### Developing/Adding Changes to Workspace setup:
@@ -117,3 +116,18 @@ For temporary access keys run the following from anywhere in your terminal
 `kion s`
 
 Both steps above will prompt you for your EUA password then walk you through a select menu in which you select your desired account you wish to gain access whether it be for temporary access keys or console access.
+
+## StackPort (local MiniStack browser)
+
+A soft-fork of [StackPort](https://github.com/DaviReisVieira/stackport) lives at `apps/stackport` for inspecting Lambda, DynamoDB, S3, and logs on MiniStack. MDCT changes stay in this repo — do not open upstream PRs or push to the StackPort project.
+
+```sh
+# from macpro-mdct-tools (MiniStack must be running)
+./scripts/run-stackport.sh
+
+# or from an app repo
+./run stackport
+MDCT_STACKPORT=1 ./run local
+```
+
+Requires `uv` and Node (both installed by `mdct-setup.sh`, which also builds the UI). `./scripts/run-stackport.sh` rebuilds `apps/stackport/ui/dist` when it is missing or stale. Defaults: endpoint `http://127.0.0.1:4566`, credentials `mdct`/`mdct`, UI port `8080`.

@@ -24,14 +24,15 @@ jobs:
           ref="${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}"
           curl -o mdct-setup.sh "https://raw.githubusercontent.com/$repo/$ref/mdct-setup.sh" && chmod +x mdct-setup.sh && ./mdct-setup.sh
 
-      # This job flexes the 1Password capability for MFP after the projects have been setup by using a 1password service account
+      # This job flexes the 1Password capability for MFP after the projects have been setup by using a 1password service account.
+      # Call the CLI directly: ./run update-env currently re-invokes yargs with an empty arg
       - name: one password test
         run: |
           cd ~/Projects/macpro-mdct-mfp
           source /tmp/.profile
           nvm install
           export OP_SERVICE_ACCOUNT_TOKEN=${{ secrets.MDCT_OP_TOKEN }}
-          ./run update-env
+          ./cli/run.ts update-env
 
   # Notify the tools channel on failure
   notify_on_failure:
