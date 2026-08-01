@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Python syntax check
+        run: python -c "import ast, glob; [ast.parse(open(f).read()) for f in glob.glob('backend/**/*.py', recursive=True)]"
+
+      - name: Install UI dependencies
+        run: cd ui && npm ci
+
+      - name: TypeScript check
+        run: cd ui && npx tsc -b
+
+      - name: Build UI
+        run: cd ui && npm run build
+
+      - name: Frontend tests
+        run: cd ui && npx vitest run
+
+      - name: Install Python package
+        run: pip install ".[dev]"
+
+      - name: Verify CLI entry point
+        run: python -c "from backend.main import app; print('OK')"
+
+      - name: Backend tests
+        run: python -m pytest -x --tb=short

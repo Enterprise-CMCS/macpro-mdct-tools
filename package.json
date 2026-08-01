@@ -5,6 +5,10 @@
     "reporting",
     "scripts"
   ],
+  "scripts": {
+    "oxfmt": "oxfmt",
+    "oxlint": "node ./node_modules/oxlint/bin/oxlint"
+  },
   "devDependencies": {
     "globals": "^16.5.0",
     "oxfmt": "^0.24.0",
