@@ -32,6 +32,8 @@ Notes:
 - Unsupported app rows are skipped before credentials are requested.
 - If an app has zero submissions, the script skips CSV creation for that app.
 
+Drop them in a folder in https://drive.google.com/drive/folders/1-cpac4qo0NrkBOl329mJiKFl3w647qUx
+
 ## Quick Start
 
 ### Run All Configured Accounts
