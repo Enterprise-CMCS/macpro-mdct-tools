@@ -1,0 +1,8 @@
+# friendly_name|account_id|cloud_access_role|app|environment|output_file
+aws-cms-oit-iusg-acct283|<account_id>|MDCT Application Admin|seds|production|mdct-seds-prod.csv
+aws-cms-cmcs-mdct-carts-prod|<account_id>|mdctcarts-application-admin|carts|production|mdct-carts-prod.csv
+aws-cms-cmcs-mdctmcr-prod|<account_id>|mdctmcr-application-admin|mcr|production|mdct-mcr-prod.csv
+aws-cms-cmcs-mdct-mfp-prod|<account_id>|mdctmfp-application-admin|mfp|production|mdct-mfp-prod.csv
+aws-cms-cmcs-mdct-qmr-prod|<account_id>|mdctqmr-application-admin|qmr|production|mdct-qmr-prod.csv
+aws-cms-cmcs-mdct-rhtp-prod|<account_id>|mdct-rhtp-application-admin|rhtp|production|mdct-rhtp-prod.csv
+aws-cms-cmcs-mdcthcbs-prod|<account_id>|mdcthcbs-application-admin|hcbs|production|mdct-hcbs-prod.csv
