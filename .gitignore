@@ -6,3 +6,11 @@ node_modules
 /reporting/output
 **/.yarn/*
 .vscode/settings.json
+.DS_Store
+
+# StackPort local install artifacts (UI is built by scripts/build-stackport-ui.sh)
+apps/stackport/ui/node_modules/
+apps/stackport/ui/dist/
+apps/stackport/**/__pycache__/
+apps/stackport/.venv/
+apps/stackport/*.egg-info/
