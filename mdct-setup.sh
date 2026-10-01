@@ -16,6 +16,7 @@ repo_names=(
     "macpro-mdct-seds"
     "macpro-mdct-core"
     "macpro-mdct-tools"
+    "macpro-mdct-datasets"
 )
 
 # Check that user is using MacOS
