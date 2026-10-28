@@ -77,6 +77,7 @@ snyk cli
 kion
 docker
 colima
+librsvg
 ```
 
 ### Developing/Adding Changes to Workspace setup:
