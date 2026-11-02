@@ -235,6 +235,12 @@ fi
 echo "brew installing/updating pre-commit"
 brew install pre-commit
 
+# Install/Update librsvg for converting SVG files to other formats
+if ! which rsvg-convert > /dev/null ; then
+  echo "brew installing librsvg"
+  brew install librsvg
+fi
+
 # Install awslogs, a utility for streaming CloudWatch logs
 if ! which awslogs > /dev/null ; then
   echo "brew installing awslogs"
